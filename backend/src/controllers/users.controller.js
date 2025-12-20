@@ -22,7 +22,7 @@ const registerUser = asyncHandler(async (req, res) => {
     throw new ApiError(400, "User with this email or username already exists");
   }
 
-  // null - indicates the variable represents intentional absence of object / value 
+  // null - indicates the variable represents intentional absence of object / value
   // used for later adding object / value to the variable
   let cloudinaryAvatar = null;
 
