@@ -29,4 +29,10 @@ app.get("/", (_, res) => {
   });
 });
 
+// route imports
+import userRouter from "./routes/users.routes.js";
+
+// route declarations
+app.use("/api/v1/users", userRouter);
+
 export default app;

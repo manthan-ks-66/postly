@@ -4,6 +4,10 @@ import bcrypt from "bcrypt";
 
 const userSchema = new mongoose.Schema(
   {
+    avatar: {
+      type: String, // cloudinary url
+      default: "",
+    },
     username: {
       type: String,
       required: true,
@@ -20,6 +24,9 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    refreshToken: {
+      type: String,
+    },
   },
   {
     timestamps: true,
@@ -31,8 +38,7 @@ userSchema.pre("save", async function (next) {
   // check: if password is changed while updating user details on userSchema
   if (!this.isModified("password")) return next();
 
-  this.password = await bcrypt.hash(this.password, 20);
-  next();
+  this.password = await bcrypt.hash(this.password, 10);
 });
 
 // mongoose pre-defined methods on userSchema
@@ -59,7 +65,7 @@ userSchema.methods.generateRefreshToken = function () {
     },
     process.env.REFRESH_TOKEN_SECRET,
     {
-      expiresIn: REFRESH_TOKEN_EXPIRY,
+      expiresIn: process.env.REFRESH_TOKEN_EXPIRY,
     }
   );
 };
