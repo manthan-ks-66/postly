@@ -22,7 +22,9 @@ const registerUser = asyncHandler(async (req, res) => {
     throw new ApiError(400, "User with this email or username already exists");
   }
 
-  let cloudinaryAvatar;
+  // null - indicates the variable represents intentional absence of object / value 
+  // used for later adding object / value to the variable
+  let cloudinaryAvatar = null;
 
   const avatarLocalPath = req.file?.path;
 
@@ -36,7 +38,7 @@ const registerUser = asyncHandler(async (req, res) => {
 
   // TODO: search / ask for what if data sent in un ordered way for user creation ?
   const user = await User.create({
-    avatar: cloudinaryAvatar ? cloudinaryAvatar.url : "",
+    avatar: cloudinaryAvatar ? cloudinaryAvatar.url : null,
     username,
     fullName,
     email,
