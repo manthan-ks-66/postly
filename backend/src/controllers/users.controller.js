@@ -28,10 +28,10 @@ const registerUser = asyncHandler(async (req, res) => {
 
   if (avatarLocalPath) {
     cloudinaryAvatar = await uploadToCloudinary(avatarLocalPath);
-  }
 
-  if (!cloudinaryAvatar) {
-    throw new ApiError(500, "File upload failed");
+    if (!cloudinaryAvatar) {
+      throw new ApiError(500, "File upload failed");
+    }
   }
 
   // TODO: search / ask for what if data sent in un ordered way for user creation ?
