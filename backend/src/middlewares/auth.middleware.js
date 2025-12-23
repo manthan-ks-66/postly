@@ -27,7 +27,7 @@ const verifyJWT = async (req, _, next) => {
     }
 
     req.user = user;
-    next();
+    console.log(req);
   } catch (error) {
     console.log(error);
     throw new ApiError(500, error.message || "Something went wrong");

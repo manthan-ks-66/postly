@@ -34,9 +34,9 @@ const userSchema = new mongoose.Schema(
 );
 
 // middleware: bcrypt password hashing
-userSchema.pre("save", async function (next) {
+userSchema.pre("save", async function () {
   // check: if password is changed while updating user details on userSchema
-  if (!this.isModified("password")) return next();
+  if (!this.isModified("password")) return;
 
   this.password = await bcrypt.hash(this.password, 10);
 });

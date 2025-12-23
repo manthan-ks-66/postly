@@ -8,6 +8,7 @@ import asyncHandler from "../utils/asyncHandler.js";
 const registerUser = asyncHandler(async (req, res) => {
   const { email, username, fullName, password } = req.body;
 
+  // empty fields check
   if (
     [fullName, username, email, password].some(
       (field) => !field || field.trim() === ""
@@ -16,7 +17,7 @@ const registerUser = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Required fields are empty");
   }
 
-  // check: if user already exists
+  // check - if user already exists
   const existedUser = await User.findOne({ $or: [{ username }, { email }] });
 
   if (existedUser) {
@@ -37,13 +38,13 @@ const registerUser = asyncHandler(async (req, res) => {
     }
   }
 
-  // TODO: search / ask for what if data sent in un ordered way for user creation ?
+  // user creation
   const user = await User.create({
     avatar: cloudinaryAvatar ? cloudinaryAvatar.url : null,
     username,
-    fullName,
     email,
     password,
+    fullName,
   });
 
   if (!user) {
@@ -60,18 +61,21 @@ const registerUser = asyncHandler(async (req, res) => {
 });
 
 // generating accessToken and refreshToken for login method
-const generateTokens = async (userId) => {
+const generateUserTokens = async ({ user }) => {
   try {
-    const user = await User.findById(userId);
-
     const accessToken = user.generateAccessToken();
     const refreshToken = user.generateRefreshToken();
 
     user.refreshToken = refreshToken;
 
-    await user.save({ validateBeforeSave: false });
+    await user.save();
 
-    return { user, accessToken, refreshToken };
+    // remove password field
+    const loggedInUser = user.toObject();
+    delete loggedInUser.password;
+    delete loggedInUser.refreshToken;
+
+    return { loggedInUser, accessToken, refreshToken };
   } catch (error) {
     throw new ApiError(500, error.message);
   }
@@ -85,7 +89,7 @@ const loginUser = asyncHandler(async (req, res) => {
     throw new ApiError(400, "All fields are required");
   }
 
-  const user = await User.findOne(username);
+  const user = await User.findOne({ username });
 
   if (!user) {
     throw new ApiError(401, "User does not exist");
@@ -97,9 +101,9 @@ const loginUser = asyncHandler(async (req, res) => {
     throw new ApiError(401, "Invalid user credentials");
   }
 
-  const { loggedInUser, accessToken, refreshToken } = await generateTokens(
-    user._id
-  );
+  const { loggedInUser, accessToken, refreshToken } = await generateUserTokens({
+    user,
+  });
 
   const options = {
     httpOnly: true,
@@ -111,10 +115,8 @@ const loginUser = asyncHandler(async (req, res) => {
     .cookie("accessToken", accessToken, options)
     .cookie("refreshToken", refreshToken, options)
     .json(
-      new ApiResponse(200, "user logged in successfully", {
-        userData: loggedInUser,
-        accessToken,
-        refreshToken,
+      new ApiResponse(200, "User sessions returned successfully", {
+        user: loggedInUser,
       })
     );
 });

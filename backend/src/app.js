@@ -21,6 +21,7 @@ app.use(express.urlencoded({ extended: true, limit: "50kb" }));
 app.use(express.static("public"));
 app.use(cookieParser());
 
+// home route
 app.get("/", (_, res) => {
   res.status(200).json({
     statusCode: 200,
