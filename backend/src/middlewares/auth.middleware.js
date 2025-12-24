@@ -8,7 +8,7 @@ const verifyJWT = async (req, _, next) => {
       req.cookies?.accessToken ||
       req.header("Authorization")?.replace("Bearer ", "");
 
-    console.log(token);
+    // console.log(token);
 
     if (!token) {
       throw new ApiError(401, "Invalid token: Unauthorized");
@@ -16,7 +16,7 @@ const verifyJWT = async (req, _, next) => {
 
     const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
 
-    console.log(decodedToken);
+    // console.log(decodedToken);
 
     const user = await User.findById(decodedToken._id).select(
       "-password -refreshToken"
@@ -27,7 +27,8 @@ const verifyJWT = async (req, _, next) => {
     }
 
     req.user = user;
-    console.log(req);
+    console.log(req.header)
+    next();
   } catch (error) {
     console.log(error);
     throw new ApiError(500, error.message || "Something went wrong");

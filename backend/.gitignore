@@ -120,3 +120,8 @@ dist
 .pnp.*
 
 test.js
+
+*.jpg 
+*.jpeg 
+*.png 
+*.svg

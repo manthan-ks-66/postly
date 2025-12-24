@@ -1,5 +1,6 @@
 import { v2 as cloudinary } from "cloudinary";
 import fs from "fs";
+import { ApiError } from "../utils/ApiError.js";
 
 cloudinary.config({
   cloud_name: process.env.CLOUD_NAME,
@@ -10,18 +11,17 @@ cloudinary.config({
 const uploadToCloudinary = async (filePath) => {
   try {
     const response = await cloudinary.uploader.upload(filePath, {
-      resource_type: "image",
+      resource_type: "auto",
     });
 
     return response;
   } catch (error) {
-    console.log(error);
-    return error.message;
+    throw new ApiError(500, error.message);
   } finally {
     try {
       await fs.promises.unlink(filePath);
     } catch (error) {
-      console.log("Error in unlinking the local file path: \n", error.message);
+      console.log("Local file cleanup failed", error.message);
     }
   }
 };

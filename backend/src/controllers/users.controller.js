@@ -70,7 +70,7 @@ const generateUserTokens = async ({ user }) => {
 
     await user.save();
 
-    // remove password field
+    // remove password and refreshToken field
     const loggedInUser = user.toObject();
     delete loggedInUser.password;
     delete loggedInUser.refreshToken;
@@ -89,7 +89,9 @@ const loginUser = asyncHandler(async (req, res) => {
     throw new ApiError(400, "All fields are required");
   }
 
-  const user = await User.findOne({ username });
+  const user = await User.findOne({
+    $or: [{ username }, { email: username }],
+  });
 
   if (!user) {
     throw new ApiError(401, "User does not exist");
@@ -115,10 +117,64 @@ const loginUser = asyncHandler(async (req, res) => {
     .cookie("accessToken", accessToken, options)
     .cookie("refreshToken", refreshToken, options)
     .json(
-      new ApiResponse(200, "User sessions returned successfully", {
+      new ApiResponse(200, "User tokens returned successfully", {
         user: loggedInUser,
       })
     );
 });
 
-export { registerUser, loginUser };
+// logout user
+const logoutUser = asyncHandler(async (req, res) => {
+  const userId = req.user?.id;
+
+  await User.findByIdAndUpdate(userId, {
+    $unset: {
+      refreshToken: 1,
+    },
+  });
+
+  return res
+    .status(200)
+    .clearCookie("accessToken")
+    .clearCookie("refreshToken")
+    .json(new ApiResponse(200, "User tokens removed successfully", {}));
+});
+
+// update user avatar picture
+const updateUserAvatar = asyncHandler(async (req, res) => {
+  console.log(req.file);
+  const avatarLocalPath = req.file?.path;
+
+  if (!avatarLocalPath) {
+    throw new ApiError(400, "Avatar file is required");
+  }
+
+  // console.log(avatarLocalPath);
+  const cloudinaryAvatar = await uploadToCloudinary(avatarLocalPath);
+
+  if (!cloudinaryAvatar) {
+    throw new ApiError(500, "File upload failed");
+  }
+
+  const user = await User.findOneAndUpdate(
+    { _id: req.user?._id },
+    {
+      $set: {
+        avatar: cloudinaryAvatar.url,
+      },
+    },
+    { new: true }
+  ).select("-password -refreshToken");
+
+  if (!user) {
+    throw new ApiError(500, "Avatar update failed");
+  }
+
+  return res.status(200).json(
+    new ApiResponse(200, "Avatar updated successfully", {
+      avatar: user.avatar,
+    })
+  );
+});
+
+export { registerUser, loginUser, updateUserAvatar, logoutUser };
