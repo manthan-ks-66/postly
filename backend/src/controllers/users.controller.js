@@ -3,6 +3,7 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { ApiError } from "../utils/ApiError.js";
 import uploadToCloudinary from "../utils/cloudinary.js";
 import asyncHandler from "../utils/asyncHandler.js";
+import jwt from "jsonwebtoken";
 
 // user registration
 const registerUser = asyncHandler(async (req, res) => {
@@ -142,14 +143,12 @@ const logoutUser = asyncHandler(async (req, res) => {
 
 // update user avatar picture
 const updateUserAvatar = asyncHandler(async (req, res) => {
-  console.log(req.file);
   const avatarLocalPath = req.file?.path;
 
   if (!avatarLocalPath) {
     throw new ApiError(400, "Avatar file is required");
   }
 
-  // console.log(avatarLocalPath);
   const cloudinaryAvatar = await uploadToCloudinary(avatarLocalPath);
 
   if (!cloudinaryAvatar) {
@@ -177,4 +176,18 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
   );
 });
 
-export { registerUser, loginUser, updateUserAvatar, logoutUser };
+const getCurrentUser = asyncHandler(async (req, res) => {
+  const user = req.user;
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, "User details fetched successfully", user));
+});
+
+export {
+  registerUser,
+  loginUser,
+  updateUserAvatar,
+  logoutUser,
+  getCurrentUser,
+};

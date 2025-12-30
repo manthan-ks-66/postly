@@ -1,35 +1,44 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState } from "react";
+import { useDispatch } from "react-redux";
+import { useEffect } from "react";
+import authService from "./services/authService";
+import { login } from "./store/authSlice";
+import Header from "./components/Header/Header";
+import Footer from "./components/Footer/Footer.jsx";
+import { Outlet } from "react-router-dom";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [loader, setLoader] = useState(true);
+  const dispatch = useDispatch();
 
-  return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+  useEffect(() => {
+    authService
+      .getCurrentUser()
+      .then((response) => {
+        const user = response.data?.data;
+        // Fixed: removed the double dispatch
+        if (user) dispatch(login(user));
+      })
+      .catch((err) => {
+        console.error("Auth Error:", err.message);
+      })
+      .finally(() => setLoader(false));
+  }, [dispatch]); // Added dependency array so it only runs once
+
+  return !loader ? (
+    <div className="min-h-screen flex flex-col">
+      <Header />
+      <main className="grow">
+        <Outlet />
+      </main>
+      <Footer />
+    </div>
+  ) : (
+    /* The new design */
+    <div className="flex flex-col dark:bg-gray-900 items-center justify-center min-h-screen">
+      <div className="w-12 h-12 border-4 border-gray-100 border-t-[#55aa00] rounded-full animate-spin"></div>
+    </div>
+  );
 }
 
-export default App
+export default App;

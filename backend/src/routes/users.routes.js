@@ -6,6 +6,7 @@ import {
   loginUser,
   updateUserAvatar,
   logoutUser,
+  getCurrentUser,
 } from "../controllers/users.controller.js";
 
 const router = Router();
@@ -18,10 +19,12 @@ router.route("/register").post(upload.single("avatar"), registerUser);
 router.route("/login").post(upload.none(), loginUser);
 
 // secured routes
+router.route("/logout").post(verifyJWT, logoutUser);
+
 router
   .route("/update-avatar")
   .patch(upload.single("avatar"), verifyJWT, updateUserAvatar);
 
-router.route("/logout").post(verifyJWT, logoutUser);
+router.route("/get-current-user").get(verifyJWT, getCurrentUser);
 
 export default router;

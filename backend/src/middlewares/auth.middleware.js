@@ -8,8 +8,6 @@ const verifyJWT = async (req, _, next) => {
       req.cookies?.accessToken ||
       req.header("Authorization")?.replace("Bearer ", "");
 
-    // console.log(token);
-
     if (!token) {
       throw new ApiError(401, "Invalid token: Unauthorized");
     }
@@ -27,7 +25,6 @@ const verifyJWT = async (req, _, next) => {
     }
 
     req.user = user;
-    console.log(req.header)
     next();
   } catch (error) {
     console.log(error);
