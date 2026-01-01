@@ -38,10 +38,10 @@ const Home = () => {
             </div>
 
             {/* Headline */}
-            <h1 className="text-5xl md:text-8xl font-black mb-8 tracking-tight leading-[0.95]">
+            <h2 className="text-4xl md:text-7xl font-black mb-8 tracking-tight leading-[0.95]">
               Capture Ideas. <br />
               <span className={`${brandGreen}`}>Publish Impact.</span>
-            </h1>
+            </h2>
 
             {/* Subheadline */}
             <p className="text-lg md:text-2xl text-gray-600 dark:text-gray-400 mb-12 max-w-3xl mx-auto leading-relaxed">
@@ -65,11 +65,11 @@ const Home = () => {
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row justify-center gap-5">
               <button
-                className={`${bgBrandGreen} hover:bg-[#448800] text-white px-10 py-5 rounded-2xl font-bold text-xl flex items-center justify-center gap-3 shadow-2xl shadow-[#55aa00]/30 transition-all hover:-translate-y-1 active:scale-95`}
+                className={`${bgBrandGreen} cursor-pointer hover:bg-[#448800] text-white px-10 py-5 rounded-2xl font-bold flex items-center justify-center gap-3 shadow-2xl shadow-[#55aa00]/30 transition-all hover:-translate-y-1 active:scale-95 text-xl`}
               >
                 Start a Post <PlusCircle size={22} />
               </button>
-              <button className="bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-700 hover:border-[#55aa00] dark:hover:border-[#55aa00] px-10 py-5 rounded-2xl font-bold text-xl transition-all flex items-center justify-center gap-3 group">
+              <button className="cursor-pointer bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-700 hover:border-[#55aa00] dark:hover:border-[#55aa00] px-10 py-5 rounded-2xl font-bold text-xl transition-all flex items-center justify-center gap-3 group">
                 Browse Feed{" "}
                 <ArrowRight
                   size={22}

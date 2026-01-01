@@ -23,7 +23,7 @@ function App() {
         console.error("Auth Error:", err.message);
       })
       .finally(() => setLoader(false));
-  }, [dispatch]); // Added dependency array so it only runs once
+  }, [dispatch]);
 
   return !loader ? (
     <div className="min-h-screen flex flex-col">
@@ -34,9 +34,8 @@ function App() {
       <Footer />
     </div>
   ) : (
-    /* The new design */
     <div className="flex flex-col dark:bg-gray-900 items-center justify-center min-h-screen">
-      <div className="w-12 h-12 border-4 border-gray-100 border-t-[#55aa00] rounded-full animate-spin"></div>
+      <div className="w-12 h-12 bg-[#55aa00] border-t-[#55aa00] rounded-full animate-ping"></div>
     </div>
   );
 }

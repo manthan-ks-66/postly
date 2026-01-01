@@ -21,7 +21,6 @@ function Signup() {
   const [error, setError] = useState("");
 
   const signup = async (data) => {
-    setError("");
     try {
       const formData = new FormData();
 
@@ -68,6 +67,23 @@ function Signup() {
                   </Link>
                 </p>
               </div>
+              {error && (
+                <div className="flex items-center gap-2 p-3 mb-4 text-sm font-medium border-red-500 bg-red-50 dark:bg-red-500/25 text-red-400 dark:text-gray-200 rounded-r-xl animate-in fade-in slide-in-from-top-1 duration-300 rounded-2xl justify-center">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                    className="w-5 h-5 shrink-0"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-5a.75.75 0 01.75.75v4.5a.75.75 0 01-1.5 0v-4.5A.75.75 0 0110 5zm0 10a1 1 0 100-2 1 1 0 000 2z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  <span>{error}</span>
+                </div>
+              )}
               <form onSubmit={handleSubmit(signup)}>
                 <Input
                   id="fullName"
@@ -134,7 +150,6 @@ function Signup() {
                 </Button>
               </form>
             </div>
-            {error && <p className="text-center text-red-500">{error}</p>}
           </div>
         </div>
       </section>

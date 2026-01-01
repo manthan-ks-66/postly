@@ -7,6 +7,9 @@ import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import Signup from "./components/Signup.jsx";
 import Login from "./components/Login.jsx";
 import Home from "./components/Home.jsx";
+import AuthLayout from "./components/AuthLayout.jsx";
+import About from "./components/About.jsx";
+import Settings from "./components/Settings.jsx";
 
 const router = createBrowserRouter([
   {
@@ -14,8 +17,8 @@ const router = createBrowserRouter([
     element: <App />,
     children: [
       {
-        path: "/",
-        element: <Home />,
+        path: "/about",
+        element: <About />,
       },
       {
         path: "/signup",
@@ -24,6 +27,18 @@ const router = createBrowserRouter([
       {
         path: "/login",
         element: <Login />,
+      },
+      {
+        path: "/",
+        element: <Home />,
+      },
+      {
+        path: "/settings",
+        element: (
+          <AuthLayout>
+            <Settings />
+          </AuthLayout>
+        ),
       },
     ],
   },

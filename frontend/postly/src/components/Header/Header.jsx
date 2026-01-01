@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import Logo from "../Logo/Logo";
 import { useSelector } from "react-redux";
 import LogoutBtn from "./LogoutBtn.jsx";
-import Button from "../Utilities/Button.jsx";
 
 function Header() {
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
@@ -63,57 +62,54 @@ function Header() {
                 </Link>
               </div>
             ) : (
-              <button
-                type="button"
-                className="flex text-sm bg-neutral-primary rounded-full focus:ring-4 focus:ring-neutral-tertiary"
-                onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}
-              >
-                <img
-                  className="w-9.5 h-9.5 rounded-full"
-                  src={user.avatar === null ? "./user.png" : user.avatar}
-                  alt="user photo"
-                />
-              </button>
-            )}
+              <>
+                <button
+                  type="button"
+                  className="flex text-sm bg-neutral-primary rounded-full focus:ring-4 focus:ring-neutral-tertiary"
+                  onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}
+                >
+                  <img
+                    className="w-9.5 h-9.5 rounded-full"
+                    src={user.avatar === null ? "./user.png" : user.avatar}
+                    alt="user photo"
+                  />
+                </button>
 
-            {/* User Dropdown */}
-            <div
-              className={`z-50 absolute flex right-4 top-14 my-4 text-base list-none bg-neutral-primary-medium border-default-medium shadow-lg w-44 
-                transition-all duration-200 ease-out origin-top-right
+                <div
+                  className={`z-50 absolute flex right-4 top-14 my-4 text-base list-none bg-neutral-primary-medium shadow-lg w-44 rounded dark:bg-gray-800 transition-all duration-200 ease-out origin-top-right
                 ${
                   isUserDropdownOpen
                     ? "opacity-100 scale-100 pointer-events-auto"
                     : "opacity-0 scale-95 pointer-events-none"
                 }`}
-            >
-              <ul className="w-full dark:bg-gray-700 p-2 text-sm text-body font-medium">
-                <li>
-                  <Link
-                    to="/profile"
-                    className="block p-2 hover:bg-gray-300 hover:text-dark dark:text-gray-400 dark:hover:text-amber-50 dark:hover:bg-gray-800 rounded transition-all duration-300"
-                  >
-                    Your Profile
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    to="/settings"
-                    className="block p-2 hover:bg-gray-300 hover:text-dark dark:text-gray-400 dark:hover:text-amber-50 dark:hover:bg-gray-800 rounded transition-all duration-300"
-                  >
-                    Settings
-                  </Link>
-                </li>
-                <hr className="my-1 border-default-medium" />
-                <li>
-                  <Link
-                    to="/logout"
-                    className="block p-2 hover:bg-gray-300 hover:text-dark dark:text-gray-400 dark:hover:text-amber-50 dark:hover:bg-gray-800 rounded transition-all duration-300"
-                  >
-                    Sign out
-                  </Link>
-                </li>
-              </ul>
-            </div>
+                >
+                  <ul className="w-full dark:bg-gray-800 p-2 text-sm text-body font-medium rounded">
+                    <li key="profile">
+                      <Link
+                        to="/profile"
+                        className="block p-2 hover:bg-gray-300 hover:text-dark dark:text-gray-400 dark:hover:text-amber-50 dark:hover:bg-gray-900 rounded transition-all duration-300"
+                      >
+                        Your Profile
+                      </Link>
+                    </li>
+                    <li key="settings">
+                      <Link
+                        to="/settings"
+                        className="block p-2 hover:bg-gray-300 hover:text-dark dark:text-gray-400 dark:hover:text-amber-50 dark:hover:bg-gray-900 rounded transition-all duration-300"
+                      >
+                        Settings
+                      </Link>
+                    </li>
+                    <hr className="my-1 border-default-medium" />
+                    <li key="logout">
+                      <LogoutBtn />
+                    </li>
+                  </ul>
+                </div>
+              </>
+            )}
+
+            {/* User Dropdown */}
 
             {/* Hamburger Button */}
             <button

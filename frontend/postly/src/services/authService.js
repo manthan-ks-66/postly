@@ -22,10 +22,15 @@ class AuthService {
           password: formData.get("password"),
         });
       } else {
-        throw new Error("Login failed");
+        throw new Error("Login failed! Please Login again");
       }
     } catch (error) {
-      throw new Error("Error :: registerUser\n", error);
+      const serverMsg = error?.response?.data?.message;
+      if (serverMsg) {
+        throw new Error(serverMsg);
+      } else {
+        throw new Error("Something went wrong! Please try again later");
+      }
     }
   }
 
@@ -44,7 +49,12 @@ class AuthService {
 
       return response;
     } catch (error) {
-      throw new Error("Error :: loginUser", error);
+      const serverMsg = error?.response?.data?.message;
+      if (serverMsg) {
+        throw new Error(serverMsg);
+      } else {
+        throw new Error("Something went wrong! Please try again later");
+      }
     }
   }
 
@@ -58,7 +68,7 @@ class AuthService {
         }
       );
     } catch (error) {
-      throw new Error("Error ::  logoutUser", error);
+      throw new Error("Error while logging out user");
     }
   }
 
