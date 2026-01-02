@@ -1,5 +1,9 @@
 Postly Project
 
+# DB Structure
+
+![alt text](image-6.png)
+
 # Home page
 
 ![alt text](image-1.png)
