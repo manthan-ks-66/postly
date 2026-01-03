@@ -7,6 +7,8 @@ import {
   updateUserAvatar,
   logoutUser,
   getCurrentUser,
+  handleResetPasswordOTP,
+  resetUserPassword,
 } from "../controllers/users.controller.js";
 
 const router = Router();
@@ -17,6 +19,10 @@ const router = Router();
 router.route("/register").post(upload.single("avatar"), registerUser);
 
 router.route("/login").post(upload.none(), loginUser);
+
+router.route("/send-otp").post(handleResetPasswordOTP);
+
+router.route("/reset-password").post(resetUserPassword);
 
 // secured routes
 router.route("/logout").post(verifyJWT, logoutUser);

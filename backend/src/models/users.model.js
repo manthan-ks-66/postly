@@ -27,6 +27,14 @@ const userSchema = new mongoose.Schema(
     refreshToken: {
       type: String,
     },
+    passwordResetOTP: {
+      type: String,
+      default: null,
+    },
+    otpExpiry: {
+      type: Date,
+      default: null,
+    },
   },
   {
     timestamps: true,
@@ -73,6 +81,17 @@ userSchema.methods.generateRefreshToken = function () {
 // password validation:
 userSchema.methods.isPasswordCorrect = async function (password) {
   return await bcrypt.compare(password, this.password);
+};
+
+userSchema.methods.hashOTP = async function (otp) {
+  this.passwordResetOTP = await bcrypt.hash(otp.toString(), 10);
+  this.otpExpiry = Date.now() + 2 * 60 * 1000;
+
+  return await this.save();
+};
+
+userSchema.methods.isOtpCorrect = async function (userOTP) {
+  return bcrypt.compare(userOTP, this.passwordResetOTP);
 };
 
 export const User = mongoose.model("User", userSchema);

@@ -4,12 +4,22 @@ import { ApiError } from "../utils/ApiError.js";
 import uploadToCloudinary from "../utils/cloudinary.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import jwt from "jsonwebtoken";
+import { randomInt } from "node:crypto";
+import nodemailer from "nodemailer";
 
-// user registration
+// nodemailer: transporter config
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.EMAIL_ADDRESS,
+    pass: process.env.EMAIL_PASSWORD,
+  },
+});
+
+// Controller: user registration
 const registerUser = asyncHandler(async (req, res) => {
   const { email, username, fullName, password } = req.body;
 
-  // empty fields check
   if (
     [fullName, username, email, password].some(
       (field) => !field || field.trim() === ""
@@ -18,7 +28,6 @@ const registerUser = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Required fields are empty");
   }
 
-  // check - if user already exists
   const existedUser = await User.findOne({ $or: [{ username }, { email }] });
 
   if (existedUser) {
@@ -61,7 +70,7 @@ const registerUser = asyncHandler(async (req, res) => {
     .json(new ApiResponse(201, "User registered successfully", userObject));
 });
 
-// generating accessToken and refreshToken for login method
+// Method: generating accessToken and refreshToken for login method
 const generateUserTokens = async ({ user }) => {
   try {
     const accessToken = user.generateAccessToken();
@@ -82,7 +91,7 @@ const generateUserTokens = async ({ user }) => {
   }
 };
 
-// user login
+// Controller: user login
 const loginUser = asyncHandler(async (req, res) => {
   const { username, password } = req.body;
 
@@ -124,7 +133,7 @@ const loginUser = asyncHandler(async (req, res) => {
     );
 });
 
-// logout user
+// Controller: logout user
 const logoutUser = asyncHandler(async (req, res) => {
   const userId = req.user?.id;
 
@@ -141,7 +150,7 @@ const logoutUser = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, "User tokens removed successfully", {}));
 });
 
-// update user avatar picture
+// Controller: update user avatar picture
 const updateUserAvatar = asyncHandler(async (req, res) => {
   const avatarLocalPath = req.file?.path;
 
@@ -182,7 +191,120 @@ const getCurrentUser = asyncHandler(async (req, res) => {
   return res
     .status(200)
     .json(new ApiResponse(200, "User details fetched successfully", user));
-}); 
+});
+
+// Controller: send the OTP to user in mail
+const handleResetPasswordOTP = asyncHandler(async (req, res) => {
+  /* 
+  get email from req.body
+
+  find the user in the db
+    - throw error if user is not found
+
+  generate cryptoOtp and otpExpiry
+
+  hash the otp using bcrypt (user.hashOTP)
+
+  save the cryptoOtp (hashed) and otpExpiry in the db
+
+  send the cryptoOtp to user in mail
+  
+  return res as otp sent */
+
+  const { email } = req.body;
+
+  const user = await User.findOne({ email });
+
+  if (!user) {
+    throw new ApiError(400, "User not found!");
+  }
+
+  const otp = randomInt(100000, 999999);
+
+  await user.hashOTP(otp);
+  await user.save();
+
+  const mailMsg = `Hi ${user.fullName}, 
+
+To continue with the password reset process on Postly, please use the One Time Password (OTP) below:
+
+${otp}
+
+This OTP is valid for 2 minutes. Please do not share this code with anyone.
+
+Thank You`;
+
+  const info = transporter.sendMail({
+    from: "manthanks.0606@gmail.com",
+    to: email,
+    subject: "Password Reset OTP",
+    text: mailMsg,
+  });
+
+  if (!info) {
+    throw new ApiError(500, "Failed to send the OTP");
+  }
+
+  return res.status(200).json(new ApiResponse(200, "OTP sent successfully"));
+});
+
+// Controller: Reset user password
+const resetUserPassword = asyncHandler(async (req, res) => {
+  /* 
+    get email , cryptoOtp, newPassword, confirmNewPassword from req.body
+
+    find the user in the db through email
+      - throw error if user is not found
+
+    check if the otp is expired 
+      - throw error if Date.now is > otpExpiry
+
+    check if cryptoOtp is correct 
+
+    check newPassword is equal to confirmNewPassword
+
+    update the user password in the db and set the passwordResetOTP and otpExpiry field as null 
+
+    return res as password updated
+   */
+
+  const { email, otp, newPassword, confirmNewPassword } = req.body;
+
+  if (
+    [email, otp, newPassword, confirmNewPassword].some(
+      (field) => !field || field.trim() === ""
+    )
+  ) {
+    throw new ApiError(400, "All fields are required");
+  }
+
+  const user = await User.findOne({ email });
+
+  if (!user) {
+    throw new ApiError(400, "User not found!");
+  }
+
+  if (Date.now() > user.otpExpiry) {
+    throw new ApiError(400, "OTP Expired");
+  }
+
+  const isOTPValid = user.isOtpCorrect(otp);
+
+  if (!isOTPValid) {
+    throw new ApiError(400, "Invalid OTP");
+  }
+
+  if (newPassword !== confirmNewPassword) {
+    throw new ApiError(400, "Password doesn't match with confirmed password");
+  }
+
+  user.password = newPassword;
+  await user.save();
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, "Password changed successfully", {}));
+});
 
 export {
   registerUser,
@@ -190,4 +312,6 @@ export {
   updateUserAvatar,
   logoutUser,
   getCurrentUser,
+  resetUserPassword,
+  handleResetPasswordOTP,
 };
