@@ -38,7 +38,7 @@ function App() {
         if (user) dispatch(login(user));
       })
       .catch((err) => {
-        throw new Error(err.message);
+        console.log(err.message)
       })
       .finally(() => setLoader(false));
   }, [dispatch]);

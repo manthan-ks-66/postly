@@ -26,7 +26,6 @@ function Register() {
 
   const register = async (data) => {
     try {
-      console.log(data.avatar[0]);
       let userFormData = new FormData();
 
       for (let val in data) {
@@ -52,7 +51,7 @@ function Register() {
 
       navigate("/");
     } catch (error) {
-      setError(error);
+      setError(error.message);
     }
   };
 
