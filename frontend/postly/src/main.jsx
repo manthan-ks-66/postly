@@ -4,12 +4,53 @@ import App from "./App.jsx";
 import { store } from "./store/store.js";
 import { Provider } from "react-redux";
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
-import Signup from "./components/Signup.jsx";
+import Register from "./components/Register.jsx";
 import Login from "./components/Login.jsx";
 import Home from "./components/Home.jsx";
 import AuthLayout from "./components/AuthLayout.jsx";
 import About from "./components/About.jsx";
 import Settings from "./components/Settings.jsx";
+import ResetPassword from "./components/ResetPassword.jsx";
+import { ConfigProvider, theme as antdTheme } from "antd";
+import PostPage from "./components/PostPage.jsx";
+import Posts from "./components/Posts.jsx";
+import AddPost from "./components/AddPost.jsx";
+
+const postlyDarkTheme = {
+  algorithm: antdTheme.darkAlgorithm,
+  token: {
+    // Brand color
+    colorPrimary: "#55aa00",
+
+    colorBgLayout: "#111827",
+    colorBgContainer: "#111827",
+
+    // Text colors
+    colorTextBase: "#E5E7EB",
+    colorTextSecondary: "#9CA3AF",
+
+    // Shape & font
+    borderRadiusLG: 10,
+    fontFamily: "-apple-system",
+  },
+
+  components: {
+    Layout: {
+      headerBg: "#1f2534",
+      bodyBg: "#1f2534",
+    },
+    Menu: {
+      darkItemBg: "#1f2534",
+      darkItemSelectedBg: "#1F2937",
+      darkItemSelectedColor: "#55aa00",
+      darkItemHoverColor: "#55aa00",
+    },
+    Button: {
+      colorPrimaryHover: "#6dd400",
+      colorPrimaryActive: "#4c9900",
+    },
+  },
+};
 
 const router = createBrowserRouter([
   {
@@ -17,25 +58,53 @@ const router = createBrowserRouter([
     element: <App />,
     children: [
       {
+        path: "/",
+        element: (
+          <AuthLayout authentication={false}>
+            <Home />
+          </AuthLayout>
+        ),
+      },
+      {
         path: "/about",
         element: <About />,
       },
       {
-        path: "/signup",
-        element: <Signup />,
+        path: "/register",
+        element: (
+          <AuthLayout authentication={false}>
+            <Register />
+          </AuthLayout>
+        ),
       },
       {
         path: "/login",
-        element: <Login />,
+        element: (
+          <AuthLayout authentication={false}>
+            <Login />
+          </AuthLayout>
+        ),
       },
       {
-        path: "/",
-        element: <Home />,
+        path: "/post/:slug",
+        element: <PostPage />,
+      },
+      {
+        path: "/all-posts",
+        element: <Posts />,
+      },
+      {
+        path: "/add-post",
+        element: (
+          <AuthLayout authentication={true}>
+            <AddPost />
+          </AuthLayout>
+        ),
       },
       {
         path: "/settings",
         element: (
-          <AuthLayout>
+          <AuthLayout authentication={true}>
             <Settings />
           </AuthLayout>
         ),
@@ -46,6 +115,8 @@ const router = createBrowserRouter([
 
 createRoot(document.getElementById("root")).render(
   <Provider store={store}>
-    <RouterProvider router={router} />
+    <ConfigProvider theme={postlyDarkTheme}>
+      <RouterProvider router={router} />
+    </ConfigProvider>
   </Provider>
 );

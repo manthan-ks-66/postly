@@ -1,42 +1,56 @@
-import { useState } from "react";
-import { useDispatch } from "react-redux";
-import { useEffect } from "react";
-import authService from "./services/authService";
-import { login } from "./store/authSlice";
-import Header from "./components/Header/Header";
-import Footer from "./components/Footer/Footer.jsx";
+// components
 import { Outlet } from "react-router-dom";
+import NavBar from "./components/Header/NavBar.jsx";
+import Footer from "./components/Footer/Footer.jsx";
+
+// methods and services
+import { useEffect, useState } from "react";
+import authService from "./services/authService.js";
+import { useDispatch } from "react-redux";
+import { login } from "./store/authSlice.js";
+import { Spin } from "antd";
+import { theme } from "antd";
+
+import NotificationProvider from "./components/context/NotificationProvider.jsx";
 
 function App() {
   const [loader, setLoader] = useState(true);
   const dispatch = useDispatch();
 
+  const { token } = theme.useToken();
+
+  const contentStyle = {
+    padding: 50,
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    height: "100vh",
+    background: token.colorBgLayout,
+    borderRadius: 4,
+  };
+
   useEffect(() => {
     authService
       .getCurrentUser()
-      .then((response) => {
-        const user = response.data?.data;
-        // Fixed: removed the double dispatch
+      .then((res) => {
+        const user = res.data?.data;
+
         if (user) dispatch(login(user));
       })
       .catch((err) => {
-        console.error("Auth Error:", err.message);
+        throw new Error(err.message);
       })
       .finally(() => setLoader(false));
   }, [dispatch]);
 
   return !loader ? (
-    <div className="min-h-screen flex flex-col">
-      <Header />
-      <main className="grow">
-        <Outlet />
-      </main>
+    <NotificationProvider>
+      <NavBar />
+      <Outlet />
       <Footer />
-    </div>
+    </NotificationProvider>
   ) : (
-    <div className="flex flex-col dark:bg-gray-900 items-center justify-center min-h-screen">
-      <div className="w-12 h-12 bg-[#55aa00] border-t-[#55aa00] rounded-full animate-ping"></div>
-    </div>
+    <Spin style={contentStyle} size="large"></Spin>
   );
 }
 

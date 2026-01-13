@@ -7,8 +7,9 @@ import {
   updateUserAvatar,
   logoutUser,
   getCurrentUser,
-  handleResetPasswordOTP,
+  handleOTP,
   resetUserPassword,
+  updateUserDetails,
 } from "../controllers/users.controller.js";
 
 const router = Router();
@@ -20,7 +21,7 @@ router.route("/register").post(upload.single("avatar"), registerUser);
 
 router.route("/login").post(upload.none(), loginUser);
 
-router.route("/send-otp").post(handleResetPasswordOTP);
+router.route("/send-otp").post(handleOTP);
 
 router.route("/reset-password").post(resetUserPassword);
 
@@ -32,5 +33,7 @@ router
   .patch(upload.single("avatar"), verifyJWT, updateUserAvatar);
 
 router.route("/get-current-user").get(verifyJWT, getCurrentUser);
+
+router.route("/update-user-details").post(verifyJWT, updateUserDetails);
 
 export default router;

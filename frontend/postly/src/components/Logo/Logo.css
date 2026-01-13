@@ -12,6 +12,10 @@
   justify-content: center;
 }
 
+.logo img {
+  border-radius: 50%;
+}
+
 .brand-name {
   font-family: Helvetica;
   font-size: large;

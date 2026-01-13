@@ -1,141 +1,147 @@
 import React from "react";
-import { Lightbulb, Share2, Cpu, Rocket, ArrowRight } from "lucide-react";
+import {
+  Layout,
+  Typography,
+  Row,
+  Col,
+  Card,
+  Space,
+  theme,
+  Divider,
+} from "antd";
+import {
+  GlobalOutlined,
+  ThunderboltOutlined,
+  EditOutlined,
+  CodeOutlined,
+} from "@ant-design/icons";
 
-const About = () => {
-  const brandGreen = "text-[#55aa00]";
-  const bgBrandGreen = "bg-[#55aa00]";
-  const borderBrandGreen = "border-[#55aa00]";
+const { Content } = Layout;
+const { Title, Paragraph, Text } = Typography;
 
-  const coreValues = [
+function About() {
+  const { token } = theme.useToken();
+
+  const values = [
     {
-      icon: <Lightbulb className="w-8 h-8" />,
+      title: "Sharing Ideas",
+      desc: "A platform built for voices that need to be heard. We believe one shared thought can spark a global movement.",
+      icon: <GlobalOutlined />,
+    },
+    {
+      title: "Innovations",
+      desc: "Tracking the frontier of what's next. From breakthrough startups to world-changing scientific discoveries.",
+      icon: <ThunderboltOutlined />,
+    },
+    {
       title: "Creativity",
-      desc: "We provide the canvas; you bring the color. Postly is designed to let your creative spark fly without technical hurdles.",
+      desc: "Empowering the artist within the writer. Design, art, and storytelling are at the heart of our community.",
+      icon: <EditOutlined />,
     },
     {
-      icon: <Share2 className="w-8 h-8" />,
-      title: "Share Stories",
-      desc: "Every voice matters. We've built a seamless ecosystem where your stories reach the readers who care most.",
-    },
-    {
-      icon: <Cpu className="w-8 h-8" />,
-      title: "Tech-Driven",
-      desc: "Leveraging modern web standards to ensure your content is fast, responsive, and future-proof.",
-    },
-    {
-      icon: <Rocket className="w-8 h-8" />,
-      title: "Innovation",
-      desc: "We aren't just a blog; we are an evolving platform constantly pushing the boundaries of digital publishing.",
+      title: "Tech Focus",
+      desc: "Deep dives into software, hardware, and the digital tools shaping our future everyday lives.",
+      icon: <CodeOutlined />,
     },
   ];
 
   return (
-    <div className="min-h-screen bg-gray-200 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300">
-      {/* --- Section 1: Introduction --- */}
-      <section className="py-20 px-4">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col lg:flex-row items-center gap-12">
-            <div className="lg:w-1/2">
-              <h2
-                className={`text-sm font-bold uppercase tracking-[0.3em] mb-4 ${brandGreen}`}
-              >
-                Behind the Platform
-              </h2>
-              <h1 className="text-4xl md:text-6xl font-black mb-6 leading-tight uppercase italic tracking-tighter">
-                The Future of <br />
-                <span className={brandGreen}>Digital Expression.</span>
-              </h1>
-              <p className="text-lg text-gray-600 dark:text-gray-400 mb-8 leading-relaxed max-w-xl">
-                Postly was born from a simple idea: that technology should never
-                get in the way of a good story. We've combined high-end
-                innovation with a minimalist aesthetic to give creators the home
-                they deserve.
-              </p>
-            </div>
-
-            <div className="lg:w-1/2 grid grid-cols-2 gap-4">
-              <div
-                className={`h-40 md:h-64 rounded-3xl ${bgBrandGreen} opacity-20 flex items-center justify-center`}
-              >
-                <span className={`text-6xl font-black ${brandGreen}`}>P</span>
-              </div>
-              <div className="h-40 md:h-64 rounded-3xl bg-gray-300 dark:bg-gray-800 border border-gray-400 dark:border-gray-700 flex items-end p-6">
-                <p className="font-bold text-xl uppercase tracking-tighter">
-                  Postly v1.0
-                </p>
-              </div>
-            </div>
-          </div>
+    <Layout style={{ minHeight: "100vh", background: token.colorBgLayout }}>
+      <Content
+        style={{ padding: "60px 20px", maxWidth: "900px", margin: "0 auto" }}
+      >
+        {/* Header Section */}
+        <div style={{ textAlign: "center", marginBottom: 60 }}>
+          <Title level={2} style={{ fontSize: "24px", letterSpacing: "1px" }}>
+            The Story of{" "}
+            <span style={{ color: token.colorPrimary }}>Postly</span>
+          </Title>
+          <Paragraph
+            style={{
+              color: token.colorTextSecondary,
+              fontSize: "14px",
+              lineHeight: "1.8",
+            }}
+          >
+            Postly was founded with a simple mission: to bridge the gap between
+            complex technology and human storytelling. In a world of
+            fast-scrolling content, we created a space for meaningful innovation
+            and creative depth.
+          </Paragraph>
         </div>
-      </section>
 
-      {/* --- Section 2: Concepts Bento Grid --- */}
-      <section className="py-20 bg-gray-300/50 dark:bg-black/20 backdrop-blur-sm">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-5xl font-black mb-4 uppercase tracking-tighter">
-              Built on Four Pillars
-            </h2>
-            <div
-              className={`h-1.5 w-24 ${bgBrandGreen} mx-auto rounded-full`}
-            ></div>
-          </div>
+        <Divider style={{ borderColor: "rgba(255,255,255,0.1)" }} />
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {coreValues.map((value, index) => (
-              <div
-                key={index}
-                className="group p-8 bg-gray-200 dark:bg-gray-900 rounded-4xl border border-gray-300 dark:border-gray-800 hover:border-[#55aa00] transition-all duration-300 hover:-translate-y-2 shadow-sm hover:shadow-2xl hover:shadow-[#55aa00]/10"
+        {/* Values Grid */}
+        <Row gutter={[24, 24]} style={{ marginTop: 40 }}>
+          {values.map((item, index) => (
+            <Col xs={24} sm={12} key={index}>
+              <Card
+                bordered={false}
+                style={{
+                  background: "#ffffff0a", // Slightly subtler than login for readability
+                  borderRadius: 16,
+                  height: "100%",
+                  border: "1px solid rgba(255, 255, 255, 0.05)",
+                }}
               >
-                <div
-                  className={`${brandGreen} mb-6 transition-transform group-hover:scale-110 duration-300`}
-                >
-                  {value.icon}
-                </div>
-                <h3 className="text-2xl font-bold mb-3 uppercase tracking-tight">
-                  {value.title}
-                </h3>
-                <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">
-                  {value.desc}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+                <Space direction="vertical" size="small">
+                  <div
+                    style={{
+                      fontSize: "20px",
+                      color: token.colorPrimary,
+                      background: "#55aa0015",
+                      padding: "8px",
+                      borderRadius: "8px",
+                      display: "inline-block",
+                    }}
+                  >
+                    {item.icon}
+                  </div>
+                  <Title
+                    level={5}
+                    style={{ margin: "10px 0 5px", fontSize: "16px" }}
+                  >
+                    {item.title}
+                  </Title>
+                  <Text
+                    style={{
+                      fontSize: "13px",
+                      color: token.colorTextSecondary,
+                    }}
+                  >
+                    {item.desc}
+                  </Text>
+                </Space>
+              </Card>
+            </Col>
+          ))}
+        </Row>
 
-      {/* --- Section 3: The Mission Statement --- */}
-      <section className="py-32 px-4 relative overflow-hidden">
+        {/* Mission Statement Footer */}
         <div
-          className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 ${bgBrandGreen} opacity-5 blur-[120px] rounded-full`}
-        ></div>
-
-        <div className="max-w-4xl mx-auto text-center relative z-10">
-          <h2 className="text-3xl md:text-6xl font-bold mb-10 leading-snug">
-            "Our mission is to empower the next generation of{" "}
-            <span className={brandGreen}>tech-savvy writers</span> to share
-            stories that spark innovation."
-          </h2>
-          <div className="flex items-center justify-center gap-4">
-            <div className="w-12 h-px bg-gray-400"></div>
-            <p className="font-bold uppercase tracking-[0.2em] text-gray-500">
-              The Postly Team
-            </p>
-            <div className="w-12 h-px bg-gray-400"></div>
-          </div>
-        </div>
-      </section>
-
-      {/* --- Final CTA --- */}
-      <section className="pb-20 px-4 text-center">
-        <button
-          className={`${bgBrandGreen} hover:bg-[#448800] text-white px-12 py-5 rounded-full font-black text-xl uppercase tracking-widest flex items-center gap-4 mx-auto transition-all shadow-xl shadow-[#55aa00]/20`}
+          style={{
+            marginTop: 80,
+            padding: "40px",
+            textAlign: "center",
+            background: "#ffffff1e",
+            borderRadius: 20,
+            border: "1px solid rgba(255, 255, 255, 0.1)",
+          }}
         >
-          Join the Movement <ArrowRight size={24} />
-        </button>
-      </section>
-    </div>
+          <Title level={4} style={{ fontSize: "18px", marginBottom: 15 }}>
+            Our Vision
+          </Title>
+          <Paragraph
+            style={{ fontSize: "14px", fontStyle: "italic", margin: 0 }}
+          >
+            "To become the world's most trusted archive for human creativity and
+            technical advancement."
+          </Paragraph>
+        </div>
+      </Content>
+    </Layout>
   );
-};
+}
 
 export default About;

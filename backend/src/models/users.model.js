@@ -27,13 +27,13 @@ const userSchema = new mongoose.Schema(
     refreshToken: {
       type: String,
     },
-    passwordResetOTP: {
+    OTP: {
       type: String,
-      default: null,
+      default: undefined,
     },
     otpExpiry: {
       type: Date,
-      default: null,
+      default: undefined,
     },
   },
   {
@@ -84,14 +84,14 @@ userSchema.methods.isPasswordCorrect = async function (password) {
 };
 
 userSchema.methods.hashOTP = async function (otp) {
-  this.passwordResetOTP = await bcrypt.hash(otp.toString(), 10);
+  this.OTP = await bcrypt.hash(otp.toString(), 10);
   this.otpExpiry = Date.now() + 2 * 60 * 1000;
 
   return await this.save();
 };
 
 userSchema.methods.isOtpCorrect = async function (userOTP) {
-  return bcrypt.compare(userOTP, this.passwordResetOTP);
+  return bcrypt.compare(userOTP, this.OTP);
 };
 
 export const User = mongoose.model("User", userSchema);

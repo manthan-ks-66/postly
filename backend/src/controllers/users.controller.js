@@ -70,7 +70,7 @@ const registerUser = asyncHandler(async (req, res) => {
     .json(new ApiResponse(201, "User registered successfully", userObject));
 });
 
-// Method: generating accessToken and refreshToken for login method
+// Method: generating accessToken and refreshToken for user auth
 const generateUserTokens = async ({ user }) => {
   try {
     const accessToken = user.generateAccessToken();
@@ -150,7 +150,7 @@ const logoutUser = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, "User tokens removed successfully", {}));
 });
 
-// Controller: update user avatar picture
+// Controller: update user picture
 const updateUserAvatar = asyncHandler(async (req, res) => {
   const avatarLocalPath = req.file?.path;
 
@@ -194,7 +194,7 @@ const getCurrentUser = asyncHandler(async (req, res) => {
 });
 
 // Controller: send the OTP to user in mail
-const handleResetPasswordOTP = asyncHandler(async (req, res) => {
+const handleOTP = asyncHandler(async (req, res) => {
   /* 
   get email from req.body
 
@@ -224,18 +224,19 @@ const handleResetPasswordOTP = asyncHandler(async (req, res) => {
   await user.hashOTP(otp);
   await user.save();
 
-  const mailMsg = `Hi ${user.fullName}, 
+  const mailMsg = `
+Hi ${user.fullName.trim().split(" ")[0]}, 
 
-To continue with the password reset process on Postly, please use the One Time Password (OTP) below:
+To continue with the password reset process on Postly, 
 
-${otp}
+Use the One Time Password (OTP): ${otp} 
 
-This OTP is valid for 2 minutes. Please do not share this code with anyone.
+This OTP is valid for 2 minutes. Do not share this code with anyone.
 
 Thank You`;
 
   const info = transporter.sendMail({
-    from: "manthanks.0606@gmail.com",
+    from: process.env.EMAIL_ADDRESS,
     to: email,
     subject: "Password Reset OTP",
     text: mailMsg,
@@ -265,7 +266,7 @@ const resetUserPassword = asyncHandler(async (req, res) => {
 
     update the user password in the db and set the passwordResetOTP and otpExpiry field as null 
 
-    return res as password updated
+    return res - password updated
    */
 
   const { email, otp, newPassword, confirmNewPassword } = req.body;
@@ -299,11 +300,89 @@ const resetUserPassword = asyncHandler(async (req, res) => {
   }
 
   user.password = newPassword;
+  user.OTP = undefined;
+  user.otpExpiry = undefined;
   await user.save();
 
   return res
     .status(200)
     .json(new ApiResponse(200, "Password changed successfully", {}));
+});
+
+// Controller: Update user details
+// TODO: Postman testing
+const updateUserDetails = asyncHandler(async (req, res) => {
+  const userId = req.user?._id;
+
+  const { email, fullName, username } = req.body;
+
+  if (!email && !fullName && !username) {
+    throw new ApiError(400, "All fields are required");
+  }
+
+  const user = await User.findByIdAndUpdate(
+    userId,
+    {
+      $set: {
+        email,
+        username,
+        fullName,
+      },
+    },
+    {
+      new: true,
+    }
+  );
+
+  if (!user) {
+    throw new ApiError(400, "Cannot find user");
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, "User details updated successfully", user));
+});
+
+// Controller: refresh accessToken
+// TODO: Postman testing
+const refreshAccessToken = asyncHandler(async (req, res) => {
+  const incomingToken = req.cookies?.refreshToken;
+
+  if (!incomingToken) {
+    throw new ApiError(400, "User Unauthenticated");
+  }
+
+  const decodedToken = jwt.verify(
+    incomingToken,
+    process.env.REFRESH_TOKEN_SECRET
+  );
+
+  const user = await User.findById(decodedToken._id);
+
+  if (!user) {
+    throw new ApiError(400, "Invalid token");
+  }
+
+  if (user.refreshToken !== incomingToken) {
+    throw new ApiError(400, "Refresh token is Invalid");
+  }
+
+  const { loggedInUser, accessToken, refreshToken } = await generateUserTokens(
+    user._id
+  );
+
+  const options = {
+    httpOnly: true,
+    secure: true,
+  };
+
+  return res
+    .status(200)
+    .cookie("accessToken", accessToken, options)
+    .cookie("refreshToken", refreshToken, options)
+    .json(
+      new ApiResponse(200, "User tokens returned successfully", loggedInUser)
+    );
 });
 
 export {
@@ -313,5 +392,6 @@ export {
   logoutUser,
   getCurrentUser,
   resetUserPassword,
-  handleResetPasswordOTP,
+  handleOTP,
+  updateUserDetails,
 };

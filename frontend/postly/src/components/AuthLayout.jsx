@@ -1,23 +1,45 @@
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { Spin } from "antd";
+import { theme } from "antd";
+import { useNotify } from "./context/NotificationProvider";
 
-function AuthLayout({ children }) {
+function AuthLayout({ children, authentication = true }) {
+  const { token } = theme.useToken();
+
+  const notify = useNotify();
+
+  const contentStyle = {
+    padding: 50,
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    height: "100vh",
+    background: token.colorBgLayout,
+    borderRadius: 4,
+  };
+
   const authStatus = useSelector((state) => state.auth.status);
   const [loader, setLoader] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (authStatus === false) {
+    if (authentication && authentication !== authStatus) {
       navigate("/login");
+
+      notify.api.error({
+        title: "Authentication Required!",
+        description: "Please Login to continue",
+      });
+    } else if (!authentication && authentication !== authStatus) {
+      navigate("/");
     }
 
     setLoader(false);
   });
   return loader ? (
-    <div className="flex flex-col dark:bg-gray-900 bg-gray-300 items-center justify-center min-h-screen">
-      <div className="w-12 h-12 bg-[#55aa00] border-t-[#55aa00] rounded-full animate-ping"></div>
-    </div>
+    <Spin style={contentStyle} size="large"></Spin>
   ) : (
     <>{children}</>
   );

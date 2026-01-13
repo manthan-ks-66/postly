@@ -21,15 +21,13 @@ class AuthService {
           username: formData.get("username"),
           password: formData.get("password"),
         });
-      } else {
-        throw new Error("Login failed! Please Login again");
-      }
+      } 
     } catch (error) {
       const serverMsg = error?.response?.data?.message;
       if (serverMsg) {
         throw new Error(serverMsg);
       } else {
-        throw new Error("Something went wrong! Please try again later");
+        throw new Error("Something went wrong! try again later");
       }
     }
   }
@@ -47,7 +45,7 @@ class AuthService {
         }
       );
 
-      return response;
+      return response?.data?.data?.user;
     } catch (error) {
       const serverMsg = error?.response?.data?.message;
       if (serverMsg) {
@@ -79,6 +77,30 @@ class AuthService {
       });
     } catch (error) {
       throw new Error("Failed to fetch user details");
+    }
+  }
+
+  async sendOTP({ email }) {
+    try {
+      const response = await axios.post(`${this.usersBaseUrl}/send-otp`, {
+        email,
+      });
+
+      return response.data;
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  }
+
+  async resetUserPassword(data) {
+    try {
+      const response = await axios.post(`${this.usersBaseUrl}/reset-password`, {
+        data,
+      });
+
+      return response.data;
+    } catch (error) {
+      throw new Error(error.message);
     }
   }
 }

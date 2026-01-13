@@ -15,11 +15,19 @@ const postSchema = new mongoose.Schema(
       required: true,
     },
     featuredImage: {
-      type: String, // cloudinary url
+      type: String, // cloudinary url 
     },
-    status: {
+    category: {
       type: String,
       required: true,
+    },
+    likesCount: {
+      type: Number,
+      default: 0,
+    },
+    commentsCount: {
+      type: Number,
+      default: 0,
     },
     userId: {
       type: mongoose.Schema.Types.ObjectId,
