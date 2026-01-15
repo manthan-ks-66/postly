@@ -7,7 +7,7 @@ import { login } from "../store/authSlice";
 import { Button, Flex, Form, Input, Layout, Upload, Alert } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 
-import { useNotify } from "./context/NotificationProvider.jsx";
+import { useNotify } from "../context/NotificationProvider.jsx";
 
 import { theme } from "antd";
 

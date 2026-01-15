@@ -385,6 +385,11 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
     );
 });
 
+// Controller: Delete user account
+const deleteUserAccount = asyncHandler(async (req, res) => {
+  //  delete user
+});
+
 export {
   registerUser,
   loginUser,
@@ -394,4 +399,5 @@ export {
   resetUserPassword,
   handleOTP,
   updateUserDetails,
+  deleteUserAccount,
 };

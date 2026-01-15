@@ -35,7 +35,7 @@ function PostPage({ post }) {
   const data = post || {
     title: "The Impact of Quantum Computing on Modern Web Security",
     featuredImage:
-      "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?q=80&w=1000",
+      "https://res.cloudinary.com/dih3k6kyk/image/upload/v1768417354/v9rhh1aniohssksaflu6.png",
     content:
       "Quantum computing is no longer a thing of the future. As we move closer to practical quantum advantage, the cryptographic foundations of the web are being challenged...",
     likes: 124,
@@ -75,8 +75,7 @@ function PostPage({ post }) {
             width="100%"
             height={400}
             src={data.featuredImage}
-            style={{ objectFit: "cover", borderRadius: 16 }}
-            preview={false}
+            style={{ objectFit: "fill", borderRadius: 16 }}
           />
         </div>
 

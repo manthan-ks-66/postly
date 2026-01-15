@@ -15,11 +15,12 @@ const postSchema = new mongoose.Schema(
       required: true,
     },
     featuredImage: {
-      type: String, // cloudinary url 
+      type: String,
     },
     category: {
       type: String,
       required: true,
+      enum: ["Tech", "Story", "Business", "Education", "Creative Idea"],
     },
     likesCount: {
       type: Number,

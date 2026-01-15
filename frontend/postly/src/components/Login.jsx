@@ -5,7 +5,7 @@ import { useForm, Controller } from "react-hook-form";
 import authService from "../services/authService";
 import { login } from "../store/authSlice";
 import { Button, Form, Input, Layout, Alert } from "antd";
-import { useNotify } from "./context/NotificationProvider.jsx";
+import { useNotify } from "../context/NotificationProvider.jsx";
 
 import { theme } from "antd";
 import { LockOutlined, UserOutlined } from "@ant-design/icons";

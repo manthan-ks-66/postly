@@ -12,17 +12,24 @@ import {
 } from "antd";
 import { UploadOutlined, RocketOutlined } from "@ant-design/icons";
 
+import { useForm } from "react-hook-form";
+
 const { Content } = Layout;
 const { Title } = Typography;
 const { Option } = Select;
 
-function AddPost({ post }) {
+function PostForm({ post }) {
   const { token } = theme.useToken();
   const [form] = Form.useForm();
 
-  const onFinish = (values) => {
-    console.log("Post Data:", values);
-    // Handle submission logic here
+  const { handleSubmit, control } = useForm();
+
+  const submitPost = async () => {
+    //
+  };
+
+  const handlePostForm = () => {
+    handleSubmit(submitPost)();
   };
 
   // Custom styling for the form container
@@ -57,7 +64,7 @@ function AddPost({ post }) {
           <Form
             form={form}
             layout="vertical"
-            onFinish={onFinish}
+            onFinish={handlePostForm}
             requiredMark={false}
           >
             <div style={{ display: "flex", flexWrap: "wrap", gap: "20px" }}>
@@ -87,21 +94,21 @@ function AddPost({ post }) {
               style={{ flex: "1 1 45%" }}
             >
               <Select placeholder="Select a category" size="middle">
-                <Option value="tech">Tech</Option>
-                <Option value="innovation">Innovation</Option>
-                <Option value="story">Story</Option>
-                <Option value="creative idea">Creative Idea</Option>
+                <Option value="Tech">Tech</Option>
+                <Option value="Story">Story</Option>
+                <Option value="Business">Business</Option>
+                <Option value="Education">Education</Option>
+                <Option value="Creative Idea">Creative Idea</Option>
               </Select>
             </Form.Item>
 
-            
             <Form.Item
               label="Select an Image"
               name="featuredImage"
               style={{ flex: "1 1 45%" }}
             >
               <Upload
-                beforeUpload={() => false} 
+                beforeUpload={() => false}
                 maxCount={1}
                 listType="picture"
               >
@@ -157,4 +164,4 @@ function AddPost({ post }) {
   );
 }
 
-export default AddPost;
+export default PostForm;

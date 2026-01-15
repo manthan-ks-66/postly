@@ -31,10 +31,12 @@ app.get("/", (_, res) => {
 });
 
 // route imports
-import userRouter from "./routes/users.routes.js";
+import usersRouter from "./routes/users.routes.js";
+import postsRouter from "./routes/posts.routes.js";
 
 // route declarations
-app.use("/api/v1/users", userRouter);
+app.use("/api/v1/users", usersRouter);
+app.use("/api/v1/posts", postsRouter);
 
 app.use((err, req, res, next) => {
   const statusCode = err.statusCode || 500;

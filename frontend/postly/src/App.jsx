@@ -11,7 +11,7 @@ import { login } from "./store/authSlice.js";
 import { Spin } from "antd";
 import { theme } from "antd";
 
-import NotificationProvider from "./components/context/NotificationProvider.jsx";
+import NotificationProvider from "./context/NotificationProvider.jsx";
 
 function App() {
   const [loader, setLoader] = useState(true);
@@ -38,7 +38,7 @@ function App() {
         if (user) dispatch(login(user));
       })
       .catch((err) => {
-        console.log(err.message)
+        console.log(err.message);
       })
       .finally(() => setLoader(false));
   }, [dispatch]);

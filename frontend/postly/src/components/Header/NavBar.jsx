@@ -21,7 +21,7 @@ import { useSelector } from "react-redux";
 import authService from "../../services/authService.js";
 import { logout } from "../../store/authSlice.js";
 import { useDispatch } from "react-redux";
-import { useNotify } from "../context/NotificationProvider.jsx";
+import { useNotify } from "../../context/NotificationProvider.jsx";
 
 const { Header } = Layout;
 const { useBreakpoint } = Grid;

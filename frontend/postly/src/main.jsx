@@ -14,7 +14,7 @@ import ResetPassword from "./components/ResetPassword.jsx";
 import { ConfigProvider, theme as antdTheme } from "antd";
 import PostPage from "./components/PostPage.jsx";
 import Posts from "./components/Posts.jsx";
-import AddPost from "./components/AddPost.jsx";
+import PostForm from "./components/PostForm.jsx";
 
 const postlyDarkTheme = {
   algorithm: antdTheme.darkAlgorithm,
@@ -70,6 +70,10 @@ const router = createBrowserRouter([
         element: <About />,
       },
       {
+        path: "/reset-password",
+        element: <ResetPassword />,
+      },
+      {
         path: "/register",
         element: (
           <AuthLayout authentication={false}>
@@ -97,7 +101,7 @@ const router = createBrowserRouter([
         path: "/add-post",
         element: (
           <AuthLayout authentication={true}>
-            <AddPost />
+            <PostForm />
           </AuthLayout>
         ),
       },

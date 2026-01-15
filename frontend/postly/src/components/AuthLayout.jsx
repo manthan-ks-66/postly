@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { Spin } from "antd";
 import { theme } from "antd";
-import { useNotify } from "./context/NotificationProvider";
+import { useNotify } from "../context/NotificationProvider";
 
 function AuthLayout({ children, authentication = true }) {
   const { token } = theme.useToken();

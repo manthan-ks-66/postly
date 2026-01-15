@@ -3,13 +3,14 @@ import { Layout, theme } from "antd";
 
 function Posts() {
   const token = theme.useToken();
+
   return (
     <Layout
       style={{
         alignItems: "center",
         justifyContent: "center",
-        background: token.colorBgContainer,
-        minHeight: "100vh", // Use minHeight for mobile stability
+        background: token.darkItemBg,
+        minHeight: "100vh",
         padding: "10px",
       }}
     >
