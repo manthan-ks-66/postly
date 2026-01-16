@@ -155,7 +155,7 @@ function PostPage({ post }) {
           </div>
 
           {/* Comment List */}
-          <Space direction="vertical" size="large" style={{ width: "100%" }}>
+          <Space vertical size="large" style={{ width: "100%" }}>
             {data.comments.map((comment) => (
               <div key={comment.id} style={{ display: "flex", gap: "12px" }}>
                 <Avatar size="small" icon={<UserOutlined />} />

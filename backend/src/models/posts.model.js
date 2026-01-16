@@ -16,6 +16,7 @@ const postSchema = new mongoose.Schema(
     },
     featuredImage: {
       type: String,
+      default: undefined,
     },
     category: {
       type: String,

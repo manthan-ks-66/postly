@@ -33,10 +33,12 @@ app.get("/", (_, res) => {
 // route imports
 import usersRouter from "./routes/users.routes.js";
 import postsRouter from "./routes/posts.routes.js";
+import commentsRouter from "./routes/comments.routes.js";
 
 // route declarations
 app.use("/api/v1/users", usersRouter);
 app.use("/api/v1/posts", postsRouter);
+app.use("/api/v1/comments", commentsRouter);
 
 app.use((err, req, res, next) => {
   const statusCode = err.statusCode || 500;
