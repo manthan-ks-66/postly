@@ -22,8 +22,8 @@ function App() {
   const contentStyle = {
     padding: 50,
     display: "flex",
-    justifyContent: "center",
     alignItems: "center",
+    justifyContent: "center",
     height: "100vh",
     background: token.colorBgLayout,
     borderRadius: 4,
@@ -50,7 +50,9 @@ function App() {
       <Footer />
     </NotificationProvider>
   ) : (
-    <Spin style={contentStyle} size="large"></Spin>
+    <div style={contentStyle}>
+      <Spin className="icon-spin" />
+    </div>
   );
 }
 

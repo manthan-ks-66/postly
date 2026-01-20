@@ -25,13 +25,15 @@ const postlyDarkTheme = {
     colorBgLayout: "#111827",
     colorBgContainer: "#111827",
 
+    colorBgCard: "#1d2538be",
+
     // Text colors
     colorTextBase: "#E5E7EB",
     colorTextSecondary: "#9CA3AF",
 
     // Shape & font
     borderRadiusLG: 10,
-    fontFamily: "-apple-system",
+    fontFamily: "-apple systems",
   },
 
   components: {
@@ -74,7 +76,7 @@ const router = createBrowserRouter([
         element: <ResetPassword />,
       },
       {
-        path: "/register",
+        path: "/auth/register",
         element: (
           <AuthLayout authentication={false}>
             <Register />
@@ -82,7 +84,7 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: "/login",
+        path: "/auth/login",
         element: (
           <AuthLayout authentication={false}>
             <Login />
@@ -90,15 +92,15 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: "/post/:slug",
+        path: "/post/:_id/:slug",
         element: <PostPage />,
       },
       {
-        path: "/all-posts",
+        path: "/explore-posts",
         element: <Posts />,
       },
       {
-        path: "/add-post",
+        path: "/post/add-post",
         element: (
           <AuthLayout authentication={true}>
             <PostForm />
@@ -122,5 +124,5 @@ createRoot(document.getElementById("root")).render(
     <ConfigProvider theme={postlyDarkTheme}>
       <RouterProvider router={router} />
     </ConfigProvider>
-  </Provider>
+  </Provider>,
 );

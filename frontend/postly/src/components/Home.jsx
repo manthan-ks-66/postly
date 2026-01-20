@@ -75,7 +75,9 @@ function Home() {
             >
               Start Writing
             </Button>
-            <Button onClick={() => navigate("/all-posts")} size="middle">Explore Posts</Button>
+            <Button onClick={() => navigate("/all-posts")} size="middle">
+              Explore Posts
+            </Button>
           </Space>
         </div>
 

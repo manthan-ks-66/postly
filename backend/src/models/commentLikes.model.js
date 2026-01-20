@@ -13,7 +13,9 @@ const commentLikesSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
+
+commentLikesSchema.index({ commentId: 1, likedBy: 1 }, { unique: true });
 
 export const CommentLike = mongoose.model("CommentLike", commentLikesSchema);

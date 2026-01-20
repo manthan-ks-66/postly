@@ -51,6 +51,7 @@ function NavBar() {
 
         notify.api.success({
           title: "Logged out successfully",
+          placement: "top",
         });
 
         navigate("/");
@@ -89,11 +90,11 @@ function NavBar() {
     },
     {
       label: "Explore",
-      key: "/all-posts",
+      key: "/explore-posts?page=1&limit=5",
     },
     {
       label: "Add Post",
-      key: "/add-post",
+      key: "/post/add-post",
     },
   ];
 
@@ -124,7 +125,6 @@ function NavBar() {
           display: "flex",
           alignItems: "center",
           padding: "0 20px",
-          // if authenticated, center everything. If not, space between.
           justifyContent: user ? "center" : "space-between",
           position: "relative",
         }}
@@ -185,16 +185,16 @@ function NavBar() {
           {user ? (
             <Dropdown menu={{ items: userItems }} trigger={["click"]}>
               <Space style={{ cursor: "pointer" }}>
-                <Avatar src={user?.avatar} size={40} icon={<UserOutlined />} />
+                <Avatar src={user?.avatar} size={45} icon={<UserOutlined />} />
               </Space>
             </Dropdown>
           ) : (
             isDesktop && (
               <Space>
-                <Link to="/login">
+                <Link to="/auth/login">
                   <Button>Login</Button>
                 </Link>
-                <Link to="/register">
+                <Link to="/auth/register">
                   <Button type="primary">Register</Button>
                 </Link>
               </Space>
@@ -227,10 +227,10 @@ function NavBar() {
                 gap: 10,
               }}
             >
-              <Link to="/login" onClick={toggleDrawer}>
+              <Link to="/auth/login" onClick={toggleDrawer}>
                 <Button block>Login</Button>
               </Link>
-              <Link to="/register" onClick={toggleDrawer}>
+              <Link to="/auth/register" onClick={toggleDrawer}>
                 <Button type="primary" block>
                   Register
                 </Button>

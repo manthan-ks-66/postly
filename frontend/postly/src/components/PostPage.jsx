@@ -1,4 +1,3 @@
-import React from "react";
 import {
   Layout,
   Typography,
@@ -21,37 +20,53 @@ import {
   UserOutlined,
 } from "@ant-design/icons";
 
+import postService from "../services/postService.js";
+import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import Posts from "./Posts.jsx";
 
 const { Content } = Layout;
 const { Title, Paragraph, Text } = Typography;
 
-function PostPage({ post }) {
+function PostPage() {
   const { token } = theme.useToken();
 
-  const user = useSelector(state => state.auth.user);
+  const [post, setPost] = useState(null);
+  const [error, setError] = useState("");
 
-  // Placeholder data if props are empty
-  const data = post || {
-    title: "The Impact of Quantum Computing on Modern Web Security",
-    featuredImage:
-      "https://res.cloudinary.com/dih3k6kyk/image/upload/v1768417354/v9rhh1aniohssksaflu6.png",
-    content:
-      "Quantum computing is no longer a thing of the future. As we move closer to practical quantum advantage, the cryptographic foundations of the web are being challenged...",
-    likes: 124,
-    comments: [
-      {
-        id: 1,
-        user: "Alex Tech",
-        text: "This is a fascinating breakdown of post-quantum cryptography!",
-      },
-      {
-        id: 2,
-        user: "Sarah Design",
-        text: "Great read! Love the insights on security.",
-      },
-    ],
+  const [like, setLike] = useState(<LikeOutlined />);
+
+  const { _id } = useParams();
+
+  const user = useSelector((state) => state.auth.user);
+
+  const fetchPost = async () => {
+    try {
+      const resPost = await postService.fetchOnePost(_id);
+
+      setPost(resPost[0]);
+    } catch (error) {
+      setError(error.message);
+    }
   };
+
+  useEffect(() => {
+    fetchPost();
+  }, [_id]);
+
+  const togglePostLike = async () => {
+    postService.togglePostLike(post?._id).then((res) => {
+      if (res.statusCode === 200) {
+        fetchPost();
+      }
+    });
+  };
+
+  const isAuthor = post && user ? user._id === post.userId : false;
+
+  console.log(post);
 
   return (
     <Layout style={{ minHeight: "100vh", background: token.colorBgLayout }}>
@@ -59,60 +74,58 @@ function PostPage({ post }) {
         style={{ padding: "40px 20px", maxWidth: "800px", margin: "0 auto" }}
       >
         {/* Post Actions (Edit/Delete) - Top Right */}
-        <Row justify="end" style={{ marginBottom: 20 }}>
-          <Space>
-            <Button icon={<EditOutlined />} size="small">
-              Edit
-            </Button>
-            <Button icon={<DeleteOutlined />} danger size="small">
-              Delete
-            </Button>
-          </Space>
-        </Row>
+        {isAuthor && (
+          <Row justify="end" style={{ marginBottom: 20 }}>
+            <Space>
+              <Link to={`/post/${post?._id}/${post?.slug}/edit`}>
+                <Button icon={<EditOutlined />} size="small">
+                  Edit
+                </Button>
+              </Link>
+              <Link>
+                <Button icon={<DeleteOutlined />} danger size="small">
+                  Delete
+                </Button>
+              </Link>
+            </Space>
+          </Row>
+        )}
         {/* Featured Image */}
         <div style={{ marginBottom: 30 }}>
           <Image
             width="100%"
             height={400}
-            src={data.featuredImage}
+            src={post?.featuredImage}
             style={{ objectFit: "fill", borderRadius: 16 }}
           />
         </div>
 
         {/* Post Header */}
         <Title level={2} style={{ fontSize: "28px", marginBottom: 16 }}>
-          {data.title}
+          {post?.title}
         </Title>
 
-        <Space split={<Divider type="vertical" />} style={{ marginBottom: 24 }}>
+        <Space split={<Divider vertical />} style={{ marginBottom: 24 }}>
           <Space>
-            <Avatar size="small" icon={<UserOutlined />} />
-            <Text type="secondary" style={{ fontSize: "12px" }}>
-              By Author Name
+            <Avatar
+              src={post?.author?.avatar}
+              size="large"
+              icon={<UserOutlined />}
+            />
+            <Text type="secondary" style={{ fontSize: "14px" }}>
+              By {post?.author?.fullName}
             </Text>
           </Space>
-          <Text type="secondary" style={{ fontSize: "12px" }}>
-            Oct 24, 2025
+          <Text type="secondary" style={{ fontSize: "13px" }}>
+            {post?.createdAt}
           </Text>
         </Space>
-
-        {/* Main Content */}
-        <Paragraph
-          style={{
-            fontSize: "15px",
-            lineHeight: "1.8",
-            color: token.colorTextBase,
-            marginBottom: 40,
-          }}
-        >
-          {data.content}
-        </Paragraph>
 
         {/* Interaction Bar */}
         <div
           style={{
             display: "flex",
-            gap: "24px",
+            gap: "28px",
             padding: "15px 0",
             borderTop: "1px solid rgba(255,255,255,0.1)",
             borderBottom: "1px solid rgba(255,255,255,0.1)",
@@ -120,19 +133,37 @@ function PostPage({ post }) {
         >
           <Space style={{ cursor: "pointer" }}>
             <LikeOutlined
+              onClick={() => {
+                togglePostLike();
+                setLike(<LikeFilled />);
+              }}
               style={{ fontSize: "18px", color: token.colorPrimary }}
             />
-            <Text style={{ fontSize: "13px" }}>{data.likes}</Text>
+            <Text style={{ fontSize: "13px" }}>{post?.likesCount}</Text>
           </Space>
           <Space style={{ cursor: "pointer" }}>
             <MessageOutlined style={{ fontSize: "18px" }} />
-            <Text style={{ fontSize: "13px" }}>{data.comments.length}</Text>
+            <Text style={{ fontSize: "13px" }}>{post?.commentsCount}</Text>
           </Space>
           <Space style={{ cursor: "pointer" }}>
             <ShareAltOutlined style={{ fontSize: "18px" }} />
             <Text style={{ fontSize: "13px" }}>Share</Text>
           </Space>
         </div>
+
+        {/* Main Content */}
+        <Paragraph
+          style={{
+            fontSize: "15px",
+            lineHeight: "1.8",
+            color: token.colorTextBase,
+            marginTop: 40,
+            lineHeight: "1.8",
+            letterSpacing: "0.6px",
+          }}
+        >
+          {post?.content}
+        </Paragraph>
 
         {/* Comments Section */}
         <div style={{ marginTop: 40 }}>
@@ -142,7 +173,7 @@ function PostPage({ post }) {
 
           {/* Add Comment Input */}
           <div style={{ marginBottom: 30, display: "flex", gap: "12px" }}>
-            <Avatar icon={<UserOutlined />} />
+            <Avatar src={user?.avatar} icon={<UserOutlined />} />
             <Input.TextArea
               placeholder="Add a comment..."
               autoSize={{ minRows: 1, maxRows: 4 }}
@@ -155,33 +186,6 @@ function PostPage({ post }) {
           </div>
 
           {/* Comment List */}
-          <Space vertical size="large" style={{ width: "100%" }}>
-            {data.comments.map((comment) => (
-              <div key={comment.id} style={{ display: "flex", gap: "12px" }}>
-                <Avatar size="small" icon={<UserOutlined />} />
-                <div
-                  style={{
-                    background: "#ffffff0a",
-                    padding: "12px 16px",
-                    borderRadius: "0 12px 12px 12px",
-                    flex: 1,
-                  }}
-                >
-                  <Text strong style={{ fontSize: "13px", display: "block" }}>
-                    {comment.user}
-                  </Text>
-                  <Text
-                    style={{
-                      fontSize: "13px",
-                      color: token.colorTextSecondary,
-                    }}
-                  >
-                    {comment.text}
-                  </Text>
-                </div>
-              </div>
-            ))}
-          </Space>
         </div>
       </Content>
     </Layout>

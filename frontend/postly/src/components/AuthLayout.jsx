@@ -26,11 +26,12 @@ function AuthLayout({ children, authentication = true }) {
 
   useEffect(() => {
     if (authentication && authentication !== authStatus) {
-      navigate("/login");
+      navigate("/auth/login");
 
       notify.api.error({
         title: "Authentication Required!",
         description: "Please Login to continue",
+        placement: "top",
       });
     } else if (!authentication && authentication !== authStatus) {
       navigate("/");

@@ -33,6 +33,7 @@ function Login() {
       notify.api.success({
         title: "Welcome Back",
         description: "You are now logged in",
+        placement: "top",
       });
     } catch (error) {
       setError(error.message);
@@ -82,7 +83,7 @@ function Login() {
           </span>
           &nbsp; &nbsp;
           <Link
-            to="/register"
+            to="/auth/register"
             style={{
               fontSize: "13px",
               fontWeight: "bold",

@@ -47,6 +47,7 @@ function Register() {
       notify.api.success({
         title: "Registration Completed",
         description: "Your are now logged in",
+        placement: "top",
       });
 
       navigate("/");
@@ -100,7 +101,7 @@ function Register() {
           </span>
           &nbsp; &nbsp;
           <Link
-            to="/login"
+            to="/auth/login"
             style={{
               fontSize: "13px",
               fontWeight: "bold",

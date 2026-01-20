@@ -2,3 +2,20 @@ body {
   margin: 0;
   padding: 0;
 }
+
+@keyframes samsungZoom {
+  0%,
+  100% {
+    transform: rotate(0deg) scale(2);
+  }
+  50% {
+    transform: rotate(180deg) scale(2.5);
+  }
+  100% {
+    transform: rotate(360deg) scale(2);
+  }
+}
+
+.icon-spin .ant-spin-dot {
+  animation: samsungZoom 1.2s infinite linear !important;
+}

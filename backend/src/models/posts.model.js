@@ -21,7 +21,7 @@ const postSchema = new mongoose.Schema(
     category: {
       type: String,
       required: true,
-      enum: ["Tech", "Story", "Business", "Education", "Creative Idea"],
+      enum: ["Tech", "Story", "Business", "Education"],
     },
     likesCount: {
       type: Number,

@@ -5,6 +5,7 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import uploadToCloudinary from "../utils/cloudinary.js";
 import mongoose, { isValidObjectId, mongo } from "mongoose";
 import { PostLike } from "../models/postLikes.model.js";
+import formatPost from "../utils/dateFormatter.js";
 
 // Controller: Upload post
 const publishPost = asyncHandler(async (req, res) => {
@@ -107,13 +108,13 @@ const updatePost = asyncHandler(async (req, res) => {
 
 // Controller: Get all the Posts (Paginated)
 const getAllPosts = asyncHandler(async (req, res) => {
-  const { page = 1, limit = 10 } = req.query;
+  const { page = 1, limit = 5 } = req.query;
 
   const totalPosts = await Post.countDocuments();
 
   const posts = await Post.find({})
     .sort()
-    .skip(page - 1)
+    .skip((page - 1) * limit)
     .limit(Number(limit));
 
   if (posts?.length === 0) {
@@ -173,33 +174,34 @@ const togglePostLike = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Invalid user id or post id");
   }
 
-  let post = await Post.findById(postId);
+  // check - if post is valid
+  const post = await Post.findById(postId);
 
   if (!post) {
-    throw new ApiError(400, "Cannot find the post");
+    throw new ApiError(400, "No post found");
   }
 
-  const existingPostLike = await PostLike.findOne({ likedBy, postId });
-
-  if (existingPostLike) {
-    await PostLike.findByIdAndDelete(existingPostLike._id);
-    await Post.updateOne({ _id: postId }, { $inc: { likesCount: -1 } });
-
-    post = await Post.findById(post._id);
-  } else {
-    await PostLike.create({
-      postId,
-      likedBy,
-    });
+  try {
+    await PostLike.create({ postId, likedBy });
 
     await Post.updateOne({ _id: postId }, { $inc: { likesCount: 1 } });
 
-    post = await Post.findById(post._id);
-  }
+    return res
+      .status(200)
+      .json(new ApiResponse(200, "Post Liked successfully", {}));
+  } catch (error) {
+    if (error.code === 11000) {
+      await PostLike.deleteOne({ postId, likedBy });
 
-  return res
-    .status(200)
-    .json(new ApiResponse(200, "post like toggled successfully", post));
+      await Post.updateOne({ _id: postId }, { $inc: { likesCount: -1 } });
+
+      return res
+        .status(200)
+        .json(new ApiResponse(200, "Post un-liked successfully", {}));
+    } else {
+      throw error;
+    }
+  }
 });
 
 // Controller: Get one post
@@ -222,6 +224,14 @@ const getPost = asyncHandler(async (req, res) => {
         localField: "userId",
         foreignField: "_id",
         as: "author",
+        pipeline: [
+          {
+            $project: {
+              fullName: 1,
+              avatar: 1,
+            },
+          },
+        ],
       },
     },
     {
@@ -231,19 +241,27 @@ const getPost = asyncHandler(async (req, res) => {
       $project: {
         title: 1,
         content: 1,
+        userId: 1,
+        slug: 1,
         featuredImage: 1,
-        createdAt: 1,
-        updatedAt: 1,
+        createdAt: {
+          $dateToString: {
+            date: "$createdAt",
+            format: "%d %b %Y",
+            timezone: "Asia/Kolkata",
+          },
+        },
+        updatedAt: {
+          $dateToString: {
+            date: "$updatedAt",
+            format: "%d %b %Y",
+            timezone: "Asia/Kolkata",
+          },
+        },
         category: 1,
         likesCount: 1,
         commentsCount: 1,
-        author: {
-          username: 1,
-          fullName: 1,
-          email: 1,
-          avatar: 1,
-          _id: 1,
-        },
+        author: 1,
       },
     },
   ]);
@@ -265,7 +283,64 @@ const getUserLikedPosts = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Invalid user id");
   }
 
-  // left outer join of PostLikes (left) with Posts (right) and Posts(array) with Users (right)
+  // left join of PostLikes (left) with Posts (right) and Posts(array) with Users (right)
+  // const userLikedPosts = await PostLike.aggregate([
+  //   {
+  //     $match: {
+  //       likedBy: new mongoose.Types.ObjectId(likedBy),
+  //     },
+  //   },
+  //   {
+  //     $lookup: {
+  //       from: "posts",
+  //       localField: "postId",
+  //       foreignField: "_id",
+  //       as: "userLikedPosts",
+  //       pipeline: [
+  //         {
+  //           $lookup: {
+  //             from: "users",
+  //             localField: "userId",
+  //             foreignField: "_id",
+  //             as: "author",
+  //             pipeline: [
+  //               {
+  //                 $project: {
+  //                   username: 1,
+  //                   fullName: 1,
+  //                   email: 1,
+  //                   avatar: 1,
+  //                   _id: 1,
+  //                 },
+  //               },
+  //             ],
+  //           },
+  //         },
+  //         {
+  //           $unwind: "$author",
+  //         },
+  //       ],
+  //     },
+  //   },
+  //   {
+  //     $unwind: "$userLikedPosts",
+  //   },
+  //   {
+  //     $project: {
+  //       _id: "$userLikedPosts._id",
+  //       title: "$userLikedPosts.title",
+  //       content: "$userLikedPosts.content",
+  //       featuredImage: "$userLikedPosts.featuredImage",
+  //       category: "$userLikedPosts.category",
+  //       likesCount: "$userLikedPosts.likesCount",
+  //       commentsCount: "$userLikedPosts.commentsCount",
+  //       createdAt: "$userLikedPosts.createdAt",
+  //       updatedAt: "$userLikedPosts.updatedAt",
+  //       author: "$userLikedPosts.author",
+  //     },
+  //   },
+  // ]);
+
   const userLikedPosts = await PostLike.aggregate([
     {
       $match: {
@@ -280,26 +355,30 @@ const getUserLikedPosts = asyncHandler(async (req, res) => {
         as: "userLikedPosts",
         pipeline: [
           {
-            $lookup: {
-              from: "users",
-              localField: "userId",
-              foreignField: "_id",
-              as: "author",
-              pipeline: [
-                {
-                  $project: {
-                    username: 1,
-                    fullName: 1,
-                    email: 1,
-                    avatar: 1,
-                    _id: 1,
-                  },
+            $project: {
+              title: 1,
+              content: 1,
+              userId: 1,
+              slug: 1,
+              featuredImage: 1,
+              createdAt: {
+                $dateToString: {
+                  date: "$createdAt",
+                  format: "%d %b %Y",
+                  timezone: "Asia/Kolkata",
                 },
-              ],
+              },
+              updatedAt: {
+                $dateToString: {
+                  date: "$updatedAt",
+                  format: "%d %b %Y",
+                  timezone: "Asia/Kolkata",
+                },
+              },
+              category: 1,
+              likesCount: 1,
+              commentsCount: 1,
             },
-          },
-          {
-            $unwind: "$author",
           },
         ],
       },
@@ -309,16 +388,8 @@ const getUserLikedPosts = asyncHandler(async (req, res) => {
     },
     {
       $project: {
-        _id: "$userLikedPosts._id",
-        title: "$userLikedPosts.title",
-        content: "$userLikedPosts.content",
-        featuredImage: "$userLikedPosts.featuredImage",
-        category: "$userLikedPosts.category",
-        likesCount: "$userLikedPosts.likesCount",
-        commentsCount: "$userLikedPosts.commentsCount",
-        createdAt: "$userLikedPosts.createdAt",
-        updatedAt: "$userLikedPosts.updatedAt",
-        author: "$userLikedPosts.author",
+        _id: 0,
+        userLikedPosts: 1,
       },
     },
   ]);
@@ -333,8 +404,8 @@ const getUserLikedPosts = asyncHandler(async (req, res) => {
       new ApiResponse(
         200,
         "User liked posts fetched successfully",
-        userLikedPosts
-      )
+        userLikedPosts,
+      ),
     );
 });
 

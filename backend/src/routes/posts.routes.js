@@ -31,6 +31,6 @@ router.route("/get-user-liked-posts").get(verifyJWT, getUserLikedPosts);
 
 router
   .route("/update-post/:postId")
-  .patch(verifyJWT, upload.single("featuredImage"), updatePost);  
+  .patch(verifyJWT, upload.single("featuredImage"), updatePost);
 
 export default router;
