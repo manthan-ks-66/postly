@@ -93,8 +93,8 @@ function NavBar() {
       key: "/explore-posts?page=1&limit=5",
     },
     {
-      label: "Add Post",
-      key: "/post/add-post",
+      label: "Write",
+      key: "/post/new/write",
     },
   ];
 

@@ -1,7 +1,7 @@
 import { Content } from "antd/es/layout/layout";
 import PostCard from "./PostCard.jsx";
 import { Layout, theme, Pagination, Spin } from "antd";
-import postService from "../services/postService.js";
+import postService from "../../services/postService.js";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSearchParams } from "react-router-dom";

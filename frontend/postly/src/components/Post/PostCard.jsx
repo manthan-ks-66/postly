@@ -1,4 +1,4 @@
-import { Card, Typography, Space, theme, Divider } from "antd";
+import { Card, Typography, theme, Divider } from "antd";
 import {
   ShareAltOutlined,
   MessageOutlined,
@@ -6,7 +6,7 @@ import {
 } from "@ant-design/icons";
 
 const { Title, Paragraph } = Typography;
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 function PostCard({
   _id,
@@ -18,24 +18,25 @@ function PostCard({
   slug,
 }) {
   const { token } = theme.useToken();
+  const navigate = useNavigate();
 
   return (
-    <Link to={`/post/${_id}/${slug}`}>
-      <>
-        <Card
-          hoverable
-          styles={{ body: { padding: 0 } }}
-          style={{
-            margin: "30px 0",
-            width: "100%",
-            maxWidth: "890px",
-            background: token.colorBgCard,
-            borderRadius: 16,
-            border: "1px solid rgba(255, 255, 255, 0.1)",
-            overflow: "hidden",
-            backdropFilter: "blur(10px)",
-          }}
-        >
+    <>
+      <Card
+        hoverable
+        styles={{ body: { padding: 0 } }}
+        style={{
+          margin: "30px 0",
+          width: "100%",
+          maxWidth: "890px",
+          background: token.colorBgCard,
+          borderRadius: 16,
+          border: "1px solid rgba(255, 255, 255, 0.1)",
+          overflow: "hidden",
+          backdropFilter: "blur(10px)",
+        }}
+      >
+        <Link to={`/post/${_id}/${slug}`}>
           {/* Top Section */}
           <div
             style={{
@@ -95,43 +96,48 @@ function PostCard({
                   margin: 0,
                   lineHeight: 1.5,
                   justifyContent: "center",
-                  textAlign: "left",
                 }}
               >
-                {content.slice(0, 200)} &nbsp;
-                <Link to={`/post/${_id}/${slug}`}>Read More</Link>
+                {content.slice(0, 180)}
+                <p
+                  onClick={() => navigate(`/post/${_id}/${slug}`)}
+                  style={{ color: token.colorPrimary, cursor: "pointer" }}
+                >
+                  More
+                </p>
               </Paragraph>
             </div>
           </div>
+        </Link>
 
-          {/* Bottom Section */}
-          <div
-            style={{
-              display: "flex",
-              borderTop: "1px solid rgba(255, 255, 255, 0.05)",
-            }}
-          >
-            <div className="card-action-item">
-              <LikeOutlined style={{ color: "#ff4d4f" }} />
-              <span style={{ marginLeft: 6, fontSize: "12px" }}>
-                {likesCount} {/* Fixed reference */}
-              </span>
-            </div>
-            <Divider vertical style={{ height: "48px", margin: 0 }} />
-            <div className="card-action-item">
-              <MessageOutlined style={{ color: "#1890ff" }} />
-              <span style={{ marginLeft: 6, fontSize: "12px" }}>
-                {commentsCount} {/* Fixed reference */}
-              </span>
-            </div>
-            <Divider vertical style={{ height: "48px", margin: 0 }} />
-            <div className="card-action-item">
-              <ShareAltOutlined style={{ color: "#52c41a" }} />
-              <span style={{ marginLeft: 6, fontSize: "12px" }}>Share</span>
-            </div>
+        {/* Bottom Section */}
+        <div
+          style={{
+            display: "flex",
+            borderTop: "1px solid rgba(255, 255, 255, 0.05)",
+          }}
+        >
+          <div className="card-action-item">
+            <LikeOutlined style={{ color: "#ff4d4f" }} />
+            <span style={{ marginLeft: 6, fontSize: "12px" }}>
+              {likesCount}
+            </span>
           </div>
+          <Divider vertical style={{ height: "48px", margin: 0 }} />
+          <div className="card-action-item">
+            <MessageOutlined style={{ color: "#1890ff" }} />
+            <span style={{ marginLeft: 6, fontSize: "12px" }}>
+              {commentsCount} {/* Fixed reference */}
+            </span>
+          </div>
+          <Divider vertical style={{ height: "48px", margin: 0 }} />
+          <div className="card-action-item">
+            <ShareAltOutlined style={{ color: "#52c41a" }} />
+            <span style={{ marginLeft: 6, fontSize: "12px" }}>Share</span>
+          </div>
+        </div>
 
-          <style>{`
+        <style>{`
         .card-action-item {
           flex: 1;
           display: flex;
@@ -160,9 +166,8 @@ function PostCard({
           }
         }
       `}</style>
-        </Card>
-      </>
-    </Link>
+      </Card>
+    </>
   );
 }
 

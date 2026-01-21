@@ -1,0 +1,40 @@
+.interaction-btn {
+  background: transparent !important;
+  border: 1px solid transparent !important;
+  box-shadow: none !important;
+}
+
+.interaction-btn:hover {
+  border-color: #55aa00 !important;
+  background: transparent !important;
+}
+
+/* Dark mode support for the hover border */
+[data-theme="dark"] .interaction-btn:hover {
+  border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+.divider {
+  display: none;
+}
+
+/* Responsive padding for the main container */
+@media (max-width: 576px) {
+  .post-content-container {
+    padding: 20px 15px !important;
+  }
+
+  .featured-image {
+    height: 250px !important;
+  }
+}
+
+@media (max-width: 400px) {
+  .divider {
+    display: block;
+  }
+
+  .meta-divider-left {
+    display: none;
+  }
+}

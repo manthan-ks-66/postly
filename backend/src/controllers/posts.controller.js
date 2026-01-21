@@ -94,6 +94,7 @@ const updatePost = asyncHandler(async (req, res) => {
   post.slug = slug;
   post.content = content;
   post.category = category;
+  post.editedAt = new Date();
 
   const updatedPost = await post.save({ validateBeforeSave: true });
 
@@ -258,6 +259,20 @@ const getPost = asyncHandler(async (req, res) => {
             timezone: "Asia/Kolkata",
           },
         },
+        editedAt: {
+          $cond: {
+            // check if editedAt is false then format the date
+            if: { $ifNull: ["$editedAt", false] },
+            then: {
+              $dateToString: {
+                date: "$updatedAt",
+                format: "%d %b %Y",
+                timezone: "Asia/Kolkata",
+              },
+            },
+            else: null,
+          },
+        },
         category: 1,
         likesCount: 1,
         commentsCount: 1,
@@ -284,62 +299,6 @@ const getUserLikedPosts = asyncHandler(async (req, res) => {
   }
 
   // left join of PostLikes (left) with Posts (right) and Posts(array) with Users (right)
-  // const userLikedPosts = await PostLike.aggregate([
-  //   {
-  //     $match: {
-  //       likedBy: new mongoose.Types.ObjectId(likedBy),
-  //     },
-  //   },
-  //   {
-  //     $lookup: {
-  //       from: "posts",
-  //       localField: "postId",
-  //       foreignField: "_id",
-  //       as: "userLikedPosts",
-  //       pipeline: [
-  //         {
-  //           $lookup: {
-  //             from: "users",
-  //             localField: "userId",
-  //             foreignField: "_id",
-  //             as: "author",
-  //             pipeline: [
-  //               {
-  //                 $project: {
-  //                   username: 1,
-  //                   fullName: 1,
-  //                   email: 1,
-  //                   avatar: 1,
-  //                   _id: 1,
-  //                 },
-  //               },
-  //             ],
-  //           },
-  //         },
-  //         {
-  //           $unwind: "$author",
-  //         },
-  //       ],
-  //     },
-  //   },
-  //   {
-  //     $unwind: "$userLikedPosts",
-  //   },
-  //   {
-  //     $project: {
-  //       _id: "$userLikedPosts._id",
-  //       title: "$userLikedPosts.title",
-  //       content: "$userLikedPosts.content",
-  //       featuredImage: "$userLikedPosts.featuredImage",
-  //       category: "$userLikedPosts.category",
-  //       likesCount: "$userLikedPosts.likesCount",
-  //       commentsCount: "$userLikedPosts.commentsCount",
-  //       createdAt: "$userLikedPosts.createdAt",
-  //       updatedAt: "$userLikedPosts.updatedAt",
-  //       author: "$userLikedPosts.author",
-  //     },
-  //   },
-  // ]);
 
   const userLikedPosts = await PostLike.aggregate([
     {
@@ -394,7 +353,7 @@ const getUserLikedPosts = asyncHandler(async (req, res) => {
     },
   ]);
 
-  if (!userLikedPosts) {
+  if (userLikedPosts.length === 0) {
     throw new ApiError(400, "No Posts found!");
   }
 

@@ -35,10 +35,14 @@ const postSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
+    editedAt: {
+      type: Date,
+      default: null,
+    },
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 export const Post = mongoose.model("Post", postSchema);

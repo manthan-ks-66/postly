@@ -2,10 +2,10 @@ import { useDispatch } from "react-redux";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useForm, Controller } from "react-hook-form";
-import authService from "../services/authService";
-import { login } from "../store/authSlice";
+import authService from "../../services/authService.js";
+import { login } from "../../store/authSlice.js";
 import { Button, Form, Input, Layout, Alert } from "antd";
-import { useNotify } from "../context/NotificationProvider.jsx";
+import { useNotify } from "../../context/NotificationProvider.jsx";
 
 import { theme } from "antd";
 import { LockOutlined, UserOutlined } from "@ant-design/icons";
@@ -75,7 +75,9 @@ function Login() {
           Login
         </h2>
 
-        {error && <Alert type="error" title={error} />}
+        {error && (
+          <Alert style={{ textAlign: "center", border: "none" }} type="error" title={error} />
+        )}
 
         <div style={{ marginBottom: 19, textAlign: "center" }}>
           <span style={{ color: token.colorTextSecondary }}>

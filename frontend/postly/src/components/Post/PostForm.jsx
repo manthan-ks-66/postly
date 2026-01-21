@@ -1,4 +1,4 @@
-import PostEditor from "./Editor/PostEditor.jsx";
+import PostEditor from "../Editor/PostEditor.jsx";
 import {
   Layout,
   Form,
@@ -98,7 +98,6 @@ function PostForm({ post }) {
                 <Option value="Story">Story</Option>
                 <Option value="Business">Business</Option>
                 <Option value="Education">Education</Option>
-                <Option value="Creative Idea">Creative Idea</Option>
               </Select>
             </Form.Item>
 

@@ -4,17 +4,17 @@ import App from "./App.jsx";
 import { store } from "./store/store.js";
 import { Provider } from "react-redux";
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
-import Register from "./components/Register.jsx";
-import Login from "./components/Login.jsx";
+import Register from "./components/Auth/Register.jsx";
+import Login from "./components/Auth/Login.jsx";
 import Home from "./components/Home.jsx";
 import AuthLayout from "./components/AuthLayout.jsx";
 import About from "./components/About.jsx";
-import Settings from "./components/Settings.jsx";
-import ResetPassword from "./components/ResetPassword.jsx";
+import Settings from "./components/Auth/Settings.jsx";
+import ResetPassword from "./components/Auth/ResetPassword.jsx";
 import { ConfigProvider, theme as antdTheme } from "antd";
-import PostPage from "./components/PostPage.jsx";
-import Posts from "./components/Posts.jsx";
-import PostForm from "./components/PostForm.jsx";
+import PostPage from "./components/Post/PostPage.jsx";
+import Posts from "./components/Post/Posts.jsx";
+import PostForm from "./components/Post/PostForm.jsx";
 
 const postlyDarkTheme = {
   algorithm: antdTheme.darkAlgorithm,
@@ -100,7 +100,7 @@ const router = createBrowserRouter([
         element: <Posts />,
       },
       {
-        path: "/post/add-post",
+        path: "/post/new/write",
         element: (
           <AuthLayout authentication={true}>
             <PostForm />

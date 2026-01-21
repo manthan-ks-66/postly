@@ -2,12 +2,12 @@ import { useDispatch } from "react-redux";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useForm, Controller } from "react-hook-form";
-import authService from "../services/authService";
-import { login } from "../store/authSlice";
+import authService from "../../services/authService.js";
+import { login } from "../../store/authSlice.js";
 import { Button, Flex, Form, Input, Layout, Upload, Alert } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 
-import { useNotify } from "../context/NotificationProvider.jsx";
+import { useNotify } from "../../context/NotificationProvider.jsx";
 
 import { theme } from "antd";
 

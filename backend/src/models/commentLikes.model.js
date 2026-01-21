@@ -16,6 +16,8 @@ const commentLikesSchema = new mongoose.Schema(
   },
 );
 
+// the property unique: true will not allow the combination of postId and likedBy to be repeated
+
 commentLikesSchema.index({ commentId: 1, likedBy: 1 }, { unique: true });
 
 export const CommentLike = mongoose.model("CommentLike", commentLikesSchema);
