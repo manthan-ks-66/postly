@@ -1,45 +1,37 @@
-import { Content } from "antd/es/layout/layout";
-import PostCard from "./PostCard.jsx";
 import { Layout, theme, Pagination, Spin } from "antd";
-import postService from "../../services/postService.js";
+import { Content } from "antd/es/layout/layout";
+
+import postService from "../../services/postService";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSearchParams } from "react-router-dom";
+import PostCard from "./PostCard";
 
-function Posts() {
+function QueryPosts() {
   const { token } = theme.useToken();
   const navigate = useNavigate();
 
   const [searchParams] = useSearchParams();
 
-  const [error, setError] = useState("");
-
   let page = Number(searchParams.get("page"));
   let limit = Number(searchParams.get("limit"));
-
-  const [loader, setLoader] = useState(true);
+  let query = searchParams.get("query");
 
   const [posts, setPosts] = useState([]);
-  const [totalPosts, setTotalPosts] = useState(0);
+  const [totalPosts, setTotalPosts] = useState(1);
+
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    const getPosts = async () => {
-      try {
-        const res = await postService.fetchPosts(
-          `?page=${page}&limit=${limit}`,
-        );
+    postService
+      .fetchQueryPost(`?query=${query}&page=${page}&limit=${limit}`)
+      .then((data) => {
+        setPosts(data?.data?.posts);
+        setTotalPosts(data?.data?.totalPosts);
+      });
+  }, [page, limit, query]);
 
-        setPosts(res.posts);
-        setTotalPosts(res.totalPosts);
-
-        setLoader(false);
-      } catch (error) {
-        setError(error.message);
-      }
-    };
-
-    getPosts();
-  }, [page, limit]);
+  console.log(totalPosts);
 
   return (
     <Layout
@@ -51,7 +43,7 @@ function Posts() {
         background: token.colorBgContainer,
       }}
     >
-      {!loader ? (
+      {posts.length > 0 ? (
         <Content
           style={{
             display: "flex",
@@ -68,7 +60,9 @@ function Posts() {
           <div style={{ marginTop: "auto" }}>
             <Pagination
               onChange={(newPage) => {
-                navigate(`/explore-posts?page=${newPage}&limit=${limit}`);
+                navigate(
+                  `/search?query=${query}&page=${newPage}&limit=${limit}`,
+                );
                 window.scrollTo(0, 0);
               }}
               current={page}
@@ -80,12 +74,26 @@ function Posts() {
           </div>
         </Content>
       ) : (
-        <div>
-          <Spin className="icon-spin" />
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            background: token.colorBgContainer,
+          }}
+        >
+          <h2
+            style={{
+              textAlign: "center",
+              color: token.colorText,
+            }}
+          >
+            No posts found!
+          </h2>
         </div>
       )}
     </Layout>
   );
 }
 
-export default Posts;
+export default QueryPosts;

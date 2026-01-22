@@ -54,16 +54,29 @@ function Login() {
         padding: "10px",
       }}
     >
+      {error && (
+        <Alert
+          style={{
+            textAlign: "center",
+            border: "none",
+            width: "20%",
+            justifySelf: "center",
+            marginBottom: 20,
+          }}
+          type="error"
+          title={error}
+        />
+      )}
+
       <div
         style={{
           width: "100%",
-          maxWidth: "450px", // Limits width on desktop
+          maxWidth: "450px",
           padding: "30px 20px",
           backgroundColor: "#ffffff1e",
-          backdropFilter: "blur(10px)", // Glassmorphism effect
-          border: "1px solid rgba(255, 255, 255, 0.1)",
+          border: "1px solid rgba(255, 255, 255, 0.12)",
           borderRadius: 20,
-          boxShadow: "0 8px 32px 0 rgba(0, 0, 0, 0.37)",
+          boxShadow: "0 8px 32px 0 rgba(0, 0, 0, 0)",
         }}
       >
         <h2
@@ -75,15 +88,11 @@ function Login() {
           Login
         </h2>
 
-        {error && (
-          <Alert style={{ textAlign: "center", border: "none" }} type="error" title={error} />
-        )}
-
         <div style={{ marginBottom: 19, textAlign: "center" }}>
           <span style={{ color: token.colorTextSecondary }}>
-            Don't &nbsp; have&nbsp; an &nbsp;account?
+            Don't have an account?
           </span>
-          &nbsp; &nbsp;
+          &nbsp;
           <Link
             to="/auth/register"
             style={{

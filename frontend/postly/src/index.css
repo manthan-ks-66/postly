@@ -6,16 +6,16 @@ body {
 @keyframes samsungZoom {
   0%,
   100% {
-    transform: rotate(0deg) scale(2);
+    transform: rotate(0deg) scale(1);
   }
   50% {
     transform: rotate(180deg) scale(2.5);
   }
   100% {
-    transform: rotate(360deg) scale(2);
+    transform: rotate(360deg) scale(1);
   }
 }
 
 .icon-spin .ant-spin-dot {
-  animation: samsungZoom 1.2s infinite linear !important;
+  animation: samsungZoom 1.4s infinite linear !important;
 }

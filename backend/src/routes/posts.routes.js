@@ -16,7 +16,7 @@ const router = Router();
 
 router.route("/get-all-posts").get(getAllPosts);
 
-router.route("/get-query-posts").get(getQueryPosts);
+router.route("/get-query-post").get(getQueryPosts);
 
 router.route("/get-post/:postId").get(getPost);
 

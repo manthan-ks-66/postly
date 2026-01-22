@@ -48,6 +48,16 @@ class PostService {
       throw new Error(error.message);
     }
   }
+
+  async fetchQueryPost(query) {
+    try {
+      const res = await axios.get(`${this.postsBaseUrl}/get-query-post${query}`);
+
+      return res.data;
+    } catch (error) {
+      throw new Error(error.message)
+    }
+  }
 }
 
 const postService = new PostService();

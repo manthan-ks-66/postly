@@ -70,6 +70,20 @@ function Register() {
         padding: "10px",
       }}
     >
+      {error && (
+        <Alert
+          style={{
+            textAlign: "center",
+            border: "none",
+            width: "30%",
+            justifySelf: "center",
+            marginBottom: 20,
+          }}
+          type="error"
+          title={error}
+        />
+      )}
+
       <div
         style={{
           width: "100%",
@@ -91,13 +105,9 @@ function Register() {
           Register
         </h2>
 
-        {error && (
-          <Alert style={{ textAlign: "center" }} type="error" title={error} />
-        )}
-
         <div style={{ marginBottom: 19, textAlign: "center" }}>
           <span style={{ color: token.colorTextSecondary }}>
-            Already &nbsp; have&nbsp; an &nbsp;account?
+            Already have an account?
           </span>
           &nbsp; &nbsp;
           <Link

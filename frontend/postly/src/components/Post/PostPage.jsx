@@ -3,23 +3,23 @@ import {
   Typography,
   Button,
   Space,
-  Divider,
   Avatar,
   Image,
   theme,
-  Row,
   Input,
   Modal,
   Flex,
+  Spin,
 } from "antd";
 import {
   LikeFilled,
   LikeOutlined,
   MessageOutlined,
-  ShareAltOutlined,
+  UploadOutlined,
   EditOutlined,
   DeleteOutlined,
   UserOutlined,
+  LinkedinOutlined,
 } from "@ant-design/icons";
 import "./PostPage.css";
 
@@ -41,6 +41,8 @@ function PostPage() {
 
   const [post, setPost] = useState(null);
   const [error, setError] = useState("");
+  const [loader, setLoader] = useState(true);
+  const [liked, setLiked] = useState(false);
 
   const { _id } = useParams();
 
@@ -60,6 +62,7 @@ function PostPage() {
       const resPost = await postService.fetchOnePost(_id);
 
       setPost(resPost[0]);
+      setLoader(false);
     } catch (error) {
       setError(error.message);
     }
@@ -70,84 +73,98 @@ function PostPage() {
   }, [_id]);
 
   const togglePostLike = async () => {
-    postService.togglePostLike(post?._id).then((res) => {
-      if (res.statusCode === 200) {
-        fetchPost();
-      }
-    });
+    if (user) {
+      postService.togglePostLike(post?._id).then((res) => {
+        if (res.statusCode === 200) {
+          setPost((prev) => ({
+            ...prev,
+            likesCount: res.data?.likesCount,
+          }));
+          setLiked((prev) => !prev);
+        }
+      });
+    } else {
+      notify.api.info({ title: "Login to like post", placement: "top" });
+    }
   };
 
   const isAuthor = post && user ? user._id === post.userId : false;
 
   return (
     <Layout style={{ minHeight: "100vh", background: token.colorBgLayout }}>
-      <Content
-        className="post-content-container"
-        style={{
-          padding: "40px 20px",
-          maxWidth: "850px",
-          width: "100%",
-          margin: "0 auto",
-        }}
-      >
-        {/* Post Actions */}
-        {isAuthor && (
-          <Flex justify="flex-end" style={{ marginBottom: 20 }}>
-            <Space wrap>
-              <Link to={`/post/${post?._id}/${post?.slug}/edit`}>
-                <Button icon={<EditOutlined />} size="small">
-                  Edit
-                </Button>
-              </Link>
-              <Button icon={<DeleteOutlined />} danger size="small">
-                Delete
-              </Button>
-            </Space>
-          </Flex>
-        )}
-
-        {error && <Text type="danger">{error}</Text>}
-
-        {/* Featured Image */}
-        <div style={{ marginBottom: 30 }}>
-          <Image
-            className="featured-image"
-            width="100%"
-            src={post?.featuredImage}
-            style={{
-              objectFit: "cover",
-              borderRadius: 16,
-            }}
-          />
-        </div>
-
-        {/* Post Header */}
-        <Title
-          level={2}
+      {!loader ? (
+        <Content
+          className="post-content-container"
           style={{
-            fontSize: "clamp(22px, 5vw, 32px)",
-            marginBottom: 16,
-            lineHeight: 1.3,
+            padding: "40px 20px",
+            maxWidth: "850px",
+            width: "100%",
+            margin: "0 auto",
+            marginTop: 30,
           }}
         >
-          {post?.title}
-        </Title>
+          {/* Post Actions */}
+          {isAuthor && (
+            <Flex justify="flex-end" style={{ marginBottom: 20 }}>
+              <Space wrap>
+                <Link to={`/post/${post?._id}/${post?.slug}/edit`}>
+                  <Button icon={<EditOutlined />} size="small">
+                    Edit
+                  </Button>
+                </Link>
+                <Button icon={<DeleteOutlined />} danger size="small">
+                  Delete
+                </Button>
+              </Space>
+            </Flex>
+          )}
 
-        {/* Metadata Bar - Responsive & Non-Deprecated */}
-        <Flex
-          wrap="wrap"
-          align="center"
-          gap="12px"
-          style={{ marginBottom: 24 }}
-        >
-          <Space>
-            <Avatar src={post?.author?.avatar} icon={<UserOutlined />} />
-            <Text type="secondary" strong>
-              By {post?.author?.fullName}
-            </Text>
-          </Space>
+          {error && <Text type="danger">{error}</Text>}
 
-           <div
+          {/* Featured Image */}
+          <div style={{ marginBottom: 30 }}>
+            <Image
+              className="featured-image"
+              width="100%"
+              src={post?.featuredImage}
+              style={{
+                objectFit: "cover",
+                borderRadius: 16,
+              }}
+            />
+          </div>
+
+          {/* Post Header */}
+          <Title
+            level={2}
+            style={{
+              fontSize: "clamp(22px, 5vw, 32px)",
+              marginBottom: 16,
+              lineHeight: 1.3,
+            }}
+          >
+            {post?.title}
+          </Title>
+
+          {/* Metadata Bar */}
+          <Flex
+            wrap="wrap"
+            align="center"
+            gap="12px"
+            style={{ marginBottom: 24 }}
+          >
+            <Space>
+              <Avatar
+                size={40}
+                src={post?.author?.avatar}
+                icon={<UserOutlined />}
+              />
+              <Text type="secondary" strong>
+                By {post?.author?.fullName}
+              </Text>
+            </Space>
+
+            <div
               className="divider"
               style={{
                 width: "100%",
@@ -156,103 +173,102 @@ function PostPage() {
               }}
             />
 
-          <Flex wrap="wrap" align="center" gap="8px">
-            <div
-              className="meta-divider meta-divider-left"
-              style={{
-                width: 1,
-                height: 14,
-                background: token.colorBorderSecondary,
-              }}
-            />
+            <Flex wrap="wrap" align="center" gap="8px">
+              <div
+                className="meta-divider meta-divider-left"
+                style={{
+                  width: 1,
+                  height: 14,
+                  background: token.colorBorderSecondary,
+                }}
+              />
 
-            <Text type="secondary" style={{ fontSize: "13px" }}>
-              {post?.createdAt}
-            </Text>
+              <Text type="secondary" style={{ fontSize: "13px" }}>
+                {post?.createdAt}
+              </Text>
 
-            {post?.editedAt && (
-              <Flex align="center" gap="8px">
-                <div
-                  className="meta-divider"
-                  style={{
-                    width: 1,
-                    height: 14,
-                    background: token.colorBorderSecondary,
-                  }}
-                />
-                <Text type="secondary" italic style={{ fontSize: "13px" }}>
-                  Edited: {post?.editedAt}
-                </Text>
-              </Flex>
-            )}
+              {post?.editedAt && (
+                <Flex align="center" gap="8px">
+                  <div
+                    className="meta-divider"
+                    style={{
+                      width: 1,
+                      height: 14,
+                      background: token.colorBorderSecondary,
+                    }}
+                  />
+                  <Text type="secondary" italic style={{ fontSize: "13px" }}>
+                    Edited: {post?.editedAt}
+                  </Text>
+                </Flex>
+              )}
+            </Flex>
           </Flex>
-        </Flex>
 
-        {/* Interaction Bar */}
-        <Flex
-          gap="8px"
-          wrap="wrap"
+          {/* Interaction Bar */}
+          <Flex
+            gap="14px"
+            wrap="wrap"
+            style={{
+              padding: "12px 0",
+              borderTop: `1px solid ${token.colorBorderSecondary}`,
+              borderBottom: `1px solid ${token.colorBorderSecondary}`,
+            }}
+          >
+            <Button
+              icon={!liked ? <LikeOutlined /> : <LikeFilled />}
+              onClick={togglePostLike}
+            >
+              {post?.likesCount}
+            </Button>
+
+            <Button icon={<MessageOutlined />}>{post?.commentsCount}</Button>
+
+            <Button onClick={() => setOpen(true)} icon={<UploadOutlined />}>
+              Share
+            </Button>
+
+            <Modal
+              title="Share Post"
+              okText="Copy"
+              onOk={copyToClipboard}
+              open={open}
+              onCancel={() => setOpen(false)}
+              centered
+            >
+              <Input
+                value={window.location.href}
+                readOnly
+                style={{ marginTop: 16 }}
+              />
+            </Modal>
+          </Flex>
+
+          {/* Main Content */}
+          <Paragraph
+            style={{
+              fontSize: "16px",
+              lineHeight: "1.9",
+              marginTop: 40,
+              whiteSpace: "pre-wrap",
+              color: token.colorText,
+            }}
+          >
+            {post?.content}
+          </Paragraph>
+        </Content>
+      ) : (
+        <div
           style={{
-            padding: "12px 0",
-            borderTop: `1px solid ${token.colorBorderSecondary}`,
-            borderBottom: `1px solid ${token.colorBorderSecondary}`,
+            display: "flex",
+            justifyContent: "center",
+            minHeight: "100vh",
+            alignItems: "center",
           }}
         >
-          <Button
-            className="interaction-btn"
-            icon={
-              post?.isLiked ? (
-                <LikeFilled style={{ color: token.colorPrimary }} />
-              ) : (
-                <LikeOutlined />
-              )
-            }
-            onClick={togglePostLike}
-          >
-            {post?.likesCount || 0}
-          </Button>
-
-          <Button className="interaction-btn" icon={<MessageOutlined />}>
-            {post?.commentsCount || 0}
-          </Button>
-
-          <Button
-            className="interaction-btn"
-            onClick={() => setOpen(true)}
-            icon={<ShareAltOutlined />}
-          >
-            Share
-          </Button>
-
-          <Modal
-            title="Share Post"
-            okText="Copy"
-            onOk={copyToClipboard}
-            open={open}
-            onCancel={() => setOpen(false)}
-            centered
-          >
-            <Input
-              value={window.location.href}
-              readOnly
-              style={{ marginTop: 16 }}
-            />
-          </Modal>
-        </Flex>
-
-        {/* Main Content */}
-        <Paragraph
-          style={{
-            fontSize: "16px",
-            lineHeight: "1.9",
-            marginTop: 40,
-            whiteSpace: "pre-wrap",
-            color: token.colorText,
-          }}
-        >
-          {post?.content}
-        </Paragraph>
-      </Content>
+          <Spin className="icon-spin" />
+        </div>
+      )}
     </Layout>
   );
 }

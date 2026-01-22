@@ -134,10 +134,10 @@ const getAllPosts = asyncHandler(async (req, res) => {
 
 // Controller: get posts on query
 const getQueryPosts = asyncHandler(async (req, res) => {
-  const { query, page = 1, limit = 10 } = req.query;
+  const { query, page = 1, limit = 5 } = req.query;
 
   if (!query) {
-    throw new ApiError(400, "Query is required to fetch posts");
+    throw new ApiError(400, "Query is required");
   }
 
   const filter = {
@@ -146,13 +146,13 @@ const getQueryPosts = asyncHandler(async (req, res) => {
 
   const posts = await Post.find(filter)
     .sort()
-    .skip(page - 1)
+    .skip((page - 1) * limit)
     .limit(Number(limit));
 
-  const totalPosts = await Post.countDocuments();
+  const totalPosts = await Post.find(filter).countDocuments();
 
   if (posts.length === 0) {
-    throw new ApiError(400, "No such posts found");
+    throw new ApiError(400, "No posts found");
   }
 
   const data = {
@@ -176,7 +176,7 @@ const togglePostLike = asyncHandler(async (req, res) => {
   }
 
   // check - if post is valid
-  const post = await Post.findById(postId);
+  let post = await Post.findById(postId);
 
   if (!post) {
     throw new ApiError(400, "No post found");
@@ -185,20 +185,32 @@ const togglePostLike = asyncHandler(async (req, res) => {
   try {
     await PostLike.create({ postId, likedBy });
 
-    await Post.updateOne({ _id: postId }, { $inc: { likesCount: 1 } });
+    post = await Post.findByIdAndUpdate(
+      postId,
+      { $inc: { likesCount: 1 } },
+      { new: true },
+    );
 
-    return res
-      .status(200)
-      .json(new ApiResponse(200, "Post Liked successfully", {}));
+    return res.status(200).json(
+      new ApiResponse(200, "Post Liked successfully", {
+        likesCount: post.likesCount,
+      }),
+    );
   } catch (error) {
     if (error.code === 11000) {
       await PostLike.deleteOne({ postId, likedBy });
 
-      await Post.updateOne({ _id: postId }, { $inc: { likesCount: -1 } });
+      post = await Post.findByIdAndUpdate(
+        postId,
+        { $inc: { likesCount: -1 } },
+        { new: true },
+      );
 
-      return res
-        .status(200)
-        .json(new ApiResponse(200, "Post un-liked successfully", {}));
+      return res.status(200).json(
+        new ApiResponse(200, "Post un-liked successfully", {
+          likesCount: post.likesCount,
+        }),
+      );
     } else {
       throw error;
     }

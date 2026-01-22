@@ -13,7 +13,7 @@ class AuthService {
     try {
       const response = await axios.post(
         `${this.usersBaseUrl}/register`,
-        formData
+        formData,
       );
 
       if (response?.data) {
@@ -21,13 +21,13 @@ class AuthService {
           username: formData.get("username"),
           password: formData.get("password"),
         });
-      } 
+      }
     } catch (error) {
       const serverMsg = error?.response?.data?.message;
       if (serverMsg) {
         throw new Error(serverMsg);
       } else {
-        throw new Error("Something went wrong! try again later");
+        throw new Error("Something went wrong");
       }
     }
   }
@@ -42,7 +42,7 @@ class AuthService {
         },
         {
           withCredentials: true,
-        }
+        },
       );
 
       return response?.data?.data?.user;
@@ -51,7 +51,7 @@ class AuthService {
       if (serverMsg) {
         throw new Error(serverMsg);
       } else {
-        throw new Error("Something went wrong! Please try again later");
+        throw new Error("Something went wrong");
       }
     }
   }
@@ -63,10 +63,10 @@ class AuthService {
         {},
         {
           withCredentials: true,
-        }
+        },
       );
     } catch (error) {
-      throw new Error("Error while logging out user");
+      throw new Error("Something went wrong");
     }
   }
 

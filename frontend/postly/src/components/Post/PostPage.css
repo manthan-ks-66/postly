@@ -1,18 +1,4 @@
-.interaction-btn {
-  background: transparent !important;
-  border: 1px solid transparent !important;
-  box-shadow: none !important;
-}
 
-.interaction-btn:hover {
-  border-color: #55aa00 !important;
-  background: transparent !important;
-}
-
-/* Dark mode support for the hover border */
-[data-theme="dark"] .interaction-btn:hover {
-  border-color: rgba(255, 255, 255, 0.2) !important;
-}
 
 .divider {
   display: none;

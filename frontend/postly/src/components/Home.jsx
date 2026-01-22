@@ -83,7 +83,7 @@ function Home() {
 
         {/* Featured Posts Grid */}
         <Title level={4} style={{ marginBottom: 20, fontSize: "20px" }}>
-          Trending Now
+          Most Liked
         </Title>
         <Row gutter={[16, 16]}>
           {featuredPosts.map((post, index) => (

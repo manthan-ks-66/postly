@@ -15,6 +15,8 @@ import { ConfigProvider, theme as antdTheme } from "antd";
 import PostPage from "./components/Post/PostPage.jsx";
 import Posts from "./components/Post/Posts.jsx";
 import PostForm from "./components/Post/PostForm.jsx";
+import NotFount from "./components/NotFound.jsx";
+import QueryPosts from "./components/Post/QueryPosts.jsx";
 
 const postlyDarkTheme = {
   algorithm: antdTheme.darkAlgorithm,
@@ -31,6 +33,8 @@ const postlyDarkTheme = {
     colorTextBase: "#E5E7EB",
     colorTextSecondary: "#9CA3AF",
 
+    colorBgFooter: "#171d30",
+
     // Shape & font
     borderRadiusLG: 10,
     fontFamily: "-apple systems",
@@ -38,12 +42,12 @@ const postlyDarkTheme = {
 
   components: {
     Layout: {
-      headerBg: "#1f2534",
-      bodyBg: "#1f2534",
+      headerBg: "#171d30",
+      bodyBg: "#1F2937",
     },
     Menu: {
-      darkItemBg: "#1f2534",
-      darkItemSelectedBg: "#1F2937",
+      darkItemBg: "#171d30",
+      darkItemSelectedBg: "#24273a47",
       darkItemSelectedColor: "#55aa00",
       darkItemHoverColor: "#55aa00",
     },
@@ -100,7 +104,19 @@ const router = createBrowserRouter([
         element: <Posts />,
       },
       {
+        path: "/search",
+        element: <QueryPosts />,
+      },
+      {
         path: "/post/new/write",
+        element: (
+          <AuthLayout authentication={true}>
+            <PostForm />
+          </AuthLayout>
+        ),
+      },
+      {
+        path: "/post/:postId/:slug/edit",
         element: (
           <AuthLayout authentication={true}>
             <PostForm />
@@ -116,6 +132,10 @@ const router = createBrowserRouter([
         ),
       },
     ],
+  },
+  {
+    path: "*",
+    element: <NotFount />,
   },
 ]);
 

@@ -17,7 +17,7 @@ function AppFooter() {
   return (
     <Footer
       style={{
-        background: token.colorBgLayout, // #000102 from your theme
+        background: token.colorBgFooter, // #000102 from your theme
         color: token.colorTextSecondary,
         padding: "40px 20px 20px",
         borderTop: "1px solid rgba(255, 255, 255, 0.05)",

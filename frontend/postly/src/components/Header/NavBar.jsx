@@ -8,13 +8,19 @@ import {
   Avatar,
   Drawer,
   Grid,
+  theme,
+  Input,
 } from "antd";
 import {
   UserOutlined,
+  SearchOutlined,
   MenuOutlined,
   SettingOutlined,
+  EditOutlined,
   PoweroffOutlined,
 } from "@ant-design/icons";
+import "./NavBar.css";
+
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useSelector } from "react-redux";
@@ -29,6 +35,8 @@ const { useBreakpoint } = Grid;
 function NavBar() {
   const notify = useNotify();
 
+  const { token } = theme.useToken();
+
   const dispatch = useDispatch();
 
   const user = useSelector((state) => state.auth.user);
@@ -37,6 +45,7 @@ function NavBar() {
 
   const screens = useBreakpoint();
   const [drawerVisible, setDrawerVisible] = useState(false);
+  const [showMobileSearch, setShowMobileSearch] = useState(false);
 
   // Desktop view is true if screen size is MD or larger
   const isDesktop = screens.md;
@@ -61,24 +70,6 @@ function NavBar() {
       });
   };
 
-  // Content for Login/Register buttons
-  const AuthButtons = (
-    <div
-      style={{
-        display: "flex",
-        gap: "10px",
-        flexDirection: isDesktop ? "row" : "column",
-      }}
-    >
-      <Link to="/login" onClick={() => setDrawerVisible(false)}>
-        <Button block={!isDesktop}>Login</Button>
-      </Link>
-      <Link to="/register" onClick={() => setDrawerVisible(false)}>
-        <Button block={!isDesktop}>Register</Button>
-      </Link>
-    </div>
-  );
-
   const navItems = [
     {
       label: "Home",
@@ -95,6 +86,7 @@ function NavBar() {
     {
       label: "Write",
       key: "/post/new/write",
+      icon: <EditOutlined />,
     },
   ];
 
@@ -111,7 +103,6 @@ function NavBar() {
     },
     {
       label: "Logout",
-      key: "/logout",
       danger: true,
       icon: <PoweroffOutlined />,
       onClick: logoutUser,
@@ -119,17 +110,21 @@ function NavBar() {
   ];
 
   return (
-    <Layout>
+    <Layout style={{ width: "100%" }}>
       <Header
         style={{
+          width: "100%",
           display: "flex",
           alignItems: "center",
           padding: "0 20px",
           justifyContent: user ? "center" : "space-between",
-          position: "relative",
+          position: "fixed",
+          zIndex: 1000,
+          top: 0,
+          left: 0,
         }}
       >
-        {/* 1. MOBILE HAMBURGER for mobile screen view */}
+        {/* 1. MOBILE HAMBURGER */}
         {!isDesktop && (
           <Button
             type="text"
@@ -139,11 +134,7 @@ function NavBar() {
           />
         )}
 
-        {/* 2. LOGO 
-            - Desktop Auth: Center
-            - Desktop Unauth: Left
-            - Mobile: Right (Unauth) or Center (Auth)
-        */}
+        {/* 2. LOGO  */}
         <div
           className="demo-logo"
           style={{
@@ -152,10 +143,12 @@ function NavBar() {
             order: isDesktop ? 0 : 2,
           }}
         >
-          <Logo />
+          <Link style={{ color: token.colorTextBase }} to="/">
+            <Logo />
+          </Link>
         </div>
 
-        {/* 3. DESKTOP MENU (Center) - Only shows if Desktop */}
+        {/* 3. DESKTOP MENU */}
         {isDesktop && (
           <Menu
             theme="dark"
@@ -163,16 +156,16 @@ function NavBar() {
             defaultSelectedKeys={["2"]}
             items={navItems}
             style={{
+              marginLeft: "3vw",
               flex: 1,
-              visibility: user ? "visible" : "visible",
-              justifyContent: "center",
+              justifyContent: "flex-start",
               minWidth: 0,
             }}
             onClick={({ key }) => navigate(key)}
           />
         )}
 
-        {/* 4. RIGHT SECTION (Avatar or Auth Buttons) */}
+        {/* 4. RIGHT SECTION */}
         <div
           style={{
             order: 3,
@@ -180,12 +173,52 @@ function NavBar() {
             alignItems: "center",
             position: !isDesktop ? "absolute" : "static",
             right: !isDesktop ? 20 : "auto",
+            gap: "12px",
           }}
         >
+          {/* SEARCH WRAPPER */}
+
+          {isDesktop || showMobileSearch ? (
+            <Input.Search
+              onSearch={(value) =>
+                navigate(`/search?query=${value}&page=1&limit=5`)
+              }
+              placeholder="search"
+              style={{
+                background: "#21293deb",
+                color: "#959595",
+                width: isDesktop ? undefined : 200,
+              }}
+              className="navbar-search"
+              onBlur={() => !isDesktop && setShowMobileSearch(false)}
+              autoFocus={!isDesktop}
+            />
+          ) : (
+            <Button
+              type="text"
+              icon={
+                <SearchOutlined style={{ color: "white", fontSize: "20px" }} />
+              }
+              onClick={() => setShowMobileSearch(true)}
+            />
+          )}
+
           {user ? (
-            <Dropdown menu={{ items: userItems }} trigger={["click"]}>
+            <Dropdown
+              menu={{
+                items: userItems,
+                onClick: ({ key }) => {
+                  if (key.startsWith("/")) navigate(key);
+                },
+              }}
+              trigger={["click"]}
+            >
               <Space style={{ cursor: "pointer" }}>
-                <Avatar src={user?.avatar} size={45} icon={<UserOutlined />} />
+                <Avatar
+                  src={user?.avatar}
+                  size={isDesktop ? 45 : 35}
+                  icon={<UserOutlined />}
+                />
               </Space>
             </Dropdown>
           ) : (
