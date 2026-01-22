@@ -32,6 +32,8 @@ import { useNotify } from "../../context/NotificationProvider.jsx";
 const { Header } = Layout;
 const { useBreakpoint } = Grid;
 
+const HEADER_HEIGHT = 64;
+
 function NavBar() {
   const notify = useNotify();
 
@@ -114,6 +116,7 @@ function NavBar() {
       <Header
         style={{
           width: "100%",
+          height: HEADER_HEIGHT,
           display: "flex",
           alignItems: "center",
           padding: "0 20px",
@@ -272,6 +275,7 @@ function NavBar() {
           )}
         </Drawer>
       </Header>
+      <div style={{ height: HEADER_HEIGHT }} />
     </Layout>
   );
 }

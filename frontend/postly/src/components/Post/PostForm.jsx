@@ -8,7 +8,6 @@ import {
   Typography,
   theme,
   Upload,
-  Flex,
 } from "antd";
 import { UploadOutlined, RocketOutlined } from "@ant-design/icons";
 
@@ -47,6 +46,8 @@ function PostForm({ post }) {
   return (
     <Layout
       style={{
+        display: "flex",
+        flexDirection: "column",
         minHeight: "100vh",
         background: token.colorBgLayout,
         padding: "40px 0",

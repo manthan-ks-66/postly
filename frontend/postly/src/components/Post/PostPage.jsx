@@ -93,16 +93,7 @@ function PostPage() {
   return (
     <Layout style={{ minHeight: "100vh", background: token.colorBgLayout }}>
       {!loader ? (
-        <Content
-          className="post-content-container"
-          style={{
-            padding: "40px 20px",
-            maxWidth: "850px",
-            width: "100%",
-            margin: "0 auto",
-            marginTop: 30,
-          }}
-        >
+        <Content className="post-content-container">
           {/* Post Actions */}
           {isAuthor && (
             <Flex justify="flex-end" style={{ marginBottom: 20 }}>
@@ -122,15 +113,11 @@ function PostPage() {
           {error && <Text type="danger">{error}</Text>}
 
           {/* Featured Image */}
-          <div style={{ marginBottom: 30 }}>
+          <div className="featured-image-wrapper">
             <Image
               className="featured-image"
               width="100%"
               src={post?.featuredImage}
-              style={{
-                objectFit: "cover",
-                borderRadius: 16,
-              }}
             />
           </div>
 
