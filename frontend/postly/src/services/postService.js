@@ -61,6 +61,18 @@ class PostService {
       handleError(error);
     }
   }
+
+  async publishPost(post) {
+    try {
+      const res = await axios.post(`${this.postsBaseUrl}/publish-post`, post, {
+        withCredentials: true,
+      });
+
+      return res.data;
+    } catch (error) {
+      handleError(error);
+    }
+  }
 }
 
 const postService = new PostService();

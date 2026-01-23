@@ -152,7 +152,7 @@ const getQueryPosts = asyncHandler(async (req, res) => {
   const totalPosts = await Post.find(filter).countDocuments();
 
   if (posts.length === 0) {
-    throw new ApiError(400, "No posts found");
+    return res.status(200).json(new ApiResponse(200, "No posts found", {}));
   }
 
   const data = {

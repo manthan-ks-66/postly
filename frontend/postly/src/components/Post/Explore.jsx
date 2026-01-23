@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSearchParams } from "react-router-dom";
 
-function Posts() {
+function Explore() {
   const { token } = theme.useToken();
   const navigate = useNavigate();
 
@@ -88,4 +88,4 @@ function Posts() {
   );
 }
 
-export default Posts;
+export default Explore;

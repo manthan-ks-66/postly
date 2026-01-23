@@ -38,7 +38,7 @@ function AuthLayout({ children, authentication = true }) {
     }
 
     setLoader(false);
-  });
+  }, [authStatus, authentication, navigate]);
   return loader ? (
     <Spin style={contentStyle} size="large"></Spin>
   ) : (

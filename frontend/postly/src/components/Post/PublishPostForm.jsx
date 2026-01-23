@@ -17,7 +17,7 @@ const { Content } = Layout;
 const { Title } = Typography;
 const { Option } = Select;
 
-function PostForm({ post }) {
+function PublishPostForm({ post }) {
   const { token } = theme.useToken();
   const [form] = Form.useForm();
 
@@ -124,7 +124,7 @@ function PostForm({ post }) {
 
             {/* Content Editor Section */}
             <Form.Item
-              label="Content"
+              label="Write What You Think"
               name="content"
               style={{ marginBottom: 32 }}
             >
@@ -164,4 +164,4 @@ function PostForm({ post }) {
   );
 }
 
-export default PostForm;
+export default PublishPostForm;

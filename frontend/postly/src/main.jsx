@@ -13,8 +13,8 @@ import Settings from "./components/Auth/Settings.jsx";
 import ResetPassword from "./components/Auth/ResetPassword.jsx";
 import { ConfigProvider, theme as antdTheme } from "antd";
 import PostPage from "./components/Post/PostPage.jsx";
-import Posts from "./components/Post/Posts.jsx";
-import PostForm from "./components/Post/PostForm.jsx";
+import Explore from "./components/Post/Explore.jsx";
+import PublishPostForm from "./components/Post/PublishPostForm.jsx";
 import NotFount from "./components/NotFound.jsx";
 import QueryPosts from "./components/Post/QueryPosts.jsx";
 
@@ -101,7 +101,7 @@ const router = createBrowserRouter([
       },
       {
         path: "/explore-posts",
-        element: <Posts />,
+        element: <Explore />,
       },
       {
         path: "/search",
@@ -111,7 +111,7 @@ const router = createBrowserRouter([
         path: "/post/new/write",
         element: (
           <AuthLayout authentication={true}>
-            <PostForm />
+            <PublishPostForm />
           </AuthLayout>
         ),
       },
@@ -119,7 +119,7 @@ const router = createBrowserRouter([
         path: "/post/:postId/:slug/edit",
         element: (
           <AuthLayout authentication={true}>
-            <PostForm />
+            <PublishPostForm />
           </AuthLayout>
         ),
       },
