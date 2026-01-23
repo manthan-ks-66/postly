@@ -23,7 +23,9 @@ class AuthService {
           password: formData.get("password"),
         });
       }
-    } catch (error) {}
+    } catch (error) {
+      errorHandler.handleError(error);
+    }
   }
 
   async loginUser({ username, password }) {
