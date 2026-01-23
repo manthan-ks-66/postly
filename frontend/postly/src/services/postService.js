@@ -1,5 +1,5 @@
 import axios from "axios";
-import errorHandler from "./errorHandler.js";
+import handleError from "./errorHandler.js";
 
 class PostService {
   constructor() {
@@ -18,7 +18,7 @@ class PostService {
 
       return response.data.data;
     } catch (error) {
-      errorHandler.handleError(error);
+      handleError(error);
     }
   }
 
@@ -28,7 +28,7 @@ class PostService {
 
       return res.data?.data;
     } catch (error) {
-      errorHandler.handleError(error);
+      handleError(error);
     }
   }
 
@@ -46,7 +46,7 @@ class PostService {
 
       return res.data;
     } catch (error) {
-      errorHandler.handleError(error);
+      handleError(error);
     }
   }
 
@@ -58,7 +58,7 @@ class PostService {
 
       return res.data;
     } catch (error) {
-      errorHandler.handleError(error);
+      handleError(error);
     }
   }
 }

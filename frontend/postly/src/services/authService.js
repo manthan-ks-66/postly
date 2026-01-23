@@ -1,5 +1,5 @@
 import axios from "axios";
-import errorHandler from "./errorHandler.js";
+import handleError from "./errorHandler.js";
 
 class AuthService {
   constructor() {
@@ -24,7 +24,7 @@ class AuthService {
         });
       }
     } catch (error) {
-      errorHandler.handleError(error);
+      handleError(error);
     }
   }
 
@@ -43,7 +43,7 @@ class AuthService {
 
       return response?.data?.data?.user;
     } catch (error) {
-      errorHandler.handleError(error);
+      handleError(error);
     }
   }
 
@@ -57,7 +57,7 @@ class AuthService {
         },
       );
     } catch (error) {
-      this.handleError(error);
+      handleError(error);
     }
   }
 
@@ -67,7 +67,7 @@ class AuthService {
         withCredentials: true,
       });
     } catch (error) {
-      errorHandler.handleError(error);
+      handleError(error);
     }
   }
 
@@ -79,7 +79,7 @@ class AuthService {
 
       return response.data;
     } catch (error) {
-      errorHandler.handleError(error);
+      handleError(error);
     }
   }
 
@@ -91,7 +91,7 @@ class AuthService {
 
       return response.data;
     } catch (error) {
-      errorHandler.handleError(error);
+      handleError(error);
     }
   }
 }
