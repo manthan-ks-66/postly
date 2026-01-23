@@ -9,6 +9,16 @@ class AuthService {
     }
   }
 
+  handleError(error, fallbackMsg = "Something went wrong") {
+    const serverMsg = error?.response?.data?.message;
+
+    if (serverMsg) {
+      throw new Error(serverMsg);
+    } else {
+      throw new Error(fallbackMsg);
+    }
+  }
+
   async registerUser(formData) {
     try {
       const response = await axios.post(
@@ -23,12 +33,7 @@ class AuthService {
         });
       }
     } catch (error) {
-      const serverMsg = error?.response?.data?.message;
-      if (serverMsg) {
-        throw new Error(serverMsg);
-      } else {
-        throw new Error("Something went wrong");
-      }
+      this.handleError(error);
     }
   }
 
@@ -47,12 +52,7 @@ class AuthService {
 
       return response?.data?.data?.user;
     } catch (error) {
-      const serverMsg = error?.response?.data?.message;
-      if (serverMsg) {
-        throw new Error(serverMsg);
-      } else {
-        throw new Error("Something went wrong");
-      }
+      this.handleError(error);
     }
   }
 
@@ -66,7 +66,7 @@ class AuthService {
         },
       );
     } catch (error) {
-      throw new Error("Something went wrong");
+      this.handleError(error);
     }
   }
 
@@ -76,7 +76,7 @@ class AuthService {
         withCredentials: true,
       });
     } catch (error) {
-      throw new Error("Failed to fetch user details");
+      tthis.handleError(error);
     }
   }
 
@@ -88,7 +88,7 @@ class AuthService {
 
       return response.data;
     } catch (error) {
-      throw new Error(error.message);
+      this.handleError(error);
     }
   }
 
@@ -100,7 +100,7 @@ class AuthService {
 
       return response.data;
     } catch (error) {
-      throw new Error(error.message);
+      this.handleError(error);
     }
   }
 }

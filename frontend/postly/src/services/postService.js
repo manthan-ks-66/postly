@@ -9,6 +9,16 @@ class PostService {
     }
   }
 
+  handleError(error, fallbackMsg = "Something went wrong") {
+    const serverMsg = error?.response?.data?.message;
+
+    if (serverMsg) {
+      throw new Error(serverMsg);
+    } else {
+      throw new Error(fallbackMsg);
+    }
+  }
+
   async fetchPosts(query) {
     try {
       const response = await axios.get(
@@ -17,7 +27,7 @@ class PostService {
 
       return response.data.data;
     } catch (error) {
-      throw new Error("Something went wrong");
+      this.handleError(error);
     }
   }
 
@@ -27,7 +37,7 @@ class PostService {
 
       return res.data?.data;
     } catch (error) {
-      throw new Error("Something went wrong");
+      this.handleError(error);
     }
   }
 
@@ -45,17 +55,19 @@ class PostService {
 
       return res.data;
     } catch (error) {
-      throw new Error(error.message);
+      this.handleError(error);
     }
   }
 
   async fetchQueryPost(query) {
     try {
-      const res = await axios.get(`${this.postsBaseUrl}/get-query-post${query}`);
+      const res = await axios.get(
+        `${this.postsBaseUrl}/get-query-post${query}`,
+      );
 
       return res.data;
     } catch (error) {
-      throw new Error(error.message)
+      this.handleError(error);
     }
   }
 }

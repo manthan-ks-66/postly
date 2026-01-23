@@ -31,8 +31,6 @@ function QueryPosts() {
       });
   }, [page, limit, query]);
 
-  console.log(totalPosts);
-
   return (
     <Layout
       style={{
