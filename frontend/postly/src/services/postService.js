@@ -1,4 +1,5 @@
 import axios from "axios";
+import errorHandler from "./errorHandler.js";
 
 class PostService {
   constructor() {
@@ -6,16 +7,6 @@ class PostService {
 
     if (!this.postsBaseUrl) {
       throw new Error("Env variable is not set");
-    }
-  }
-
-  handleError(error, fallbackMsg = "Something went wrong") {
-    const serverMsg = error?.response?.data?.message;
-
-    if (serverMsg) {
-      throw new Error(serverMsg);
-    } else {
-      throw new Error(fallbackMsg);
     }
   }
 
@@ -27,7 +18,7 @@ class PostService {
 
       return response.data.data;
     } catch (error) {
-      this.handleError(error);
+      errorHandler.handleError(error);
     }
   }
 
@@ -37,7 +28,7 @@ class PostService {
 
       return res.data?.data;
     } catch (error) {
-      this.handleError(error);
+      errorHandler.handleError(error);
     }
   }
 
@@ -55,7 +46,7 @@ class PostService {
 
       return res.data;
     } catch (error) {
-      this.handleError(error);
+      errorHandler.handleError(error);
     }
   }
 
@@ -67,7 +58,7 @@ class PostService {
 
       return res.data;
     } catch (error) {
-      this.handleError(error);
+      errorHandler.handleError(error);
     }
   }
 }

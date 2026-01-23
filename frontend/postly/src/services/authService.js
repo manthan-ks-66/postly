@@ -1,4 +1,5 @@
 import axios from "axios";
+import errorHandler from "./errorHandler.js";
 
 class AuthService {
   constructor() {
@@ -6,16 +7,6 @@ class AuthService {
 
     if (!this.usersBaseUrl) {
       throw new Error("VITE_API_BASE_URL env variable is not set");
-    }
-  }
-
-  handleError(error, fallbackMsg = "Something went wrong") {
-    const serverMsg = error?.response?.data?.message;
-
-    if (serverMsg) {
-      throw new Error(serverMsg);
-    } else {
-      throw new Error(fallbackMsg);
     }
   }
 
@@ -32,9 +23,7 @@ class AuthService {
           password: formData.get("password"),
         });
       }
-    } catch (error) {
-      this.handleError(error);
-    }
+    } catch (error) {}
   }
 
   async loginUser({ username, password }) {
@@ -52,7 +41,7 @@ class AuthService {
 
       return response?.data?.data?.user;
     } catch (error) {
-      this.handleError(error);
+      errorHandler.handleError(error);
     }
   }
 
@@ -76,7 +65,7 @@ class AuthService {
         withCredentials: true,
       });
     } catch (error) {
-      tthis.handleError(error);
+      errorHandler.handleError(error);
     }
   }
 
@@ -88,7 +77,7 @@ class AuthService {
 
       return response.data;
     } catch (error) {
-      this.handleError(error);
+      errorHandler.handleError(error);
     }
   }
 
@@ -100,7 +89,7 @@ class AuthService {
 
       return response.data;
     } catch (error) {
-      this.handleError(error);
+      errorHandler.handleError(error);
     }
   }
 }
