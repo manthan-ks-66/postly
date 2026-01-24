@@ -1,7 +1,7 @@
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { Spin } from "antd";
+import { Layout, Spin } from "antd";
 import { theme } from "antd";
 import { useNotify } from "../context/NotificationProvider";
 
@@ -39,11 +39,24 @@ function AuthLayout({ children, authentication = true }) {
 
     setLoader(false);
   }, [authStatus, authentication, navigate]);
-  return loader ? (
-    <Spin style={contentStyle} size="large"></Spin>
-  ) : (
-    <>{children}</>
-  );
+
+  const layoutStyle = {
+    alignItems: "center",
+    justifyContent: "center",
+    minHeight: "100vh",
+    padding: "10px",
+    background: token.colorBgContainer,
+  };
+
+  if (loader) {
+    return (
+      <Layout style={layoutStyle}>
+        <Spin style={contentStyle} size="large"></Spin>
+      </Layout>
+    );
+  }
+
+  return <>{children}</>;
 }
 
 export default AuthLayout;
