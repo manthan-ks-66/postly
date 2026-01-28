@@ -14,8 +14,8 @@ function Explore() {
 
   const [error, setError] = useState("");
 
-  let page = Number(searchParams.get("page"));
-  let limit = Number(searchParams.get("limit"));
+  let page = Number(searchParams.get("page")) || 1;
+  let limit = Number(searchParams.get("limit")) || 5;
 
   const [loader, setLoader] = useState(true);
 
@@ -23,35 +23,88 @@ function Explore() {
   const [totalPosts, setTotalPosts] = useState(0);
 
   useEffect(() => {
-    const getPosts = async () => {
-      try {
-        const res = await postService.fetchPosts(
-          `?page=${page}&limit=${limit}`,
-        );
-
-        setPosts(res.posts);
-        setTotalPosts(res.totalPosts);
-
-        setLoader(false);
-      } catch (error) {
-        setError(error.message);
-      }
-    };
-
-    getPosts();
+    postService
+      .fetchPosts(`?page=${page}&limit=${limit}`)
+      .then((data) => {
+        if (data?.posts?.length === 0) {
+          setPosts([]);
+          setTotalPosts(0);
+        } else {
+          setPosts(data?.posts);
+          setTotalPosts(data.totalPosts);
+        }
+      })
+      .catch((error) => setError(error.message))
+      .finally(() => setLoader(false));
   }, [page, limit]);
 
-  return (
-    <Layout
-      style={{
-        alignItems: "center",
-        justifyContent: "center",
-        minHeight: "100vh",
-        padding: "10px",
-        background: token.colorBgContainer,
-      }}
-    >
-      {!loader ? (
+  const layoutStyle = {
+    alignItems: "center",
+    justifyContent: "center",
+    minHeight: "100vh",
+    padding: "10px",
+    background: token.colorBgContainer,
+  };
+
+  if (loader) {
+    return (
+      <Layout style={layoutStyle}>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <Spin className="icon-spin" />
+        </div>
+      </Layout>
+    );
+  }
+
+  if (!loader && posts?.length === 0) {
+    return (
+      <Layout style={layoutStyle}>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            color: token.colorTextSecondary,
+          }}
+        >
+          <h2>You have reached at the end</h2>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (!loader && error) {
+    <Layout style={layoutStyle}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          color: token.colorTextSecondary,
+        }}
+      >
+        <h2>Something went wrong</h2>
+      </div>
+    </Layout>;
+  }
+
+  if (!loader && posts?.length > 0) {
+    return (
+      <Layout
+        style={{
+          alignItems: "center",
+          justifyContent: "center",
+          minHeight: "100vh",
+          padding: "10px",
+          background: token.colorBgContainer,
+        }}
+      >
         <Content
           style={{
             display: "flex",
@@ -79,13 +132,9 @@ function Explore() {
             />
           </div>
         </Content>
-      ) : (
-        <div>
-          <Spin className="icon-spin" />
-        </div>
-      )}
-    </Layout>
-  );
+      </Layout>
+    );
+  }
 }
 
 export default Explore;

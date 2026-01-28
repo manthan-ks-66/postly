@@ -123,7 +123,7 @@ function Login() {
               render={({ field }) => (
                 <Input
                   {...field}
-                  placeholder="username  or  email"
+                  placeholder="username or email"
                   size="large"
                 />
               )}

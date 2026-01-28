@@ -1,4 +1,3 @@
-import PostEditor from "../Editor/PostEditor.jsx";
 import {
   Layout,
   Form,
@@ -8,23 +7,58 @@ import {
   Typography,
   theme,
   Upload,
+  Row,
+  Col,
+  Popover,
+  Space,
 } from "antd";
-import { UploadOutlined, RocketOutlined } from "@ant-design/icons";
+import {
+  UploadOutlined,
+  RocketOutlined,
+  InfoCircleOutlined,
+} from "@ant-design/icons";
 
-import { useForm } from "react-hook-form";
+import ControlledInput from "../Utils/ControlledInput.jsx";
+import ControlledSelect from "../Utils/ControlledSelect.jsx";
+import ControlledUpload from "../Utils/ControlledUpload.jsx";
+import ControlledEditor from "../Editor/ControlledEditor.jsx";
+
+import { useForm, Controller, FormProvider } from "react-hook-form";
+import { useEffect } from "react";
 
 const { Content } = Layout;
 const { Title } = Typography;
 const { Option } = Select;
 
-function PublishPostForm({ post }) {
+function PublishPostForm() {
   const { token } = theme.useToken();
   const [form] = Form.useForm();
 
-  const { handleSubmit, control } = useForm();
+  const methods = useForm();
+  const { handleSubmit, control, setValue, watch } = methods;
 
-  const submitPost = async () => {
-    //
+  const slugTransform = (value) => {
+    if (typeof value === "string")
+      return value
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-zA-Z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "");
+    return "";
+  };
+
+  useEffect(() => {
+    let subscription = watch((values, { name }) => {
+      if (name === "title") {
+        setValue("slug", slugTransform(values.title));
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [watch, setValue]);
+
+  const submitPost = async (data) => {
+    console.log(data);
   };
 
   const handlePostForm = () => {
@@ -34,13 +68,9 @@ function PublishPostForm({ post }) {
   // Custom styling for the form container
   const containerStyle = {
     width: "100%",
-    maxWidth: "1000px",
+    maxWidth: "1200px",
     margin: "0 auto",
     padding: "40px 24px",
-    background: "#ffffff1e",
-    borderRadius: 20,
-    border: "1px solid rgba(255, 255, 255, 0.1)",
-    backdropFilter: "blur(10px)",
   };
 
   return (
@@ -57,107 +87,84 @@ function PublishPostForm({ post }) {
         <div style={containerStyle}>
           <div style={{ textAlign: "center", marginBottom: 32 }}>
             <Title level={3} style={{ margin: 0, fontSize: "22px" }}>
-              Create &nbsp; Your &nbsp; New &nbsp;{" "}
+              Create Your New{" "}
               <span style={{ color: token.colorPrimary }}>Post</span>
             </Title>
           </div>
 
-          <Form
-            form={form}
-            layout="vertical"
-            onFinish={handlePostForm}
-            requiredMark={false}
-          >
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "20px" }}>
-              <Form.Item
-                label="Post Title"
-                name="title"
-                rules={[{ required: true, message: "Please enter a title" }]}
-                style={{ flex: "1" }}
-              >
-                <Input size="middle" />
-              </Form.Item>
-
-              <Form.Item
-                label="Slug"
-                name="slug"
-                rules={[{ required: true, message: "Please enter a slug" }]}
-                style={{ flex: "1" }}
-              >
-                <Input size="middle" />
-              </Form.Item>
-            </div>
-
-            <Form.Item
-              label="Category"
-              name="category"
-              rules={[{ required: true, message: "Please select a category" }]}
-              style={{ flex: "1 1 45%" }}
+          <FormProvider {...methods}>
+            <Form
+              form={form}
+              layout="vertical"
+              onFinish={handlePostForm}
+              requiredMark={false}
             >
-              <Select placeholder="Select a category" size="middle">
-                <Option value="Tech">Tech</Option>
-                <Option value="Story">Story</Option>
-                <Option value="Business">Business</Option>
-                <Option value="Education">Education</Option>
-              </Select>
-            </Form.Item>
+              <Row gutter={20}>
+                <Col xs={24} md={12}>
+                  <ControlledInput name="title" label="Title" />
+                </Col>
 
-            <Form.Item
-              label="Select an Image"
-              name="featuredImage"
-              style={{ flex: "1 1 45%" }}
-            >
-              <Upload
-                beforeUpload={() => false}
-                maxCount={1}
-                listType="picture"
-              >
+                <Col xs={24} md={12}>
+                  <ControlledInput name="slug" label="Slug" readOnly />
+                </Col>
+              </Row>
+
+              <Row gutter={20}>
+                <Col xs={24} md={12}>
+                  <ControlledSelect
+                    options={["Tech", "Story", "Education", "Business"]}
+                    name="category"
+                    label="Category"
+                  />
+                </Col>
+
+                <Col xs={24} md={12}>
+                  <ControlledUpload
+                    customStyle={{ width: "100%" }}
+                    name="featuredImage"
+                    label={
+                      <Space size="small">
+                        Select an Image
+                        <Popover
+                          content="This field is optional"
+                          trigger="hover"
+                        >
+                          <InfoCircleOutlined
+                            style={{
+                              color: token.colorPrimary,
+                              cursor: "pointer",
+                            }}
+                          />
+                        </Popover>
+                      </Space>
+                    }
+                  />
+                </Col>
+              </Row>
+
+              {/* Content Editor Section */}
+              <ControlledEditor name="content" label="Write What You Think" />
+
+              {/* Submit Button */}
+              <Form.Item style={{ textAlign: "center", marginBottom: 0 }}>
                 <Button
-                  icon={<UploadOutlined />}
+                  type="primary"
+                  htmlType="submit"
                   size="middle"
-                  style={{ width: "100%" }}
+                  icon={<RocketOutlined />}
+                  block
+                  style={{
+                    width: "200px",
+                    height: "45px",
+                    fontWeight: "bold",
+                    cursor: "pointer",
+                  }}
                 >
-                  Choose File
+                  Publish
                 </Button>
-              </Upload>
-            </Form.Item>
-
-            {/* Content Editor Section */}
-            <Form.Item
-              label="Write What You Think"
-              name="content"
-              style={{ marginBottom: 32 }}
-            >
-              <div
-                style={{
-                  borderRadius: "8px",
-                  overflow: "hidden",
-                  border: "1px solid rgba(255, 255, 255, 0.1)",
-                }}
-              >
-                {/* Your custom TinyMCE Editor component */}
-                <PostEditor />
-              </div>
-            </Form.Item>
-
-            {/* Submit Button */}
-            <Form.Item style={{ marginBottom: 0 }}>
-              <Button
-                type="primary"
-                htmlType="submit"
-                size="middle"
-                icon={<RocketOutlined />}
-                block
-                style={{
-                  height: "45px",
-                  fontWeight: "bold",
-                  cursor: "pointer",
-                }}
-              >
-                Publish Post
-              </Button>
-            </Form.Item>
-          </Form>
+              </Form.Item>
+            </Form>
+          </FormProvider>
         </div>
       </Content>
     </Layout>

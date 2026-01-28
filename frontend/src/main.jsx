@@ -37,7 +37,7 @@ const postlyDarkTheme = {
 
     // Shape & font
     borderRadiusLG: 10,
-    fontFamily: "-apple systems",
+    fontFamily: "Alibaba Pua Light",
   },
 
   components: {

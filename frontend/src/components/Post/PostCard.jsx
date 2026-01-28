@@ -1,8 +1,8 @@
 import { Card, Typography, theme, Divider } from "antd";
 import {
-  ShareAltOutlined,
+  AppstoreOutlined,
   MessageOutlined,
-  LikeOutlined,
+  LikeFilled,
 } from "@ant-design/icons";
 
 const { Title, Paragraph } = Typography;
@@ -16,6 +16,7 @@ function PostCard({
   likesCount,
   commentsCount,
   slug,
+  category,
 }) {
   const { token } = theme.useToken();
   const navigate = useNavigate();
@@ -71,7 +72,7 @@ function PostCard({
               >
                 <img
                   src={featuredImage}
-                    alt="post"
+                  alt="post"
                   style={{ width: "100%", height: "100%", objectFit: "cover" }}
                 />
               </div>
@@ -98,13 +99,7 @@ function PostCard({
                   justifyContent: "center",
                 }}
               >
-                {content.slice(0, 180)}
-                <p
-                  onClick={() => navigate(`/post/${_id}/${slug}`)}
-                  style={{ color: token.colorPrimary, cursor: "pointer" }}
-                >
-                  More
-                </p>
+                {content}
               </Paragraph>
             </div>
           </div>
@@ -118,7 +113,7 @@ function PostCard({
           }}
         >
           <div className="card-action-item">
-            <LikeOutlined style={{ color: "#ff4d4f" }} />
+            <LikeFilled style={{ color: "#ff4d4f" }} />
             <span style={{ marginLeft: 6, fontSize: "12px" }}>
               {likesCount}
             </span>
@@ -127,13 +122,13 @@ function PostCard({
           <div className="card-action-item">
             <MessageOutlined style={{ color: "#1890ff" }} />
             <span style={{ marginLeft: 6, fontSize: "12px" }}>
-              {commentsCount} {/* Fixed reference */}
+              {commentsCount}
             </span>
           </div>
           <Divider vertical style={{ height: "48px", margin: 0 }} />
           <div className="card-action-item">
-            <ShareAltOutlined style={{ color: "#52c41a" }} />
-            <span style={{ marginLeft: 6, fontSize: "12px" }}>Share</span>
+            <AppstoreOutlined style={{ color: "#52c41a" }} />
+            <span style={{ marginLeft: 6, fontSize: "12px" }}>{category}</span>
           </div>
         </div>
 
@@ -147,9 +142,6 @@ function PostCard({
           cursor: pointer;
           transition: background 0.3s;
           color: rgba(255, 255, 255, 0.65);
-        }
-        .card-action-item:hover {
-          background: rgba(255, 255, 255, 0.05);
         }
         
         @media (max-width: 576px) {

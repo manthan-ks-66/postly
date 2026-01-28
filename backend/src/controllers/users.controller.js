@@ -185,6 +185,7 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
   );
 });
 
+// Controller: Get user details
 const getCurrentUser = asyncHandler(async (req, res) => {
   const user = req.user;
 

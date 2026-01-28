@@ -118,10 +118,6 @@ const getAllPosts = asyncHandler(async (req, res) => {
     .skip((page - 1) * limit)
     .limit(Number(limit));
 
-  if (posts?.length === 0) {
-    throw new ApiError(400, "No posts found");
-  }
-
   const data = {
     posts,
     totalPosts: totalPosts,
@@ -216,6 +212,24 @@ const togglePostLike = asyncHandler(async (req, res) => {
     }
   }
 });
+
+const fetchPost = asyncHandler(async (req, res) => {
+  const { postId } = req.body;
+  const userId = req.user?._id;
+
+  if (!isValidObjectId(postId)) {
+    throw new ApiError(400, "Invalid post id");
+  }
+
+  // TODO: implement isLiked functionality
+  const post = await Post.aggregate([
+    {
+      $match: {
+        _id: new mongoose.Types.ObjectId(postId)
+      }
+    }
+  ])
+})
 
 // Controller: Get one post
 const getPost = asyncHandler(async (req, res) => {

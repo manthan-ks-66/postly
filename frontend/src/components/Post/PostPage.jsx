@@ -42,9 +42,8 @@ function PostPage() {
   const [post, setPost] = useState(null);
   const [error, setError] = useState("");
   const [loader, setLoader] = useState(true);
-  const [liked, setLiked] = useState(false);
 
-  const { _id } = useParams();
+  const { _id, slug } = useParams();
 
   const user = useSelector((state) => state.auth.user);
 
@@ -62,9 +61,10 @@ function PostPage() {
       const resPost = await postService.fetchOnePost(_id);
 
       setPost(resPost[0]);
-      setLoader(false);
     } catch (error) {
       setError(error.message);
+    } finally {
+      setLoader(false);
     }
   };
 
@@ -80,13 +80,14 @@ function PostPage() {
             ...prev,
             likesCount: res.data?.likesCount,
           }));
-          setLiked((prev) => !prev);
         }
       });
     } else {
       notify.api.info({ title: "Login to like post", placement: "top" });
     }
   };
+
+  // TODO: implement isLiked functionality
 
   const isAuthor = post && user ? user._id === post.userId : false;
 
@@ -96,7 +97,7 @@ function PostPage() {
         <Content className="post-content-container">
           {/* Post Actions */}
           {isAuthor && (
-            <Flex justify="flex-end" style={{ marginBottom: 20 }}>
+            <Flex justify="flex-end" className="post-actions">
               <Space wrap>
                 <Link to={`/post/${post?._id}/${post?.slug}/edit`}>
                   <Button icon={<EditOutlined />} size="small">
@@ -122,14 +123,7 @@ function PostPage() {
           </div>
 
           {/* Post Header */}
-          <Title
-            level={2}
-            style={{
-              fontSize: "clamp(22px, 5vw, 32px)",
-              marginBottom: 16,
-              lineHeight: 1.3,
-            }}
-          >
+          <Title level={2} className="post-title">
             {post?.title}
           </Title>
 
@@ -138,7 +132,7 @@ function PostPage() {
             wrap="wrap"
             align="center"
             gap="12px"
-            style={{ marginBottom: 24 }}
+            className="post-meta-container"
           >
             <Space>
               <Avatar
@@ -196,16 +190,13 @@ function PostPage() {
           <Flex
             gap="14px"
             wrap="wrap"
+            className="post-interactions"
             style={{
-              padding: "12px 0",
               borderTop: `1px solid ${token.colorBorderSecondary}`,
               borderBottom: `1px solid ${token.colorBorderSecondary}`,
             }}
           >
-            <Button
-              icon={!liked ? <LikeOutlined /> : <LikeFilled />}
-              onClick={togglePostLike}
-            >
+            <Button icon={<LikeFilled />} onClick={togglePostLike}>
               {post?.likesCount}
             </Button>
 
@@ -221,6 +212,7 @@ function PostPage() {
               onOk={copyToClipboard}
               open={open}
               onCancel={() => setOpen(false)}
+              cancelText="Close"
               centered
             >
               <Input
@@ -233,11 +225,8 @@ function PostPage() {
 
           {/* Main Content */}
           <Paragraph
+            className="post-body"
             style={{
-              fontSize: "16px",
-              lineHeight: "1.9",
-              marginTop: 40,
-              whiteSpace: "pre-wrap",
               color: token.colorText,
             }}
           >
