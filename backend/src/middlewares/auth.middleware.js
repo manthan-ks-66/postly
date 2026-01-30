@@ -15,7 +15,7 @@ const verifyJWT = async (req, _, next) => {
     const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
 
     const user = await User.findById(decodedToken._id).select(
-      "-password -refreshToken"
+      "-password -refreshToken",
     );
 
     if (!user) {
@@ -26,7 +26,7 @@ const verifyJWT = async (req, _, next) => {
     next();
   } catch (error) {
     console.log(error);
-    throw new ApiError(500, error.message || "Something went wrong");
+    throw new ApiError(500, "Something went wrong");
   }
 };
 

@@ -1,7 +1,7 @@
 import { User } from "../models/users.model.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { ApiError } from "../utils/ApiError.js";
-import { uploadToImageKit } from "../utils/imagekit.js";
+import { uploadToImageKit, deleteImageKitFile } from "../utils/imagekit.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import jwt from "jsonwebtoken";
 import { randomInt } from "node:crypto";
@@ -17,6 +17,7 @@ const transporter = nodemailer.createTransport({
 });
 
 // Controller: user registration
+// TODO: change according to new requirement
 const registerUser = asyncHandler(async (req, res) => {
   const { email, username, fullName, password } = req.body;
 
@@ -36,21 +37,28 @@ const registerUser = asyncHandler(async (req, res) => {
 
   // null - indicates the variable represents intentional absence of object / value
   // used for later adding object / value to the variable
-  let cloudinaryAvatar = null;
+  let imagekitAvatar = null;
 
   const avatarLocalPath = req.file?.path;
 
   if (avatarLocalPath) {
-    cloudinaryAvatar = await uploadToCloudinary(avatarLocalPath);
+    imagekitAvatar = await uploadToImageKit(
+      avatarLocalPath,
+      req.file?.originalname,
+      "users",
+    );
 
-    if (!cloudinaryAvatar) {
+    if (!imagekitAvatar) {
       throw new ApiError(500, "File upload failed");
     }
   }
 
   // user creation
   const user = await User.create({
-    avatar: cloudinaryAvatar ? cloudinaryAvatar.url : null,
+    avatar: {
+      url: imagekitAvatar.url,
+      fileId: imagekitAvatar.fileId,
+    },
     username,
     email,
     password,
@@ -135,7 +143,7 @@ const loginUser = asyncHandler(async (req, res) => {
 
 // Controller: logout user
 const logoutUser = asyncHandler(async (req, res) => {
-  const userId = req.user?.id;
+  const userId = req.user?._id;
 
   await User.findByIdAndUpdate(userId, {
     $unset: {
@@ -150,32 +158,59 @@ const logoutUser = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, "User tokens removed successfully", {}));
 });
 
-// Controller: update user picture
+// Controller: update user avatar picture
 const updateUserAvatar = asyncHandler(async (req, res) => {
   const avatarLocalPath = req.file?.path;
+
+  const fileName = req.file?.originalname;
 
   if (!avatarLocalPath) {
     throw new ApiError(400, "Avatar file is required");
   }
 
-  const cloudinaryAvatar = await uploadToCloudinary(avatarLocalPath);
+  const user = await User.findById(req.user?._id);
 
-  if (!cloudinaryAvatar) {
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+
+  const oldFileId = user.avatar?.fileId;
+
+  const imagekitAvatar = await uploadToImageKit(
+    avatarLocalPath,
+    fileName,
+    "users",
+  );
+
+  if (!imagekitAvatar) {
     throw new ApiError(500, "File upload failed");
   }
 
-  const user = await User.findOneAndUpdate(
-    { _id: req.user?._id },
-    {
-      $set: {
-        avatar: cloudinaryAvatar.url,
-      },
-    },
-    { new: true },
-  ).select("-password -refreshToken");
+  try {
+    user.avatar = {
+      url: imagekitAvatar.url,
+      fileId: imagekitAvatar.fileId,
+    };
 
-  if (!user) {
-    throw new ApiError(500, "Avatar update failed");
+    await user.save();
+  } catch (error) {
+    if (imagekitAvatar?.fileId) {
+      try {
+        await deleteImageKitFile(imagekitAvatar.fileId);
+      } catch (cleanupErr) {
+        console.log("Imagekit rollback delete failed\n", cleanupErr.message);
+      }
+    }
+
+    throw new ApiError(400, "User avatar update failed");
+  }
+
+  if (oldFileId) {
+    try {
+      await deleteImageKitFile(oldFileId);
+    } catch (error) {
+      console.log("imagekit avatar file deletion failed\n", error.message);
+    }
   }
 
   return res.status(200).json(
@@ -311,7 +346,7 @@ const resetUserPassword = asyncHandler(async (req, res) => {
 });
 
 // Controller: Update user details
-// TODO: Postman testing
+// TODO: Change according to new requirement
 const updateUserDetails = asyncHandler(async (req, res) => {
   const userId = req.user?._id;
 

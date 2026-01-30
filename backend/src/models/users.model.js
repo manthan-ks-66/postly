@@ -5,8 +5,14 @@ import bcrypt from "bcrypt";
 const userSchema = new mongoose.Schema(
   {
     avatar: {
-      type: String, // cloudinary url
-      default: "",
+      url: {
+        type: String,
+        default: "",
+      },
+      fileId: {
+        type: String,
+        default: "",
+      },
     },
     username: {
       type: String,
@@ -38,7 +44,7 @@ const userSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 // middleware: bcrypt password hashing
@@ -61,7 +67,7 @@ userSchema.methods.generateAccessToken = function () {
     process.env.ACCESS_TOKEN_SECRET,
     {
       expiresIn: process.env.ACCESS_TOKEN_EXPIRY,
-    }
+    },
   );
 };
 
@@ -73,7 +79,7 @@ userSchema.methods.generateRefreshToken = function () {
     process.env.REFRESH_TOKEN_SECRET,
     {
       expiresIn: process.env.REFRESH_TOKEN_EXPIRY,
-    }
+    },
   );
 };
 

@@ -406,8 +406,6 @@ const uploadEditorImage = asyncHandler(async (req, res) => {
   const userId = req.user?._id;
   const { postId } = req.body;
 
-  console.log(req.file);
-
   if (!isValidObjectId(userId) || !isValidObjectId(postId)) {
     throw new ApiError(400, "User id or Post id is invalid");
   }

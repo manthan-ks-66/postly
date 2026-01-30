@@ -218,8 +218,8 @@ function NavBar() {
             >
               <Space style={{ cursor: "pointer" }}>
                 <Avatar
-                  src={user?.avatar}
-                  size={isDesktop ? 45 : 35}
+                  src={user?.avatar?.url}
+                  size={isDesktop ? 50 : 45}
                   icon={<UserOutlined />}
                 />
               </Space>

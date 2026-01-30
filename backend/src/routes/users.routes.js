@@ -27,7 +27,7 @@ router.route("/logout").post(verifyJWT, logoutUser);
 
 router
   .route("/update-avatar")
-  .patch(upload.single("avatar"), verifyJWT, updateUserAvatar);
+  .patch(verifyJWT, upload.single("avatar"), updateUserAvatar);
 
 router.route("/get-current-user").get(verifyJWT, getCurrentUser);
 

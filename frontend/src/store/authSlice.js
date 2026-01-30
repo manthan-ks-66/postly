@@ -18,8 +18,8 @@ export const authSlice = createSlice({
   },
 });
 
-// exported reduces to use it in component files
+// export reducers to use it in component files
 export const { login, logout } = authSlice.actions;
 
-// exported for providing reducers to store (redux)
+// export for providing reducers to redux store
 export default authSlice.reducer;
