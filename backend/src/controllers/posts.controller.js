@@ -2,10 +2,10 @@ import { Post } from "../models/posts.model.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
-import uploadToCloudinary from "../utils/cloudinary.js";
-import mongoose, { isValidObjectId, mongo } from "mongoose";
+import { uploadToImageKit } from "../utils/imagekit.js";
+import mongoose, { isValidObjectId } from "mongoose";
 import { PostLike } from "../models/postLikes.model.js";
-import formatPost from "../utils/dateFormatter.js";
+import { PostImage } from "../models/postImages.model.js";
 
 // Controller: Upload post
 const publishPost = asyncHandler(async (req, res) => {
@@ -13,9 +13,10 @@ const publishPost = asyncHandler(async (req, res) => {
 
   const userId = req.user?._id;
 
-  let cloudinaryFeautredImage = null;
+  let imagekitFeaturedImage = null;
 
   const featuredImagePath = req.file?.path;
+  const imageFileName = req.file?.originalname;
 
   if ([title, slug, content, category].some((field) => !field)) {
     throw new ApiError(400, "All fields are required!");
@@ -26,9 +27,13 @@ const publishPost = asyncHandler(async (req, res) => {
   }
 
   if (featuredImagePath) {
-    cloudinaryFeautredImage = await uploadToCloudinary(featuredImagePath);
+    imagekitFeaturedImage = await uploadToImageKit(
+      featuredImagePath,
+      imageFileName,
+      "featuredImages",
+    );
 
-    if (!cloudinaryFeautredImage) {
+    if (!featuredImagePath) {
       throw new ApiError(500, "Image upload failed!");
     }
   }
@@ -39,7 +44,7 @@ const publishPost = asyncHandler(async (req, res) => {
     content,
     category,
     userId,
-    featuredImage: cloudinaryFeautredImage?.url,
+    featuredImage: imagekitFeaturedImage?.url,
   });
 
   if (!publishedPost) {
@@ -213,6 +218,7 @@ const togglePostLike = asyncHandler(async (req, res) => {
   }
 });
 
+// test controller
 const fetchPost = asyncHandler(async (req, res) => {
   const { postId } = req.body;
   const userId = req.user?._id;
@@ -225,11 +231,11 @@ const fetchPost = asyncHandler(async (req, res) => {
   const post = await Post.aggregate([
     {
       $match: {
-        _id: new mongoose.Types.ObjectId(postId)
-      }
-    }
-  ])
-})
+        _id: new mongoose.Types.ObjectId(postId),
+      },
+    },
+  ]);
+});
 
 // Controller: Get one post
 const getPost = asyncHandler(async (req, res) => {
@@ -394,6 +400,49 @@ const getUserLikedPosts = asyncHandler(async (req, res) => {
     );
 });
 
+const uploadEditorImage = asyncHandler(async (req, res) => {
+  const editorImageLocalPath = req.file?.path;
+
+  const userId = req.user?._id;
+  const { postId } = req.body;
+
+  console.log(req.file);
+
+  if (!isValidObjectId(userId) || !isValidObjectId(postId)) {
+    throw new ApiError(400, "User id or Post id is invalid");
+  }
+
+  if (!editorImageLocalPath) {
+    throw new ApiError(400, "Image file is required");
+  }
+
+  const imageKitFile = await uploadToImageKit(
+    editorImageLocalPath,
+    req.file?.originalname,
+    "posts",
+  );
+
+  if (!imageKitFile) {
+    throw new ApiError(500, "Image upload failed");
+  }
+
+  await PostImage.create({
+    imageKitFileId: imageKitFile?.fileId,
+    fileName: imageKitFile?.name,
+    url: imageKitFile?.url,
+    uploadedBy: userId,
+    postId: postId,
+  });
+
+  const image = {
+    url: imageKitFile.url,
+  };
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, "Imagekit file upload completed", image));
+});
+
 export {
   getPost,
   publishPost,
@@ -402,4 +451,5 @@ export {
   togglePostLike,
   getQueryPosts,
   getUserLikedPosts,
+  uploadEditorImage,
 };

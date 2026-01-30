@@ -1,7 +1,7 @@
 import { User } from "../models/users.model.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { ApiError } from "../utils/ApiError.js";
-import uploadToCloudinary from "../utils/cloudinary.js";
+import { uploadToImageKit } from "../utils/imagekit.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import jwt from "jsonwebtoken";
 import { randomInt } from "node:crypto";
@@ -22,7 +22,7 @@ const registerUser = asyncHandler(async (req, res) => {
 
   if (
     [fullName, username, email, password].some(
-      (field) => !field || field.trim() === ""
+      (field) => !field || field.trim() === "",
     )
   ) {
     throw new ApiError(400, "Required fields are empty");
@@ -129,7 +129,7 @@ const loginUser = asyncHandler(async (req, res) => {
     .json(
       new ApiResponse(200, "User tokens returned successfully", {
         user: loggedInUser,
-      })
+      }),
     );
 });
 
@@ -171,7 +171,7 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
         avatar: cloudinaryAvatar.url,
       },
     },
-    { new: true }
+    { new: true },
   ).select("-password -refreshToken");
 
   if (!user) {
@@ -181,7 +181,7 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
   return res.status(200).json(
     new ApiResponse(200, "Avatar updated successfully", {
       avatar: user.avatar,
-    })
+    }),
   );
 });
 
@@ -274,7 +274,7 @@ const resetUserPassword = asyncHandler(async (req, res) => {
 
   if (
     [email, otp, newPassword, confirmNewPassword].some(
-      (field) => !field || field.trim() === ""
+      (field) => !field || field.trim() === "",
     )
   ) {
     throw new ApiError(400, "All fields are required");
@@ -332,7 +332,7 @@ const updateUserDetails = asyncHandler(async (req, res) => {
     },
     {
       new: true,
-    }
+    },
   );
 
   if (!user) {
@@ -355,7 +355,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 
   const decodedToken = jwt.verify(
     incomingToken,
-    process.env.REFRESH_TOKEN_SECRET
+    process.env.REFRESH_TOKEN_SECRET,
   );
 
   const user = await User.findById(decodedToken._id);
@@ -369,7 +369,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
   }
 
   const { loggedInUser, accessToken, refreshToken } = await generateUserTokens(
-    user._id
+    user._id,
   );
 
   const options = {
@@ -382,7 +382,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
     .cookie("accessToken", accessToken, options)
     .cookie("refreshToken", refreshToken, options)
     .json(
-      new ApiResponse(200, "User tokens returned successfully", loggedInUser)
+      new ApiResponse(200, "User tokens returned successfully", loggedInUser),
     );
 });
 

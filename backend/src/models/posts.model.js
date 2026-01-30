@@ -11,8 +11,15 @@ const postSchema = new mongoose.Schema(
       required: true,
     },
     content: {
-      type: String,
-      required: true,
+      time: {
+        type: Number,
+      },
+      blocks: {
+        type: Array,
+      },
+      version: {
+        type: String,
+      },
     },
     featuredImage: {
       type: String,

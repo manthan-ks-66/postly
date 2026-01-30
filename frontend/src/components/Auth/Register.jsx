@@ -40,8 +40,6 @@ function Register() {
 
       const user = await authService.registerUser(userFormData);
 
-      console.log(user);
-
       if (user) dispatch(login(user));
 
       notify.api.success({

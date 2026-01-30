@@ -16,11 +16,13 @@ function ControlledEditor({ name, label, defaultValue = "" }) {
               width: "100%",
               height: 600,
               plugins:
-                "anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount",
+                "anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount quickbars",
               toolbar:
-                "undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | align lineheight | numlist bullist indent outdent | emoticons charmap | removeformat",
+                "undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link image media table | align lineheight | numlist bullist indent outdent | emoticons charmap | removeformat",
               content_css: "dark",
               skin: "oxide-dark",
+              quickbars_selection_toolbar:
+                "bold italic | quicklink h2 h3 blockquote quickimage quicktable",
             }}
             initialValue={defaultValue}
             onEditorChange={field.onChange}

@@ -24,7 +24,9 @@ import ControlledUpload from "../Utils/ControlledUpload.jsx";
 import ControlledEditor from "../Editor/ControlledEditor.jsx";
 
 import { useForm, Controller, FormProvider } from "react-hook-form";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+
+import postService from "../../services/postService.js";
 
 const { Content } = Layout;
 const { Title } = Typography;
@@ -33,6 +35,8 @@ const { Option } = Select;
 function PublishPostForm() {
   const { token } = theme.useToken();
   const [form] = Form.useForm();
+
+  const [error, setError] = useState("");
 
   const methods = useForm();
   const { handleSubmit, control, setValue, watch } = methods;
@@ -44,6 +48,7 @@ function PublishPostForm() {
         .toLowerCase()
         .replace(/[^a-zA-Z0-9]+/g, "-")
         .replace(/^-+|-+$/g, "");
+
     return "";
   };
 
@@ -59,6 +64,24 @@ function PublishPostForm() {
 
   const submitPost = async (data) => {
     console.log(data);
+    let postFormData = new FormData();
+
+    for (let val in data) {
+      if (typeof val !== "object") {
+        postFormData.append(val, data[val]);
+      }
+    }
+
+    if (data.featuredImage && data.featuredImage[0]) {
+      postFormData.append("featuredImage", data.featuredImage[0].originFileObj);
+    }
+
+    try {
+      // const post = await postService.publishPost(postFormData);
+      // console.log(post);
+    } catch (error) {
+      setError(error.message);
+    }
   };
 
   const handlePostForm = () => {
