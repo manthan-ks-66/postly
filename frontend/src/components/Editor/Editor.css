@@ -1,0 +1,75 @@
+/* The Outer Shell */
+.editor-shell {
+  border-radius: 12px; /* Rounded corners like the image */
+  overflow: hidden; /* Clips the inner content to the corners */
+  background: #0f172a;
+}
+
+/* Toolbar Wrapper */
+.editor-toolbar-wrapper {
+  height: 50px;
+  padding: 0 20px 0 20px;
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid #3c465f;
+  display: flex;
+  align-items: center;
+}
+
+.editor-paragraph {
+  margin: 0 0 15px 0;
+  position: relative;
+}
+
+/* Inner Container */
+.editor-inner {
+  position: relative;
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(8px);
+}
+
+/* The Typing Area */
+.editor-input {
+  min-height: 450px;
+  padding: 20px 28px;
+  outline: none;
+  font-size: 15px;
+  line-height: 1.6;
+  color: #b0afaf;
+  font-size: 16px;
+  font-family: "-apple-system", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Placeholder Alignment */
+.editor-placeholder {
+  color: #616161;
+  overflow: hidden;
+  position: absolute;
+  text-overflow: ellipsis;
+  top: 20px;
+  left: 28px;
+  user-select: none;
+  pointer-events: none;
+}
+
+.tool:hover {
+  background-color: #2e3649;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 5px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.tool {
+  background-color: #242d42;
+  align-items: center;
+  display: flex;
+  justify-content: center;
+  height: 35px;
+  padding: 5px 5px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+}

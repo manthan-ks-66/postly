@@ -22,13 +22,30 @@ const postSchema = new mongoose.Schema(
       },
     },
     featuredImage: {
-      type: String,
-      default: undefined,
+      url: {
+        type: String,
+        default: undefined,
+      },
+      fileId: {
+        type: String,
+        default: undefined,
+      },
     },
     category: {
       type: String,
       required: true,
-      enum: ["Tech", "Story", "Business", "Education"],
+      enum: [
+        "Tech",
+        "Travel",
+        "Story",
+        "Food",
+        "Health",
+        "Lifestyle",
+        "Business",
+        "Education",
+        "Programming",
+        "Mental Health",
+      ],
     },
     likesCount: {
       type: Number,

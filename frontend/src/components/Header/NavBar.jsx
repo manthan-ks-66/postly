@@ -119,7 +119,7 @@ function NavBar() {
           height: HEADER_HEIGHT,
           display: "flex",
           alignItems: "center",
-          padding: "0 20px",
+          padding: "0 80px",
           justifyContent: user ? "center" : "space-between",
           position: "fixed",
           zIndex: 1000,
@@ -219,7 +219,7 @@ function NavBar() {
               <Space style={{ cursor: "pointer" }}>
                 <Avatar
                   src={user?.avatar?.url}
-                  size={isDesktop ? 50 : 45}
+                  size={isDesktop ? 47 : 40}
                   icon={<UserOutlined />}
                 />
               </Space>

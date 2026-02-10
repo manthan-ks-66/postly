@@ -14,7 +14,7 @@ import ResetPassword from "./components/Auth/ResetPassword.jsx";
 import { ConfigProvider, theme as antdTheme } from "antd";
 import PostPage from "./components/Post/PostPage.jsx";
 import Explore from "./components/Post/Explore.jsx";
-import PublishPostForm from "./components/Post/PublishPostForm.jsx";
+import PublishPost from "./components/Post/PublishPost.jsx";
 import NotFount from "./components/NotFound.jsx";
 import QueryPosts from "./components/Post/QueryPosts.jsx";
 
@@ -37,7 +37,7 @@ const postlyDarkTheme = {
 
     // Shape & font
     borderRadiusLG: 10,
-    fontFamily: "Alibaba Pua Light",
+    fontFamily: "-apple-system, Roboto, Oxygen, Ubuntu, Cantarell",
   },
 
   components: {
@@ -110,16 +110,16 @@ const router = createBrowserRouter([
       {
         path: "/post/new/write",
         element: (
-          <AuthLayout authentication={true}>
-            <PublishPostForm />
-          </AuthLayout>
+          // <AuthLayout authentication={true}>
+          <PublishPost />
+          // </AuthLayout>
         ),
       },
       {
         path: "/post/:postId/:slug/edit",
         element: (
           <AuthLayout authentication={true}>
-            <PublishPostForm />
+            <PublishPost />
           </AuthLayout>
         ),
       },
