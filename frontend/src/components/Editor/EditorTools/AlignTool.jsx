@@ -1,5 +1,15 @@
-import { FORMAT_ELEMENT_COMMAND } from "lexical";
-import { Dropdown, Space } from "antd";
+// lexical imports
+import { $getNearestNodeOfType } from "@lexical/utils";
+import {
+  $getSelection,
+  $isElementNode,
+  $isRangeSelection,
+  FORMAT_ELEMENT_COMMAND,
+  ParagraphNode,
+} from "lexical";
+
+// antd imports
+import { Dropdown } from "antd";
 import {
   AlignLeftOutlined,
   AlignCenterOutlined,
@@ -7,6 +17,11 @@ import {
   MenuOutlined,
   AlignRightOutlined,
 } from "@ant-design/icons";
+
+// react
+import { useEffect, useState } from "react";
+
+// css
 import "../Editor.css";
 
 const alignmentOptions = [
@@ -33,19 +48,49 @@ const alignmentOptions = [
 ];
 
 function AlignTool({ editor }) {
+  const [currentAlign, setCurrentAlign] = useState("left");
+
+  const updateToolBar = () => {
+    const selection = $getSelection();
+
+    const node = selection.anchor.getNode();
+
+    // TODO: fix paragraph node issue
+    const element =
+      node.getKey() === "root"
+        ? node
+        : $getNearestNodeOfType(node, ParagraphNode);
+
+    const format = element.getFormatType() || "left";
+
+    setCurrentAlign(format);
+  };
+
+  useEffect(() => {
+    return editor.registerUpdateListener(({ editorState }) => {
+      editorState.read(() => updateToolBar());
+    });
+  }, [updateToolBar, editor]);
+
   const alignmentItems = alignmentOptions.map((item) => ({
     ...item,
-    onClick: () => editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, item.key),
+    onClick: () => {
+      editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, item.key);
+    },
   }));
 
+  const currentIcon = alignmentOptions.find(
+    (option) => option.key === currentAlign,
+  )?.icon || <AlignLeftOutlined />;
+
   return (
-    <div className="tool">
+    <div style={{ width: "100px" }} className="tool">
       <Dropdown menu={{ items: alignmentItems }}>
-        <Space>
-          <MenuOutlined />
-          Align
+        <div style={{ display: "flex", gap: 10 }}>
+          {currentIcon}
+          <span style={{ textTransform: "capitalize" }}>{currentAlign}</span>
           <DownOutlined />
-        </Space>
+        </div>
       </Dropdown>
     </div>
   );

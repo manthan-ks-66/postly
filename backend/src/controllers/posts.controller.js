@@ -112,7 +112,7 @@ const updatePost = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, "Post updated successfully", updatedPost));
 });
 
-// Controller: Get all the Posts (Paginated)
+// Controller: Get all posts in pages
 const getAllPosts = asyncHandler(async (req, res) => {
   const { page = 1, limit = 5 } = req.query;
 
@@ -125,7 +125,7 @@ const getAllPosts = asyncHandler(async (req, res) => {
 
   const data = {
     posts,
-    totalPosts: totalPosts,
+    totalPosts: totalPosts, 
   };
 
   return res
@@ -400,6 +400,7 @@ const getUserLikedPosts = asyncHandler(async (req, res) => {
     );
 });
 
+// Controller: Editor image file upload
 const uploadEditorImage = asyncHandler(async (req, res) => {
   const editorImageLocalPath = req.file?.path;
 

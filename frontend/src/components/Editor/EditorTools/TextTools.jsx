@@ -13,7 +13,7 @@ function TextTools({ editor }) {
         className="tool"
         onClick={() => editor.dispatchCommand(FORMAT_TEXT_COMMAND, "bold")}
         icon={<BoldOutlined />}
-      ></Button>
+      />
 
       <Button
         className="tool"
@@ -21,13 +21,13 @@ function TextTools({ editor }) {
           editor.dispatchCommand(FORMAT_TEXT_COMMAND, "italic");
         }}
         icon={<ItalicOutlined />}
-      ></Button>
+      />
 
       <Button
         className="tool"
         onClick={() => editor.dispatchCommand(FORMAT_TEXT_COMMAND, "underline")}
         icon={<UnderlineOutlined />}
-      ></Button>
+      />
     </div>
   );
 }

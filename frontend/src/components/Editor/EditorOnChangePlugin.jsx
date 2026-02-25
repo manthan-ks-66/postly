@@ -8,11 +8,29 @@ function EditorOnChangePlugin({ onChange }) {
     // when this plugin un-mounts the lexical automatically calls unsubscribe fn and cleans up the useEffect memory
     // so no need to manually call the unsubscribe() here
 
-    return editor.registerUpdateListener(({ editoState }) => {
-      // Purpose of this callback: Lexical calls this function every time the editor updates (typing, formatting, etc.)
+    return editor.registerUpdateListener(({ editorState }) => {
+      // Purpose of this callback:
+      // Lexical calls this function every time the editor updates (type, format, move-cursor etc.)
+
+      onChange(editorState.toJSON());
     });
-  }, [editor]);
-  return null;
+  }, [editor, onChange]);
+
+  return;
 }
 
 export default EditorOnChangePlugin;
+
+// NOTE:
+/**
+ * The registerUpdateListener callback runs outside React’s render cycle
+
+ * Lexical updates its internal state and then calls your listener
+
+ * This does not cause your React components 
+  - (like in this case EditorOnChangePlugin or the Editor wrapper in Editor.jsx) to re-render on every keystroke
+
+ * The plugin itself is stable — it only sets up the listener once via useEffect
+
+ * What changes is Lexical’s internal state, which you can observe with => console.log(editorState)
+ */

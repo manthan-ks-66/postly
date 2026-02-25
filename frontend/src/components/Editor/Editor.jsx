@@ -1,39 +1,34 @@
-import { $getRoot, $getSelection } from "lexical";
-import { useEffect, useState } from "react";
+// react hook form
 import { Controller } from "react-hook-form";
+
+// lexical imports
 import { AutoFocusPlugin } from "@lexical/react/LexicalAutoFocusPlugin";
 import { LexicalComposer } from "@lexical/react/LexicalComposer";
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
 import { ContentEditable } from "@lexical/react/LexicalContentEditable";
 import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
 import { LexicalErrorBoundary } from "@lexical/react/LexicalErrorBoundary";
-import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
+import { HeadingNode, QuoteNode } from "@lexical/rich-text";
 import ToolbarPlugin from "./EditorTools/ToolbarPlugin.jsx";
+import EditorOnChangePlugin from "./EditorOnChangePlugin.jsx";
+
+// css
 import "./Editor.css";
 
 const theme = {
   paragraph: "editor-paragraph",
+  heading: {
+    h1: "editor-heading-h1",
+    h2: "editor-heading-h2",
+    h3: "editor-heading-h3",
+    h4: "editor-heading-h4",
+    h5: "editor-heading-h5",
+    h6: "editor-heading-h6",
+  },
 };
 
-// Catch any errors that occur during Lexical updates and log them
-// or throw them as needed. If you don't throw them, Lexical will
-// try to recover gracefully without losing user data.
 function onError(error) {
   console.error(error);
-}
-
-function EditorPlugin() {
-  const [editor] = useLexicalComposerContext();
-
-  useEffect(() => {
-    editor.registerUpdateListener(({ editorState }) => {
-      editorState.read(() => {
-        console.log(editor.getEditorState());
-      });
-    });
-  }, [editor]);
-
-  return null;
 }
 
 function Editor({ control, name = "content" }) {
@@ -41,9 +36,8 @@ function Editor({ control, name = "content" }) {
     namespace: "PostEditor",
     theme,
     onError,
+    nodes: [HeadingNode, QuoteNode],
   };
-
-  const [editorState, setEditorState] = useState();
 
   return (
     <div className="editor-shell">
@@ -56,6 +50,8 @@ function Editor({ control, name = "content" }) {
               <ToolbarPlugin />
             </div>
 
+            <EditorOnChangePlugin onChange={field.onChange} />
+
             <div className="editor-inner">
               <RichTextPlugin
                 contentEditable={<ContentEditable className="editor-input" />}
@@ -64,7 +60,7 @@ function Editor({ control, name = "content" }) {
                   <div className="editor-placeholder">Write What You Think</div>
                 }
               />
-              <EditorPlugin />
+
               <HistoryPlugin />
               <AutoFocusPlugin />
             </div>

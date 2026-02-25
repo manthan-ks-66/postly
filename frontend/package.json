@@ -12,6 +12,9 @@
   "dependencies": {
     "@ant-design/icons": "^6.1.0",
     "@lexical/react": "^0.39.0",
+    "@lexical/rich-text": "^0.39.0",
+    "@lexical/selection": "^0.39.0",
+    "@lexical/utils": "^0.39.0",
     "@reduxjs/toolkit": "^2.11.2",
     "@tinymce/tinymce-react": "^6.3.0",
     "antd": "^6.1.4",

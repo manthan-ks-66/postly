@@ -3,22 +3,25 @@ import { upload } from "../middlewares/multer.middleware.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 import {
   registerUser,
+  verifyRegisteredUser,
   loginUser,
   updateUserAvatar,
   logoutUser,
   getCurrentUser,
-  handleOTP,
+  handleResetPasswordOTP,
   resetUserPassword,
   updateUserDetails,
 } from "../controllers/users.controller.js";
 
 const router = Router();
 
-router.route("/register").post(upload.single("avatar"), registerUser);
+router.route("/register").post(registerUser);
+
+router.route("/verify-user").post(verifyRegisteredUser);
 
 router.route("/login").post(upload.none(), loginUser);
 
-router.route("/send-otp").post(handleOTP);
+router.route("/send-otp").post(handleResetPasswordOTP);
 
 router.route("/reset-password").post(resetUserPassword);
 

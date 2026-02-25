@@ -4,6 +4,7 @@ import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext
 import AlignTool from "./AlignTool.jsx";
 import TextTools from "./TextTools.jsx";
 import { Divider } from "antd";
+import TextTypeTool from "./TextTypeTool.jsx";
 
 function ToolbarPlugin() {
   const [editor] = useLexicalComposerContext();
@@ -19,6 +20,13 @@ function ToolbarPlugin() {
       }}
       className="toolbar"
     >
+      <TextTypeTool editor={editor} />
+
+      <Divider
+        vertical
+        style={{ height: "100%", backgroundColor: "#3c465f" }}
+      />
+
       <TextTools editor={editor} />
 
       <Divider
@@ -27,6 +35,11 @@ function ToolbarPlugin() {
       />
 
       <AlignTool editor={editor} />
+
+      <Divider
+        vertical
+        style={{ height: "100%", backgroundColor: "#3c465f" }}
+      />
     </div>
   );
 }

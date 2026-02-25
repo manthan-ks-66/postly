@@ -4,11 +4,15 @@ import { Link, useNavigate } from "react-router-dom";
 import { useForm, Controller } from "react-hook-form";
 import authService from "../../services/authService.js";
 import { login } from "../../store/authSlice.js";
-import { Button, Form, Input, Layout, Alert } from "antd";
+import { Button, Form, Input, Layout, Alert, Divider } from "antd";
 import { useNotify } from "../../context/NotificationProvider.jsx";
+import Logo from "../Logo/Logo.jsx";
+import GoogleBtn from "./GoogleBtn.jsx";
 
-import { theme } from "antd";
+import { theme, Typography } from "antd";
 import { LockOutlined, UserOutlined } from "@ant-design/icons";
+
+const { Text } = Typography;
 
 function Login() {
   const notify = useNotify();
@@ -28,7 +32,7 @@ function Login() {
       const user = await authService.loginUser(data);
 
       if (user) dispatch(login(user));
-      navigate("/");
+      
 
       notify.api.success({
         title: "Welcome Back",
@@ -54,19 +58,7 @@ function Login() {
         padding: "10px",
       }}
     >
-      {error && (
-        <Alert
-          style={{
-            textAlign: "center",
-            border: "none",
-            width: "20%",
-            justifySelf: "center",
-            marginBottom: 20,
-          }}
-          type="error"
-          title={error}
-        />
-      )}
+      <Logo />
 
       <div
         style={{
@@ -81,6 +73,7 @@ function Login() {
       >
         <h2
           style={{
+            margin: "10px 0 10px 0",
             textAlign: "center",
             color: token.colorText,
           }}
@@ -88,7 +81,26 @@ function Login() {
           Login
         </h2>
 
-        <div style={{ marginBottom: 19, textAlign: "center" }}>
+        <div
+          style={{
+            minHeight: "20px",
+            margin: "10px 0",
+            textAlign: "center",
+            visibility: error ? "visible" : "hidden",
+          }}
+          className="errorContainer"
+        >
+          {error && (
+            <Text
+              style={{ display: "flex", justifyContent: "center" }}
+              type="danger"
+            >
+              {error}
+            </Text>
+          )}
+        </div>
+
+        <div style={{ margin: "15px 0 15px 0", textAlign: "center" }}>
           <span style={{ color: token.colorTextSecondary }}>
             Don't have an account?
           </span>
@@ -105,11 +117,22 @@ function Login() {
           </Link>
         </div>
 
+        <GoogleBtn />
+
+        <div
+          style={{
+            color: token.colorTextSecondary,
+          }}
+          className="authDivider"
+        >
+          <Divider>OR</Divider>
+        </div>
+
         <Form
           form={form}
           layout="vertical"
           onFinish={handleAntdSubmit}
-          requiredMark={false} // Hides the red asterisk
+          requiredMark={false}
         >
           <Form.Item
             prefix={<UserOutlined />}

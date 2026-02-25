@@ -33,6 +33,8 @@ const userSchema = new mongoose.Schema(
     refreshToken: {
       type: String,
     },
+
+    // verification fields:
     OTP: {
       type: String,
       default: undefined,
@@ -41,22 +43,41 @@ const userSchema = new mongoose.Schema(
       type: Date,
       default: undefined,
     },
+    isVerified: {
+      type: Boolean,
+      required: true,
+      default: false,
+    },
+    lifeTime: {
+      type: Date,
+      default: Date.now(),
+      index: { expires: "24h" },
+    },
   },
   {
     timestamps: true,
   },
 );
 
+userSchema.set("toJSON", {
+  transform: (_, ret) => {
+    delete ret.password;
+    delete ret.refreshToken;
+    delete ret.lifeTime;
+
+    return ret;
+  },
+});
+
 // middleware: bcrypt password hashing
 userSchema.pre("save", async function () {
-  // check: if password is changed while updating user details on userSchema
+  // check: if password is changed while updating user data on userSchema
   if (!this.isModified("password")) return;
 
   this.password = await bcrypt.hash(this.password, 10);
 });
 
 // mongoose pre-defined methods on userSchema
-
 userSchema.methods.generateAccessToken = function () {
   return jwt.sign(
     {

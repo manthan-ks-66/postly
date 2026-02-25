@@ -16,8 +16,36 @@ const transporter = nodemailer.createTransport({
   },
 });
 
+const generateAndSendOTP = async (processMsg, user, email, subject) => {
+  const otp = randomInt(100000, 999999);
+
+  await user.hashOTP(otp);
+  await user.save();
+
+  const mailMsg = `
+Hi ${user.fullName.trim().split(" ")[0]}, 
+
+To continue with the ${processMsg} on Postly, 
+
+Use the One Time Password (OTP): ${otp} 
+
+This OTP is valid for 2 minutes. Do not share this code with anyone.
+
+Thank You`;
+
+  const info = transporter.sendMail({
+    from: process.env.EMAIL_ADDRESS,
+    to: email,
+    subject: subject,
+    text: mailMsg,
+  });
+
+  if (!info) {
+    throw new ApiError(500, "Failed to send the OTP");
+  }
+};
+
 // Controller: user registration
-// TODO: change according to new requirement
 const registerUser = asyncHandler(async (req, res) => {
   const { email, username, fullName, password } = req.body;
 
@@ -29,36 +57,48 @@ const registerUser = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Required fields are empty");
   }
 
+  const existedUsername = await User.findOne({ username: username });
+
+  if (existedUsername) {
+    throw new ApiError(
+      400,
+      "username is already taken, please use different one",
+    );
+  }
+
   const existedUser = await User.findOne({ $or: [{ username }, { email }] });
 
   if (existedUser) {
-    throw new ApiError(400, "User with this email or username already exists");
-  }
+    if (existedUser.isVerified) {
+      throw new ApiError(
+        400,
+        "User with this email is already registered, please login",
+      );
+    }
 
-  // null - indicates the variable represents intentional absence of object / value
-  // used for later adding object / value to the variable
-  let imagekitAvatar = null;
+    const emailOwner = await User.findOne({ email: email });
 
-  const avatarLocalPath = req.file?.path;
+    if (emailOwner.isVerified) {
+      throw new ApiError(400, "User with this email is already registered");
+    }
 
-  if (avatarLocalPath) {
-    imagekitAvatar = await uploadToImageKit(
-      avatarLocalPath,
-      req.file?.originalname,
-      "users",
+    Object.assign(existedUser, { fullName, email, password, username });
+
+    await generateAndSendOTP(
+      "registration process",
+      existedUser,
+      email,
+      "One Time Password for user registration",
     );
 
-    if (!imagekitAvatar) {
-      throw new ApiError(500, "File upload failed");
-    }
+    return res
+      .status(200)
+      .json(
+        new ApiResponse(200, "OTP for registration has been sent successfully"),
+      );
   }
 
-  // user creation
   const user = await User.create({
-    avatar: {
-      url: imagekitAvatar.url,
-      fileId: imagekitAvatar.fileId,
-    },
     username,
     email,
     password,
@@ -69,13 +109,71 @@ const registerUser = asyncHandler(async (req, res) => {
     throw new ApiError(500, "User registration failed");
   }
 
-  const userObject = user.toObject();
-
-  delete userObject.password;
+  await generateAndSendOTP(
+    "registration process",
+    user,
+    email,
+    "One Time Password for user registration",
+  );
 
   return res
     .status(201)
-    .json(new ApiResponse(201, "User registered successfully", userObject));
+    .json(
+      new ApiResponse(
+        201,
+        "User registered and OTP has been sent successfully",
+        user.toJSON(),
+      ),
+    );
+});
+
+// Controller: verify registered user
+const verifyRegisteredUser = asyncHandler(async (req, res) => {
+  /**
+   * get email, otp from req.body
+   * find the user
+   * check if otp is expired
+   * check if otp is correct
+   * update the user as verified
+   * return res - user verified
+   */
+
+  const { email, otp } = req.body;
+
+  const user = await User.findOne({ email: email });
+
+  if (!user) {
+    throw new ApiError(400, "Could not find");
+  }
+
+  if (Date.now() > user.otpExpiry) {
+    throw new ApiError(400, "OTP is expired, please register again");
+  }
+
+  const isOTPCorrect = user.isOtpCorrect(otp);
+
+  if (!isOTPCorrect) {
+    throw new ApiError(400, "Invalid OTP");
+  }
+
+  const verifiedUser = await User.findOneAndUpdate(
+    { email: email },
+    {
+      $set: {
+        isVerified: true,
+      },
+      $unset: {
+        lifeTime: true,
+        OTP: true,
+        otpExpiry: true,
+      },
+    },
+    { new: true },
+  );
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, "User verified successfully", verifiedUser));
 });
 
 // Method: generating accessToken and refreshToken for user auth
@@ -229,8 +327,8 @@ const getCurrentUser = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, "User details fetched successfully", user));
 });
 
-// Controller: send the OTP to user in mail
-const handleOTP = asyncHandler(async (req, res) => {
+// Controller: send the OTP to user for password reset
+const handleResetPasswordOTP = asyncHandler(async (req, res) => {
   /* 
   get email from req.body
 
@@ -428,12 +526,14 @@ const deleteUserAccount = asyncHandler(async (req, res) => {
 
 export {
   registerUser,
+  verifyRegisteredUser,
   loginUser,
   updateUserAvatar,
   logoutUser,
   getCurrentUser,
   resetUserPassword,
-  handleOTP,
+  handleResetPasswordOTP,
   updateUserDetails,
+  refreshAccessToken,
   deleteUserAccount,
 };

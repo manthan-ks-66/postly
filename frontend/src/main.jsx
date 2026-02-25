@@ -15,7 +15,7 @@ import { ConfigProvider, theme as antdTheme } from "antd";
 import PostPage from "./components/Post/PostPage.jsx";
 import Explore from "./components/Post/Explore.jsx";
 import PublishPost from "./components/Post/PublishPost.jsx";
-import NotFount from "./components/NotFound.jsx";
+import NotFound from "./components/NotFound.jsx";
 import QueryPosts from "./components/Post/QueryPosts.jsx";
 
 const postlyDarkTheme = {
@@ -88,14 +88,6 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: "/auth/login",
-        element: (
-          <AuthLayout authentication={false}>
-            <Login />
-          </AuthLayout>
-        ),
-      },
-      {
         path: "/post/:_id/:slug",
         element: <PostPage />,
       },
@@ -134,8 +126,16 @@ const router = createBrowserRouter([
     ],
   },
   {
+    path: "/auth/login",
+    element: (
+      <AuthLayout authentication={false}>
+        <Login />
+      </AuthLayout>
+    ),
+  },
+  {
     path: "*",
-    element: <NotFount />,
+    element: <NotFound />,
   },
 ]);
 
