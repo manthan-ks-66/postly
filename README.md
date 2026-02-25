@@ -1,3 +1,3 @@
-# DB Structure
+# DataBase Design
 
 ![alt text](image-2.png)
