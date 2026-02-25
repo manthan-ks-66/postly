@@ -16,6 +16,7 @@ const userSchema = new mongoose.Schema(
     },
     username: {
       type: String,
+      unique: true,
       required: true,
     },
     fullName: {
@@ -24,6 +25,7 @@ const userSchema = new mongoose.Schema(
     },
     email: {
       type: String,
+      unique: true,
       required: true,
     },
     password: {
@@ -50,8 +52,7 @@ const userSchema = new mongoose.Schema(
     },
     lifeTime: {
       type: Date,
-      default: Date.now(),
-      index: { expires: "24h" },
+      index: { expires: "12hr" },
     },
   },
   {

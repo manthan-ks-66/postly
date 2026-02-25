@@ -82,7 +82,13 @@ const registerUser = asyncHandler(async (req, res) => {
       throw new ApiError(400, "User with this email is already registered");
     }
 
-    Object.assign(existedUser, { fullName, email, password, username });
+    Object.assign(existedUser, {
+      fullName,
+      email,
+      password,
+      username,
+      lifeTime: Date.now(),
+    });
 
     await generateAndSendOTP(
       "registration process",
@@ -103,6 +109,7 @@ const registerUser = asyncHandler(async (req, res) => {
     email,
     password,
     fullName,
+    lifeTime: Date.now(),
   });
 
   if (!user) {
