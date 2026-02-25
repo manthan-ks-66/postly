@@ -63,7 +63,6 @@ userSchema.set("toJSON", {
   transform: (_, ret) => {
     delete ret.password;
     delete ret.refreshToken;
-    delete ret.lifeTime;
 
     return ret;
   },
