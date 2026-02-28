@@ -183,6 +183,7 @@ const verifyRegisteredUser = asyncHandler(async (req, res) => {
     );
 });
 
+// Method: get temporary user details
 const getUser = asyncHandler(async (req, res) => {
   const { userId } = req.params;
 
@@ -192,7 +193,7 @@ const getUser = asyncHandler(async (req, res) => {
 
   const user = await User.findOne(
     { _id: userId },
-    { email: 1, fullName: 1, username: 1, password: 1 },
+    { email: 1, fullName: 1, username: 1 },
   );
 
   if (!user) {
