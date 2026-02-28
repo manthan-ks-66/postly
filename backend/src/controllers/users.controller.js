@@ -6,6 +6,7 @@ import asyncHandler from "../utils/asyncHandler.js";
 import jwt from "jsonwebtoken";
 import { randomInt } from "node:crypto";
 import nodemailer from "nodemailer";
+import { isValidObjectId } from "mongoose";
 
 // nodemailer: transporter config
 const transporter = nodemailer.createTransport({
@@ -29,7 +30,7 @@ To continue with the ${processMsg} on Postly,
 
 Use the One Time Password (OTP): ${otp} 
 
-This OTP is valid for 2 minutes. Do not share this code with anyone.
+This OTP is valid for 2 minutes. Do not share this code with anyone
 
 Thank You`;
 
@@ -60,10 +61,7 @@ const registerUser = asyncHandler(async (req, res) => {
   const existedUsername = await User.findOne({ username: username });
 
   if (existedUsername) {
-    throw new ApiError(
-      400,
-      "username is already taken, please use different one",
-    );
+    throw new ApiError(400, "Username is already taken");
   }
 
   const existedUser = await User.findOne({ $or: [{ username }, { email }] });
@@ -129,7 +127,7 @@ const registerUser = asyncHandler(async (req, res) => {
       new ApiResponse(
         201,
         "User registered and OTP has been sent successfully",
-        user.toJSON(),
+        { userId: user._id },
       ),
     );
 });
@@ -150,14 +148,14 @@ const verifyRegisteredUser = asyncHandler(async (req, res) => {
   const user = await User.findOne({ email: email });
 
   if (!user) {
-    throw new ApiError(400, "Could not find");
+    throw new ApiError(400, "User not found");
   }
 
   if (Date.now() > user.otpExpiry) {
-    throw new ApiError(400, "OTP is expired, please register again");
+    throw new ApiError(400, "OTP is expired");
   }
 
-  const isOTPCorrect = user.isOtpCorrect(otp);
+  const isOTPCorrect = await user.isOtpCorrect(otp);
 
   if (!isOTPCorrect) {
     throw new ApiError(400, "Invalid OTP");
@@ -180,7 +178,30 @@ const verifyRegisteredUser = asyncHandler(async (req, res) => {
 
   return res
     .status(200)
-    .json(new ApiResponse(200, "User verified successfully", verifiedUser));
+    .json(
+      new ApiResponse(200, "User verified successfully", verifiedUser.toJSON()),
+    );
+});
+
+const getUser = asyncHandler(async (req, res) => {
+  const { userId } = req.params;
+
+  if (!isValidObjectId(userId)) {
+    throw new ApiError(400, "Invalid user id");
+  }
+
+  const user = await User.findOne(
+    { _id: userId },
+    { email: 1, fullName: 1, username: 1, password: 1 },
+  );
+
+  if (!user) {
+    throw new ApiError(500, "User not found!");
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, "User fetched successfully", user));
 });
 
 // Method: generating accessToken and refreshToken for user auth
@@ -193,16 +214,46 @@ const generateUserTokens = async ({ user }) => {
 
     await user.save();
 
-    // remove password and refreshToken field
-    const loggedInUser = user.toObject();
-    delete loggedInUser.password;
-    delete loggedInUser.refreshToken;
+    const loggedInUser = user.toJSON();
 
     return { loggedInUser, accessToken, refreshToken };
   } catch (error) {
     throw new ApiError(500, error.message);
   }
 };
+
+const emailLogin = asyncHandler(async (req, res) => {
+  const { email } = req.body;
+
+  if (!email) {
+    throw new ApiError(400, "Email is required");
+  }
+
+  const user = await User.findOne({ email: email });
+
+  if (!user) {
+    throw new ApiError(400, "User not found!");
+  }
+
+  const { loggedInUser, accessToken, refreshToken } = await generateUserTokens({
+    user,
+  });
+
+  const options = {
+    httpOnly: true,
+    secure: true,
+  };
+
+  return res
+    .status(200)
+    .cookie("accessToken", accessToken, options)
+    .cookie("refreshToken", refreshToken, options)
+    .json(
+      new ApiResponse(200, "User tokens returned successfully", {
+        user: loggedInUser,
+      }),
+    );
+});
 
 // Controller: user login
 const loginUser = asyncHandler(async (req, res) => {
@@ -532,8 +583,10 @@ const deleteUserAccount = asyncHandler(async (req, res) => {
 });
 
 export {
+  getUser,
   registerUser,
   verifyRegisteredUser,
+  emailLogin,
   loginUser,
   updateUserAvatar,
   logoutUser,

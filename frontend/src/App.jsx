@@ -11,8 +11,6 @@ import { login } from "./store/authSlice.js";
 import { Spin } from "antd";
 import { theme } from "antd";
 
-import NotificationProvider from "./context/NotificationProvider.jsx";
-
 function App() {
   const [loader, setLoader] = useState(true);
   const dispatch = useDispatch();
@@ -44,11 +42,11 @@ function App() {
   }, [dispatch]);
 
   return !loader ? (
-    <NotificationProvider>
+    <>
       <NavBar />
       <Outlet />
       <Footer />
-    </NotificationProvider>
+    </>
   ) : (
     <div style={contentStyle}>
       <Spin className="icon-spin" />

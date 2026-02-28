@@ -2,7 +2,9 @@ import { Router } from "express";
 import { upload } from "../middlewares/multer.middleware.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 import {
+  getUser,
   registerUser,
+  emailLogin,
   verifyRegisteredUser,
   loginUser,
   updateUserAvatar,
@@ -19,11 +21,15 @@ router.route("/register").post(registerUser);
 
 router.route("/verify-user").post(verifyRegisteredUser);
 
-router.route("/login").post(upload.none(), loginUser);
+router.route("/email-login").post(emailLogin);
 
-router.route("/send-otp").post(handleResetPasswordOTP);
+router.route("/login").post(loginUser);
+
+router.route("/send-reset-password-otp").post(handleResetPasswordOTP);
 
 router.route("/reset-password").post(resetUserPassword);
+
+router.route("/get-user-email/:userId").get(getUser);
 
 // secured routes
 router.route("/logout").post(verifyJWT, logoutUser);

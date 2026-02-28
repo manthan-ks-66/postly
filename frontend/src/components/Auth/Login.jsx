@@ -1,16 +1,23 @@
-import { useDispatch } from "react-redux";
+// react imports
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useForm, Controller } from "react-hook-form";
+
+// redux imports
+import { useDispatch } from "react-redux";
 import authService from "../../services/authService.js";
 import { login } from "../../store/authSlice.js";
-import { Button, Form, Input, Layout, Alert, Divider } from "antd";
+
+// antd imports
+import { Button, Form, Input, Layout, Divider } from "antd";
 import { useNotify } from "../../context/NotificationProvider.jsx";
+import { theme, Typography } from "antd";
+import { LockOutlined, UserOutlined } from "@ant-design/icons";
+
+// logo and google btn
 import Logo from "../Logo/Logo.jsx";
 import GoogleBtn from "./GoogleBtn.jsx";
 
-import { theme, Typography } from "antd";
-import { LockOutlined, UserOutlined } from "@ant-design/icons";
 
 const { Text } = Typography;
 
@@ -32,7 +39,6 @@ function Login() {
       const user = await authService.loginUser(data);
 
       if (user) dispatch(login(user));
-      
 
       notify.api.success({
         title: "Welcome Back",

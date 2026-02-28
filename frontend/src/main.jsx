@@ -17,6 +17,9 @@ import Explore from "./components/Post/Explore.jsx";
 import PublishPost from "./components/Post/PublishPost.jsx";
 import NotFound from "./components/NotFound.jsx";
 import QueryPosts from "./components/Post/QueryPosts.jsx";
+import OtpVerification from "./components/Auth/OtpVerification.jsx";
+import Registration from "./components/Auth/Registration.jsx";
+import NotificationProvider from "./context/NotificationProvider.jsx";
 
 const postlyDarkTheme = {
   algorithm: antdTheme.darkAlgorithm,
@@ -80,14 +83,6 @@ const router = createBrowserRouter([
         element: <ResetPassword />,
       },
       {
-        path: "/auth/register",
-        element: (
-          <AuthLayout authentication={false}>
-            <Register />
-          </AuthLayout>
-        ),
-      },
-      {
         path: "/post/:_id/:slug",
         element: <PostPage />,
       },
@@ -126,6 +121,20 @@ const router = createBrowserRouter([
     ],
   },
   {
+    path: "/auth",
+    element: <Registration />,
+    children: [
+      {
+        path: "/auth/register",
+        element: <Register />,
+      },
+      {
+        path: "/auth/register/verify",
+        element: <OtpVerification />,
+      },
+    ],
+  },
+  {
     path: "/auth/login",
     element: (
       <AuthLayout authentication={false}>
@@ -142,7 +151,9 @@ const router = createBrowserRouter([
 createRoot(document.getElementById("root")).render(
   <Provider store={store}>
     <ConfigProvider theme={postlyDarkTheme}>
-      <RouterProvider router={router} />
+      <NotificationProvider>
+        <RouterProvider router={router} />
+      </NotificationProvider>
     </ConfigProvider>
   </Provider>,
 );

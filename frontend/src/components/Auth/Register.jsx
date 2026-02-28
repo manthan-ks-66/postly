@@ -1,54 +1,62 @@
-import { useDispatch } from "react-redux";
-import { useState } from "react";
+// react and redux imports
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useForm, Controller } from "react-hook-form";
+import { useOutletContext } from "react-router-dom";
+
+// services imports
 import authService from "../../services/authService.js";
-import { login } from "../../store/authSlice.js";
-import { Button, Flex, Form, Input, Layout, Upload, Alert } from "antd";
-import { UploadOutlined } from "@ant-design/icons";
 
-import { useNotify } from "../../context/NotificationProvider.jsx";
+// react hook form
+import { useForm, Controller } from "react-hook-form";
 
+// antd imports
+import { Button, Flex, Form, Input, Layout, Divider, Typography } from "antd";
+import { UserOutlined, LockOutlined } from "@ant-design/icons";
+import Logo from "../Logo/Logo.jsx";
+import GoogleBtn from "./GoogleBtn.jsx";
 import { theme } from "antd";
 
+const { Text } = Typography;
+
 function Register() {
-  const [error, setError] = useState("");
-  const dispatch = useDispatch();
-  const { handleSubmit, control } = useForm();
-
   const navigate = useNavigate();
+  const [error, setError] = useState("");
 
-  const notify = useNotify();
+  const { userData } = useOutletContext();
 
   const [form] = Form.useForm();
-
   const { token } = theme.useToken();
+
+  const { handleSubmit, control, reset } = useForm({
+    defaultValues: {
+      email: "",
+      username: "",
+      fullName: "",
+      password: "",
+    },
+  });
+
+  useEffect(() => {
+    reset({
+      email: userData?.email || "",
+      fullName: userData?.fullName || "",
+      username: userData?.username || "",
+      password: "",
+    });
+  }, [userData, reset]);
 
   const register = async (data) => {
     try {
-      let userFormData = new FormData();
+      const res = await authService.registerUser(data);
 
-      for (let val in data) {
-        if (typeof val !== "object") {
-          userFormData.append(val, data[val]);
-        }
+      const userId = res.data?.data?.userId;
+      
+
+      if (res.status === 201 || res.status === 200) {
+        localStorage.setItem("userId", userId);
+
+        navigate("/auth/register/verify");
       }
-
-      if (data.avatar && data.avatar[0]) {
-        userFormData.append("avatar", data.avatar[0].originFileObj);
-      }
-
-      const user = await authService.registerUser(userFormData);
-
-      if (user) dispatch(login(user));
-
-      notify.api.success({
-        title: "Registration Completed",
-        description: "Your are now logged in",
-        placement: "top",
-      });
-
-      navigate("/");
     } catch (error) {
       setError(error.message);
     }
@@ -64,38 +72,26 @@ function Register() {
         alignItems: "center",
         justifyContent: "center",
         background: token.colorBgContainer,
-        minHeight: "100vh", // Used minHeight for mobile stability
+        minHeight: "100vh",
         padding: "10px",
       }}
     >
-      {error && (
-        <Alert
-          style={{
-            textAlign: "center",
-            border: "none",
-            width: "30%",
-            justifySelf: "center",
-            marginBottom: 20,
-          }}
-          type="error"
-          title={error}
-        />
-      )}
+      <Logo />
 
       <div
         style={{
           width: "100%",
-          maxWidth: "600px", // Limits width on desktop
+          maxWidth: "500px",
           padding: "30px 20px",
           backgroundColor: "#ffffff1e",
-          backdropFilter: "blur(10px)",
-          border: "1px solid rgba(255, 255, 255, 0.1)",
+          border: "1px solid rgba(255, 255, 255, 0.12)",
           borderRadius: 20,
-          boxShadow: "0 8px 32px 0 rgba(0, 0, 0, 0.37)",
+          boxShadow: "0 8px 32px 0 rgba(0, 0, 0, 0)",
         }}
       >
         <h2
           style={{
+            margin: "10px 0 10px 0",
             textAlign: "center",
             color: token.colorText,
           }}
@@ -103,11 +99,36 @@ function Register() {
           Register
         </h2>
 
-        <div style={{ marginBottom: 19, textAlign: "center" }}>
+        <div
+          style={{
+            minHeight: "20px",
+            margin: "10px 0",
+            textAlign: "center",
+            visibility: error ? "visible" : "hidden",
+          }}
+          className="errorContainer"
+        >
+          {error && (
+            <Text
+              style={{ display: "flex", justifyContent: "center" }}
+              type="danger"
+            >
+              {error}
+            </Text>
+          )}
+        </div>
+
+        <div
+          style={{
+            width: "100%",
+            margin: "15px 0 15px 0",
+            textAlign: "center",
+          }}
+        >
           <span style={{ color: token.colorTextSecondary }}>
             Already have an account?
           </span>
-          &nbsp; &nbsp;
+          &nbsp;
           <Link
             to="/auth/login"
             style={{
@@ -120,46 +141,29 @@ function Register() {
           </Link>
         </div>
 
+        <GoogleBtn />
+
+        <div
+          style={{
+            color: token.colorTextSecondary,
+          }}
+          className="authDivider"
+        >
+          <Divider>OR</Divider>
+        </div>
+
         <Form
-          onFinish={handleAntdSubmit}
+          style={{ width: "100%" }}
           form={form}
           layout="vertical"
-          requiredMark={false} // Hides the red asterisk
+          onFinish={handleAntdSubmit}
+          requiredMark={false}
         >
-          <Form.Item label="Email" style={{ marginBottom: 16 }}>
-            <Controller
-              name="email"
-              control={control}
-              rules={{ required: true }}
-              render={({ field }) => (
-                <Input
-                  {...field}
-                  type="email"
-                  placeholder="email"
-                  size="middle"
-                />
-              )}
-            />
-          </Form.Item>
-
           <Flex gap="middle">
             <Form.Item
-              label="Username"
-              style={{ marginBottom: 16, flex: "50%" }}
-            >
-              <Controller
-                name="username"
-                control={control}
-                rules={{ required: true }}
-                render={({ field }) => (
-                  <Input {...field} placeholder="username" size="middle" />
-                )}
-              />
-            </Form.Item>
-
-            <Form.Item
+              prefix={<UserOutlined />}
               label="Full Name"
-              style={{ marginBottom: 16, flex: "50%" }}
+              style={{ flex: 1 }}
             >
               <Controller
                 name="fullName"
@@ -170,42 +174,58 @@ function Register() {
                 )}
               />
             </Form.Item>
+
+            <Form.Item
+              prefix={<UserOutlined />}
+              label="Username"
+              style={{ flex: 1 }}
+            >
+              <Controller
+                name="username"
+                control={control}
+                rules={{ required: true }}
+                render={({ field }) => (
+                  <Input {...field} placeholder="username" size="middle" />
+                )}
+              />
+            </Form.Item>
           </Flex>
 
-          <Form.Item label="Password" style={{ marginBottom: 8 }}>
-            <Controller
-              name="password"
-              control={control}
-              rules={{ required: true }}
-              render={({ field }) => (
-                <Input.Password
-                  {...field}
-                  placeholder="password"
-                  size="middle"
-                />
-              )}
-            />
-          </Form.Item>
+          <Flex style={{ marginBottom: 8 }} gap="middle">
+            <Form.Item
+              prefix={<UserOutlined />}
+              label="Email"
+              style={{ flex: 1 }}
+            >
+              <Controller
+                name="email"
+                control={control}
+                rules={{ required: true }}
+                render={({ field }) => (
+                  <Input {...field} placeholder="email" size="middle" />
+                )}
+              />
+            </Form.Item>
 
-          <Form.Item label="Avatar" style={{ marginBottom: 16 }}>
-            <Controller
-              name="avatar"
-              control={control}
-              render={({ field: { onChange, value } }) => (
-                <Upload
-                  fileList={value || []}
-                  onChange={(info) => {
-                    onChange(info.fileList);
-                  }}
-                  style={{ width: "100%" }}
-                  maxCount={1}
-                  beforeUpload={() => false}
-                >
-                  <Button icon={<UploadOutlined />}>Add Your Avatar</Button>
-                </Upload>
-              )}
-            />
-          </Form.Item>
+            <Form.Item
+              prefix={<LockOutlined />}
+              label="Password"
+              style={{ flex: 1 }}
+            >
+              <Controller
+                name="password"
+                control={control}
+                rules={{ required: true }}
+                render={({ field }) => (
+                  <Input.Password
+                    {...field}
+                    placeholder="password"
+                    size="middle"
+                  />
+                )}
+              />
+            </Form.Item>
+          </Flex>
 
           <Form.Item>
             <Button
@@ -213,8 +233,9 @@ function Register() {
               htmlType="submit"
               block
               style={{
-                marginTop: 10,
                 fontWeight: "bold",
+                padding: 20,
+                borderRadius: 10,
               }}
             >
               Register

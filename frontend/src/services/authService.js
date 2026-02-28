@@ -10,19 +10,57 @@ class AuthService {
     }
   }
 
-  async registerUser(formData) {
+  async getUser(userId) {
     try {
-      const response = await axios.post(
-        `${this.usersBaseUrl}/register`,
-        formData,
+      const res = await axios.get(
+        `${this.usersBaseUrl}/get-user-email/${userId}`,
       );
 
-      if (response?.data) {
-        return await this.loginUser({
-          username: formData.get("username"),
-          password: formData.get("password"),
-        });
+      return res.data?.data;
+    } catch (error) {
+      handleError(error);
+    }
+  }
+
+  async registerUser(userData) {
+    try {
+      const res = await axios.post(`${this.usersBaseUrl}/register`, userData);
+
+      return res;
+    } catch (error) {
+      handleError(error);
+    }
+  }
+
+  async verifyAndLoginUser({ email, otp }) {
+    try {
+      const res = await axios.post(`${this.usersBaseUrl}/verify-user`, {
+        email: email,
+        otp: otp.toString(),
+      });
+
+      if (res.status === 200) {
+        return await this.emailLogin({ email });
       }
+    } catch (error) {
+      handleError(error);
+    }
+  }
+
+  // usage: only on otp verifications
+  async emailLogin({ email }) {
+    try {
+      const res = await axios.post(
+        `${this.usersBaseUrl}/email-login`,
+        {
+          email,
+        },
+        {
+          withCredentials: true,
+        },
+      );
+
+      return res.data?.data?.user;
     } catch (error) {
       handleError(error);
     }
@@ -73,9 +111,12 @@ class AuthService {
 
   async sendOTP({ email }) {
     try {
-      const response = await axios.post(`${this.usersBaseUrl}/send-otp`, {
-        email,
-      });
+      const response = await axios.post(
+        `${this.usersBaseUrl}/send-reset-password-otp`,
+        {
+          email,
+        },
+      );
 
       return response.data;
     } catch (error) {
