@@ -77,6 +77,26 @@ userSchema.pre("save", async function () {
   this.password = await bcrypt.hash(this.password, 10);
 });
 
+userSchema.pre("findOneAndUpdate", async function () {
+  // getUpdate() returns update specifications not the document or updated document
+  const update = this.getUpdate();
+
+  if (!update) return;
+
+  const plainPassword =
+    update.password || (update.$set && update.$set.password);
+
+  if (!plainPassword) return;
+
+  const hashedPassword = await bcrypt.hash(plainPassword, 10);
+
+  if (update.password) {
+    update.password = hashedPassword;
+  } else if (update.$set && update.$set.password) {
+    update.$set.password = hashedPassword;
+  }
+});
+
 // mongoose pre-defined methods on userSchema
 userSchema.methods.generateAccessToken = function () {
   return jwt.sign(

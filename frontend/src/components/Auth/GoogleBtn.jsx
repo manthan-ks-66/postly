@@ -1,7 +1,7 @@
 import { Button } from "antd";
 
 const GoogleBtn = () => {
-  const handleGoogleLogin = () => {
+  const handleGoogleAuth = () => {
     console.log("Redirecting to Google...");
   };
 
@@ -10,13 +10,13 @@ const GoogleBtn = () => {
       type="default"
       size="large"
       icon={<GoogleIcon />}
-      onClick={handleGoogleLogin}
+      onClick={handleGoogleAuth}
       style={{
         width: "100%",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        fontWeight: 500,
+        fontWeight: 450,
         borderRadius: "8px",
         boxShadow: "0 2px 0 rgba(0, 0, 0, 0.02)",
       }}
@@ -28,12 +28,7 @@ const GoogleBtn = () => {
 
 // Helper component for the Google "G" logo
 const GoogleIcon = () => (
-  <svg
-    width="18"
-    height="18"
-    viewBox="0 0 18 18"
-    style={{ marginRight: "3px" }}
-  >
+  <svg width="18" height="18" viewBox="0 0 18 18">
     <path
       fill="#4285F4"
       d="M17.64 9.2c0-.63-.06-1.25-.16-1.84H9v3.49h4.84a4.14 4.14 0 0 1-1.8 2.71v2.26h2.91c1.71-1.58 2.69-3.91 2.69-6.62z"

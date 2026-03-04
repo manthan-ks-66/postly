@@ -1,6 +1,5 @@
 import { createRoot } from "react-dom/client";
 import "./index.css";
-import App from "./App.jsx";
 import { store } from "./store/store.js";
 import { Provider } from "react-redux";
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
@@ -20,6 +19,9 @@ import QueryPosts from "./components/Post/QueryPosts.jsx";
 import OtpVerification from "./components/Auth/OtpVerification.jsx";
 import Registration from "./components/Auth/Registration.jsx";
 import NotificationProvider from "./context/NotificationProvider.jsx";
+import App from "./App.jsx";
+import DashBoard from "./DashBoard.jsx";
+import UserSider from "./components/User/UserSider.jsx";
 
 const postlyDarkTheme = {
   algorithm: antdTheme.darkAlgorithm,
@@ -68,79 +70,97 @@ const router = createBrowserRouter([
     children: [
       {
         path: "/",
-        element: (
-          <AuthLayout authentication={false}>
-            <Home />
-          </AuthLayout>
-        ),
+        element: <DashBoard />,
+        children: [
+          {
+            path: "/",
+            element: <Home />,
+          },
+          {
+            path: "/about",
+            element: <About />,
+          },
+          {
+            path: "/post/:_id/:slug",
+            element: <PostPage />,
+          },
+          {
+            path: "/explore-posts",
+            element: <Explore />,
+          },
+          {
+            path: "/search",
+            element: <QueryPosts />,
+          },
+          {
+            path: "/post/new/write",
+            element: (
+              <AuthLayout>
+                <PublishPost />
+              </AuthLayout>
+            ),
+          },
+          {
+            path: "/user/profile",
+            element: <UserSider />,
+          },
+          {
+            path: "/post/:postId/:slug/edit",
+            element: (
+              <AuthLayout>
+                <PublishPost />
+              </AuthLayout>
+            ),
+          },
+          {
+            path: "/settings",
+            element: (
+              <AuthLayout>
+                <Settings />
+              </AuthLayout>
+            ),
+          },
+        ],
       },
       {
-        path: "/about",
-        element: <About />,
-      },
-      {
-        path: "/reset-password",
+        path: "/auth/reset-password",
         element: <ResetPassword />,
       },
       {
-        path: "/post/:_id/:slug",
-        element: <PostPage />,
-      },
-      {
-        path: "/explore-posts",
-        element: <Explore />,
-      },
-      {
-        path: "/search",
-        element: <QueryPosts />,
-      },
-      {
-        path: "/post/new/write",
+        path: "/auth",
         element: (
-          // <AuthLayout authentication={true}>
-          <PublishPost />
-          // </AuthLayout>
-        ),
-      },
-      {
-        path: "/post/:postId/:slug/edit",
-        element: (
-          <AuthLayout authentication={true}>
-            <PublishPost />
+          <AuthLayout authentication={false}>
+            <Registration />
           </AuthLayout>
         ),
+        children: [
+          {
+            path: "/auth/register",
+            element: (
+              <AuthLayout authentication={false}>
+                <Register />
+              </AuthLayout>
+            ),
+          },
+          {
+            path: "/auth/register/verify",
+            element: (
+              <AuthLayout authentication={false}>
+                <OtpVerification />
+              </AuthLayout>
+            ),
+          },
+        ],
       },
       {
-        path: "/settings",
+        path: "/auth/login",
         element: (
-          <AuthLayout authentication={true}>
-            <Settings />
+          <AuthLayout authentication={false}>
+            <Login />
           </AuthLayout>
         ),
       },
     ],
-  },
-  {
-    path: "/auth",
-    element: <Registration />,
-    children: [
-      {
-        path: "/auth/register",
-        element: <Register />,
-      },
-      {
-        path: "/auth/register/verify",
-        element: <OtpVerification />,
-      },
-    ],
-  },
-  {
-    path: "/auth/login",
-    element: (
-      <AuthLayout authentication={false}>
-        <Login />
-      </AuthLayout>
-    ),
   },
   {
     path: "*",

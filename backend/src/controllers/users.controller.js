@@ -132,6 +132,41 @@ const registerUser = asyncHandler(async (req, res) => {
     );
 });
 
+const regenerateRegistrationOTP = asyncHandler(async (req, res) => {
+  const { email } = req.body;
+
+  if (!email) {
+    throw new ApiError(400, "Email is required");
+  }
+
+  const user = await User.findOne({ email: email });
+
+  if (!user) {
+    throw new ApiError(400, "User not found!");
+  }
+
+  if (user.isVerified) {
+    throw new ApiError(400, "User is verified");
+  }
+
+  await generateAndSendOTP(
+    "registration process",
+    user,
+    email,
+    "One Time Password for user registration",
+  );
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        201,
+        "OTP has been sent to the registered email successfully",
+        {},
+      ),
+    );
+});
+
 // Controller: verify registered user
 const verifyRegisteredUser = asyncHandler(async (req, res) => {
   /**
@@ -417,27 +452,12 @@ const handleResetPasswordOTP = asyncHandler(async (req, res) => {
   await user.hashOTP(otp);
   await user.save();
 
-  const mailMsg = `
-Hi ${user.fullName.trim().split(" ")[0]}, 
-
-To continue with the password reset process on Postly, 
-
-Use the One Time Password (OTP): ${otp} 
-
-This OTP is valid for 2 minutes. Do not share this code with anyone.
-
-Thank You`;
-
-  const info = transporter.sendMail({
-    from: process.env.EMAIL_ADDRESS,
-    to: email,
-    subject: "Password Reset OTP",
-    text: mailMsg,
-  });
-
-  if (!info) {
-    throw new ApiError(500, "Failed to send the OTP");
-  }
+  await generateAndSendOTP(
+    "password reset process",
+    user,
+    email,
+    "Password reset One Time PassCode",
+  );
 
   return res.status(200).json(new ApiResponse(200, "OTP sent successfully"));
 });
@@ -445,7 +465,7 @@ Thank You`;
 // Controller: Reset user password
 const resetUserPassword = asyncHandler(async (req, res) => {
   /* 
-    get email , cryptoOtp, newPassword, confirmNewPassword from req.body
+    get email , otp, newPassword, confirmNewPassword from req.body
 
     find the user in the db through email
       - throw error if user is not found
@@ -453,7 +473,7 @@ const resetUserPassword = asyncHandler(async (req, res) => {
     check if the otp is expired 
       - throw error if Date.now is > otpExpiry
 
-    check if cryptoOtp is correct 
+    check if otp is correct 
 
     check newPassword is equal to confirmNewPassword
 
@@ -492,10 +512,23 @@ const resetUserPassword = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Password doesn't match with confirmed password");
   }
 
-  user.password = newPassword;
-  user.OTP = undefined;
-  user.otpExpiry = undefined;
-  await user.save();
+  const updatedUser = await User.findOneAndUpdate(
+    { email: email },
+    {
+      $set: {
+        password: newPassword,
+      },
+      $unset: {
+        OTP: true,
+        otpExpiry: true,
+      },
+    },
+    { new: true },
+  );
+
+  if (!updatedUser) {
+    throw new ApiError(500, "Password update failed");
+  }
 
   return res
     .status(200)
@@ -586,6 +619,7 @@ const deleteUserAccount = asyncHandler(async (req, res) => {
 export {
   getUser,
   registerUser,
+  regenerateRegistrationOTP,
   verifyRegisteredUser,
   emailLogin,
   loginUser,

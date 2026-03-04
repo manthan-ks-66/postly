@@ -4,6 +4,7 @@ import { verifyJWT } from "../middlewares/auth.middleware.js";
 import {
   getUser,
   registerUser,
+  regenerateRegistrationOTP,
   emailLogin,
   verifyRegisteredUser,
   loginUser,
@@ -21,11 +22,13 @@ router.route("/register").post(registerUser);
 
 router.route("/verify-user").post(verifyRegisteredUser);
 
+router.route("/regenerate-registration-otp").post(regenerateRegistrationOTP);
+
 router.route("/email-login").post(emailLogin);
 
 router.route("/login").post(loginUser);
 
-router.route("/send-reset-password-otp").post(handleResetPasswordOTP);
+router.route("/initiate-reset-password-otp").post(handleResetPasswordOTP);
 
 router.route("/reset-password").post(resetUserPassword);
 

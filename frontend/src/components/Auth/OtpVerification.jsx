@@ -58,6 +58,21 @@ const OtpVerification = () => {
     }
   };
 
+  const resendOTP = async () => {
+    try {
+      const res = await authService.regenerateRegistrationOTP(userData?.email);
+
+      if (res.status === 200) {
+        notify.api.success({
+          title: "OTP sent to the registered email",
+          placement: "top",
+        });
+      }
+    } catch (error) {
+      setError(error.message);
+    }
+  };
+
   return (
     <Layout
       style={{
@@ -129,7 +144,11 @@ const OtpVerification = () => {
 
             <Text type="secondary" style={{ fontSize: 14 }}>
               Didn't receive the code?
-              <Button type="link" style={{ padding: "0 4px" }}>
+              <Button
+                onClick={resendOTP}
+                type="link"
+                style={{ padding: "0 4px", color: token.colorPrimary }}
+              >
                 Resend
               </Button>
             </Text>

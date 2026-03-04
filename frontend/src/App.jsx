@@ -1,38 +1,21 @@
-// components
 import { Outlet } from "react-router-dom";
-import NavBar from "./components/Header/NavBar.jsx";
-import Footer from "./components/Footer/Footer.jsx";
+import AntdSpin from "./components/AntdSpin.jsx";
 
 // methods and services
 import { useEffect, useState } from "react";
 import authService from "./services/authService.js";
 import { useDispatch } from "react-redux";
 import { login } from "./store/authSlice.js";
-import { Spin } from "antd";
-import { theme } from "antd";
 
 function App() {
   const [loader, setLoader] = useState(true);
   const dispatch = useDispatch();
-
-  const { token } = theme.useToken();
-
-  const contentStyle = {
-    padding: 50,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    height: "100vh",
-    background: token.colorBgLayout,
-    borderRadius: 4,
-  };
 
   useEffect(() => {
     authService
       .getCurrentUser()
       .then((res) => {
         const user = res.data?.data;
-
         if (user) dispatch(login(user));
       })
       .catch((err) => {
@@ -41,17 +24,7 @@ function App() {
       .finally(() => setLoader(false));
   }, [dispatch]);
 
-  return !loader ? (
-    <>
-      <NavBar />
-      <Outlet />
-      <Footer />
-    </>
-  ) : (
-    <div style={contentStyle}>
-      <Spin className="icon-spin" />
-    </div>
-  );
+  return !loader ? <Outlet /> : <AntdSpin />;
 }
 
 export default App;

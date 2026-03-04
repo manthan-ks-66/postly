@@ -32,6 +32,21 @@ class AuthService {
     }
   }
 
+  async regenerateRegistrationOTP(email) {
+    try {
+      const res = await axios.post(
+        `${this.usersBaseUrl}/regenerate-registration-otp`,
+        {
+          email: email,
+        },
+      );
+
+      return res;
+    } catch (error) {
+      handleError(error);
+    }
+  }
+
   async verifyAndLoginUser({ email, otp }) {
     try {
       const res = await axios.post(`${this.usersBaseUrl}/verify-user`, {
