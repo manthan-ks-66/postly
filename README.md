@@ -1,6 +1,6 @@
 # DataBase Design
 
-![alt text](image-2.png)
+![alt text](image.png)
 
 # Screenshots of project under development
 
