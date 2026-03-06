@@ -102,7 +102,11 @@ const router = createBrowserRouter([
           },
           {
             path: "/user/profile",
-            element: <UserSider />,
+            element: (
+              <AuthLayout>
+                <UserSider />
+              </AuthLayout>
+            ),
           },
           {
             path: "/post/:postId/:slug/edit",

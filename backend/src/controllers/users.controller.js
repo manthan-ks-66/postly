@@ -187,7 +187,7 @@ const verifyRegisteredUser = asyncHandler(async (req, res) => {
   }
 
   if (Date.now() > user.otpExpiry) {
-    throw new ApiError(400, "OTP is expired");
+    throw new ApiError(400, "OTP is expired! Register Again");
   }
 
   const isOTPCorrect = await user.isOtpCorrect(otp);
