@@ -22,6 +22,9 @@ import NotificationProvider from "./context/NotificationProvider.jsx";
 import App from "./App.jsx";
 import DashBoard from "./DashBoard.jsx";
 import UserSider from "./components/User/UserSider.jsx";
+import UserLIkedPosts from "./components/User/UserLIkedPosts.jsx";
+import UserProfile from "./components/User/UserProfile.jsx";
+import UserComments from "./components/User/UserComments.jsx";
 
 const postlyDarkTheme = {
   algorithm: antdTheme.darkAlgorithm,
@@ -101,12 +104,38 @@ const router = createBrowserRouter([
             ),
           },
           {
-            path: "/user/profile",
+            path: "/user",
             element: (
               <AuthLayout>
                 <UserSider />
               </AuthLayout>
             ),
+            children: [
+              {
+                path: "/user/profile",
+                element: (
+                  <AuthLayout>
+                    <UserProfile />
+                  </AuthLayout>
+                ),
+              },
+              {
+                path: "/user/comments",
+                element: (
+                  <AuthLayout>
+                    <UserComments />
+                  </AuthLayout>
+                ),
+              },
+              {
+                path: "/user/liked-posts",
+                element: (
+                  <AuthLayout>
+                    <UserLIkedPosts />
+                  </AuthLayout>
+                ),
+              },
+            ],
           },
           {
             path: "/post/:postId/:slug/edit",

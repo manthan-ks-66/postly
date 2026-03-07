@@ -1,3 +1,4 @@
+// antd imports
 import { Button, Layout, Menu, theme } from "antd";
 import {
   UserOutlined,
@@ -6,9 +7,32 @@ import {
   LikeFilled,
   CommentOutlined,
 } from "@ant-design/icons";
-import { useState } from "react";
-
 const { Header, Sider, Content } = Layout;
+
+// react
+import { useState, useMemo } from "react";
+import { Outlet, useNavigate } from "react-router-dom";
+
+const userMenuItems = [
+  {
+    key: "1",
+    path: "/user/profile",
+    icon: <UserOutlined />,
+    label: "Profile",
+  },
+  {
+    key: "2",
+    path: "/user/liked-posts",
+    icon: <LikeFilled />,
+    label: "Liked Posts",
+  },
+  {
+    key: "3",
+    path: "/user/comments",
+    icon: <CommentOutlined />,
+    label: "Your Comments",
+  },
+];
 
 function UserSider() {
   const [collapsed, setCollapsed] = useState(false);
@@ -16,31 +40,24 @@ function UserSider() {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
 
+  const navigate = useNavigate();
+
+  const userItems = useMemo(() =>
+    userMenuItems.map((item) => ({
+      ...item,
+      onClick: () => navigate(item.path),
+    })),
+  );
+
   return (
-    <Layout>
+    <Layout style={{ minHeight: "100vh" }}>
       <Sider trigger={null} collapsible collapsed={collapsed}>
         <div className="demo-logo-vertical" />
         <Menu
           theme="dark"
           mode="inline"
           defaultSelectedKeys={["1"]}
-          items={[
-            {
-              key: "1",
-              icon: <UserOutlined />,
-              label: "Profile",
-            },
-            {
-              key: "2",
-              icon: <LikeFilled />,
-              label: "Liked Posts",
-            },
-            {
-              key: "3",
-              icon: <CommentOutlined />,
-              label: "Comments",
-            },
-          ]}
+          items={userItems}
         />
       </Sider>
       <Layout>
@@ -65,7 +82,7 @@ function UserSider() {
             borderRadius: borderRadiusLG,
           }}
         >
-          Content
+          <Outlet />
         </Content>
       </Layout>
     </Layout>
