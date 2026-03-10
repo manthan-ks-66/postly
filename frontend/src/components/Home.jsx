@@ -71,11 +71,14 @@ function Home() {
             <Button
               type="primary"
               size="middle"
-              onClick={() => navigate("/add-post")}
+              onClick={() => navigate("/post/new/write")}
             >
               Start Writing
             </Button>
-            <Button onClick={() => navigate("/all-posts")} size="middle">
+            <Button
+              onClick={() => navigate("/explore-posts?page=1&limit=5")}
+              size="middle"
+            >
               Explore Posts
             </Button>
           </Space>

@@ -14,6 +14,7 @@ import {
   handleResetPasswordOTP,
   resetUserPassword,
   updateUserDetails,
+  removeUserAvatar,
 } from "../controllers/users.controller.js";
 
 const router = Router();
@@ -40,6 +41,8 @@ router.route("/logout").post(verifyJWT, logoutUser);
 router
   .route("/update-avatar")
   .patch(verifyJWT, upload.single("avatar"), updateUserAvatar);
+
+router.route("/remove-avatar").patch(verifyJWT, removeUserAvatar);
 
 router.route("/get-current-user").get(verifyJWT, getCurrentUser);
 

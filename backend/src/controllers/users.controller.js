@@ -218,7 +218,7 @@ const verifyRegisteredUser = asyncHandler(async (req, res) => {
     );
 });
 
-// Method: get temporary user details
+// Controller: get temporary user details
 const getUser = asyncHandler(async (req, res) => {
   const { userId } = req.params;
 
@@ -354,13 +354,15 @@ const logoutUser = asyncHandler(async (req, res) => {
 const updateUserAvatar = asyncHandler(async (req, res) => {
   const avatarLocalPath = req.file?.path;
 
+  const userId = req.user?._id;
+
   const fileName = req.file?.originalname;
 
   if (!avatarLocalPath) {
     throw new ApiError(400, "Avatar file is required");
   }
 
-  const user = await User.findById(req.user?._id);
+  const user = await User.findById(userId);
 
   if (!user) {
     throw new ApiError(404, "User not found");
@@ -405,11 +407,38 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
     }
   }
 
-  return res.status(200).json(
-    new ApiResponse(200, "Avatar updated successfully", {
-      avatar: user.avatar,
-    }),
-  );
+  return res
+    .status(200)
+    .json(new ApiResponse(200, "Avatar updated successfully", user.toJSON()));
+});
+
+// Controller: remove user avatar
+const removeUserAvatar = asyncHandler(async (req, res) => {
+  const userId = req.user?._id;
+
+  const user = await User.findById(userId);
+
+  if (!user?.avatar?.fileId) {
+    throw new ApiError(400, "No avatar image found");
+  }
+
+  const { fileId } = user.avatar;
+
+  // delete from imagekit
+  try {
+    await deleteImageKitFile(fileId);
+  } catch (error) {
+    console.log("Imagekit file deletion failed", error.message);
+  }
+
+  user.avatar = null;
+  await user.save();
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(200, "User avatar removed successfully", user.toJSON()),
+    );
 });
 
 // Controller: Get user details
@@ -620,6 +649,7 @@ export {
   getUser,
   registerUser,
   regenerateRegistrationOTP,
+  removeUserAvatar,
   verifyRegisteredUser,
   emailLogin,
   loginUser,

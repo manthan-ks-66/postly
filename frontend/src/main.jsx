@@ -104,36 +104,21 @@ const router = createBrowserRouter([
             ),
           },
           {
+            // TODO: add the AuthLayout
             path: "/user",
-            element: (
-              <AuthLayout>
-                <UserSider />
-              </AuthLayout>
-            ),
+            element: <UserSider />,
             children: [
               {
                 path: "/user/profile",
-                element: (
-                  <AuthLayout>
-                    <UserProfile />
-                  </AuthLayout>
-                ),
+                element: <UserProfile />,
               },
               {
                 path: "/user/comments",
-                element: (
-                  <AuthLayout>
-                    <UserComments />
-                  </AuthLayout>
-                ),
+                element: <UserComments />,
               },
               {
                 path: "/user/liked-posts",
-                element: (
-                  <AuthLayout>
-                    <UserLIkedPosts />
-                  </AuthLayout>
-                ),
+                element: <UserLIkedPosts />,
               },
             ],
           },
