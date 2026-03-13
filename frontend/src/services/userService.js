@@ -41,6 +41,34 @@ class UserService {
       handleError(error);
     }
   }
+
+  async updateUserDetails(userData) {
+    try {
+      const res = await axios.patch(
+        `${this.usersBaseUrl}/update-user-details`,
+        userData,
+        {
+          withCredentials: true,
+        },
+      );
+
+      return res.data?.data;
+    } catch (error) {
+      handleError(error);
+    }
+  }
+
+  async getUserLikedPosts() {
+    try {
+      const res = await axios.get(`${this.usersBaseUrl}/get-user-liked-posts`, {
+        withCredentials: true,
+      });
+
+      return res.data?.data;
+    } catch (error) {
+      handleError(error);
+    }
+  }
 }
 
 const userService = new UserService();

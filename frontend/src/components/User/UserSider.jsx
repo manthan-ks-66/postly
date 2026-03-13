@@ -50,8 +50,13 @@ function UserSider() {
   );
 
   return (
-    <Layout style={{ minHeight: "100vh" }}>
-      <Sider trigger={null} collapsible collapsed={collapsed}>
+    <Layout style={{ height: "100vh", overflow: "hidden" }}>
+      <Sider
+        trigger={null}
+        collapsible
+        collapsed={collapsed}
+        style={{ height: "100vh", overflow: "auto" }}
+      >
         <div className="demo-logo-vertical" />
         <Menu
           theme="dark"
@@ -60,8 +65,14 @@ function UserSider() {
           items={userItems}
         />
       </Sider>
-      <Layout>
-        <Header style={{ padding: 0, background: colorBgContainer }}>
+      <Layout style={{ minHeight: 0, overflow: "hidden" }}>
+        <Header
+          style={{
+            padding: 0,
+            background: colorBgContainer,
+            flexShrink: 0,
+          }}
+        >
           <Button
             type="text"
             icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
@@ -75,9 +86,11 @@ function UserSider() {
         </Header>
         <Content
           style={{
+            flex: 1,
+            minHeight: 0,
+            overflowY: "auto",
             margin: "24px 16px",
             padding: 24,
-            minHeight: 280,
             background: colorBgContainer,
             borderRadius: borderRadiusLG,
           }}

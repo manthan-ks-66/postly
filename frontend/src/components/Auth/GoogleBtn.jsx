@@ -8,14 +8,12 @@ const GoogleBtn = () => {
   return (
     <Button
       type="default"
-      size="large"
+      size="middle"
+      block
       icon={<GoogleIcon />}
       onClick={handleGoogleAuth}
       style={{
-        width: "100%",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
+        padding: "16px",
         fontWeight: 450,
         borderRadius: "8px",
         boxShadow: "0 2px 0 rgba(0, 0, 0, 0.02)",

@@ -2,6 +2,7 @@
 import { Button, Input, Typography, Flex, Card, message, Layout } from "antd";
 import { MailOutlined } from "@ant-design/icons";
 import { theme } from "antd";
+import { Navigate } from "react-router-dom";
 
 const { Title, Text } = Typography;
 
@@ -16,9 +17,12 @@ import { useNotify } from "../../context/NotificationProvider.jsx";
 // react
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { useOutletContext } from "react-router-dom";
 
 const OtpVerification = () => {
+  const email = localStorage.getItem("email");
+
+  if (!email) return <Navigate to="/auth/register" replace />;
+
   const [error, setError] = useState();
 
   const [otp, setOTP] = useState();
@@ -29,30 +33,24 @@ const OtpVerification = () => {
 
   const navigate = useNavigate();
 
-  const { userData } = useOutletContext();
-
   const { token } = theme.useToken();
 
   const handleVerify = async () => {
     try {
-      if (userData?.email && otp) {
-        const user = await authService.verifyAndLoginUser({
-          email: userData?.email,
-          otp: otp,
-        });
+      const user = await authService.verifyAndLoginUser({ otp });
 
-        if (user) dispatch(login(user));
-
+      if (user) {
+        dispatch(login(user));
         localStorage.clear();
 
         notify.api.success({
-          title: "Registration Completed",
-          description: "You are now logged in",
+          title: "Registration completed",
+          description: "Your are now logged in",
           placement: "top",
         });
-
-        navigate("/");
       }
+
+      navigate("/");
     } catch (error) {
       setError(error.message);
     }
@@ -60,7 +58,7 @@ const OtpVerification = () => {
 
   const resendOTP = async () => {
     try {
-      const res = await authService.regenerateRegistrationOTP(userData?.email);
+      const res = await authService.regenerateRegistrationOTP();
 
       if (res.status === 200) {
         notify.api.success({
@@ -121,7 +119,7 @@ const OtpVerification = () => {
             <Text type="secondary">
               Enter the 6 digit One Time PassCode sent to
               <br />
-              <strong>{userData?.email}</strong>
+              <strong>{email}</strong>
             </Text>
           </div>
 

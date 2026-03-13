@@ -9,7 +9,6 @@ import {
   togglePostLike,
   getAllPosts,
   getQueryPosts,
-  getUserLikedPosts,
   uploadEditorImage,
 } from "../controllers/posts.controller.js";
 
@@ -31,8 +30,6 @@ router
   .post(verifyJWT, upload.single("featuredImage"), publishPost);
 
 router.route("/toggle-like").post(verifyJWT, togglePostLike);
-
-router.route("/get-user-liked-posts").get(verifyJWT, getUserLikedPosts);
 
 router
   .route("/update-post/:postId")

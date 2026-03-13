@@ -18,7 +18,6 @@ import { LockOutlined, UserOutlined } from "@ant-design/icons";
 import Logo from "../Logo/Logo.jsx";
 import GoogleBtn from "./GoogleBtn.jsx";
 
-
 const { Text } = Typography;
 
 function Login() {
@@ -38,13 +37,17 @@ function Login() {
     try {
       const user = await authService.loginUser(data);
 
-      if (user) dispatch(login(user));
+      if (user) {
+        dispatch(login(user));
 
-      notify.api.success({
-        title: "Welcome Back",
-        description: "You are now logged in",
-        placement: "top",
-      });
+        notify.api.success({
+          title: "Welcome Back",
+          description: "You are now logged in",
+          placement: "top",
+        });
+      }
+
+      navigate("/");
     } catch (error) {
       setError(error.message);
     }
@@ -68,7 +71,7 @@ function Login() {
 
       <div
         style={{
-          width: "100%",
+          width: "80%",
           maxWidth: "450px",
           padding: "30px 20px",
           backgroundColor: "#ffffff1e",
@@ -153,7 +156,7 @@ function Login() {
                 <Input
                   {...field}
                   placeholder="username or email"
-                  size="large"
+                  size="middle"
                 />
               )}
             />
@@ -172,7 +175,7 @@ function Login() {
                 <Input.Password
                   {...field}
                   placeholder="password"
-                  size="large"
+                  size="middle"
                 />
               )}
             />
@@ -180,7 +183,7 @@ function Login() {
 
           <div style={{ marginBottom: 19, textAlign: "left" }}>
             <Link
-              to="/reset-password"
+              to="/auth/reset-password"
               style={{
                 fontSize: "13px",
                 fontWeight: "bold",

@@ -1,4 +1,5 @@
 import { User } from "../models/users.model.js";
+import { PostLike } from "../models/postLikes.model.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { ApiError } from "../utils/ApiError.js";
 import { uploadToImageKit, deleteImageKitFile } from "../utils/imagekit.js";
@@ -6,7 +7,7 @@ import asyncHandler from "../utils/asyncHandler.js";
 import jwt from "jsonwebtoken";
 import { randomInt } from "node:crypto";
 import nodemailer from "nodemailer";
-import { isValidObjectId } from "mongoose";
+import mongoose, { isValidObjectId } from "mongoose";
 
 // nodemailer: transporter config
 const transporter = nodemailer.createTransport({
@@ -16,6 +17,11 @@ const transporter = nodemailer.createTransport({
     pass: process.env.EMAIL_PASSWORD,
   },
 });
+
+const options = {
+  httpOnly: true,
+  secured: true,
+};
 
 const generateAndSendOTP = async (processMsg, user, email, subject) => {
   const otp = randomInt(100000, 999999);
@@ -34,16 +40,12 @@ This OTP is valid for 2 minutes. Do not share this code with anyone
 
 Thank You`;
 
-  const info = transporter.sendMail({
+  await transporter.sendMail({
     from: process.env.EMAIL_ADDRESS,
     to: email,
     subject: subject,
     text: mailMsg,
   });
-
-  if (!info) {
-    throw new ApiError(500, "Failed to send the OTP");
-  }
 };
 
 // Controller: user registration
@@ -64,20 +66,11 @@ const registerUser = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Username is already taken");
   }
 
-  const existedUser = await User.findOne({ $or: [{ username }, { email }] });
+  const existedUser = await User.findOne({ email: email });
 
   if (existedUser) {
     if (existedUser.isVerified) {
-      throw new ApiError(
-        400,
-        "User with this email is already registered, please login",
-      );
-    }
-
-    const emailOwner = await User.findOne({ email: email });
-
-    if (emailOwner.isVerified) {
-      throw new ApiError(400, "User with this email is already registered");
+      throw new ApiError(400, "User is already registered, Please login");
     }
 
     Object.assign(existedUser, {
@@ -95,8 +88,11 @@ const registerUser = asyncHandler(async (req, res) => {
       "One Time Password for user registration",
     );
 
+    const verificationToken = existedUser.generateVerificationToken();
+
     return res
-      .status(200)
+      .status(201)
+      .cookie("verificationToken", verificationToken, options)
       .json(
         new ApiResponse(200, "OTP for registration has been sent successfully"),
       );
@@ -121,25 +117,32 @@ const registerUser = asyncHandler(async (req, res) => {
     "One Time Password for user registration",
   );
 
+  const verificationToken = user.generateVerificationToken();
+
   return res
     .status(201)
+    .cookie("verificationToken", verificationToken, options)
     .json(
       new ApiResponse(
         201,
         "User registered and OTP has been sent successfully",
-        { userId: user._id },
       ),
     );
 });
 
 const regenerateRegistrationOTP = asyncHandler(async (req, res) => {
-  const { email } = req.body;
+  const verificationToken = req.cookies?.verificationToken;
 
-  if (!email) {
-    throw new ApiError(400, "Email is required");
+  if (!verificationToken) {
+    throw new ApiError(400, "Invalid token: User is not registered");
   }
 
-  const user = await User.findOne({ email: email });
+  const decodedToken = jwt.verify(
+    verificationToken,
+    process.env.VERIFICATION_TOKEN_SECRET,
+  );
+
+  const user = await User.findOne({ _id: decodedToken._id });
 
   if (!user) {
     throw new ApiError(400, "User not found!");
@@ -152,7 +155,7 @@ const regenerateRegistrationOTP = asyncHandler(async (req, res) => {
   await generateAndSendOTP(
     "registration process",
     user,
-    email,
+    user.email,
     "One Time Password for user registration",
   );
 
@@ -160,44 +163,59 @@ const regenerateRegistrationOTP = asyncHandler(async (req, res) => {
     .status(200)
     .json(
       new ApiResponse(
-        201,
-        "OTP has been sent to the registered email successfully",
+        200,
+        "OTP re-sent to the registered email successfully",
         {},
       ),
     );
 });
 
-// Controller: verify registered user
-const verifyRegisteredUser = asyncHandler(async (req, res) => {
+// Controller: verify and login registered user
+const verifyAndLoginUser = asyncHandler(async (req, res) => {
   /**
-   * get email, otp from req.body
-   * find the user
+   * get verificationToken, otp from req
+   * decode the token and check the token expiry
+   * find the user from the decoded token
    * check if otp is expired
    * check if otp is correct
    * update the user as verified
-   * return res - user verified
+   * generate user tokens to login the user
+   * return res - user login
    */
 
-  const { email, otp } = req.body;
+  const { otp } = req.body;
 
-  const user = await User.findOne({ email: email });
+  const verificationToken = req.cookies?.verificationToken;
 
-  if (!user) {
+  if (!verificationToken) {
+    throw new ApiError(400, "Invalid token: User is not registered");
+  }
+
+  const decodedToken = jwt.verify(
+    verificationToken,
+    process.env.VERIFICATION_TOKEN_SECRET,
+  );
+
+  const userAccount = await User.findOne({ _id: decodedToken._id });
+
+  if (!userAccount) {
     throw new ApiError(400, "User not found");
   }
 
-  if (Date.now() > user.otpExpiry) {
+  const userId = userAccount._id;
+
+  if (Date.now() > userAccount.otpExpiry) {
     throw new ApiError(400, "OTP is expired! Register Again");
   }
 
-  const isOTPCorrect = await user.isOtpCorrect(otp);
+  const isOTPCorrect = await userAccount.isOtpCorrect(otp);
 
   if (!isOTPCorrect) {
     throw new ApiError(400, "Invalid OTP");
   }
 
-  const verifiedUser = await User.findOneAndUpdate(
-    { email: email },
+  const user = await User.findOneAndUpdate(
+    { _id: userId },
     {
       $set: {
         isVerified: true,
@@ -211,33 +229,22 @@ const verifyRegisteredUser = asyncHandler(async (req, res) => {
     { new: true },
   );
 
+  const { accessToken, refreshToken } = await generateUserTokens({
+    user,
+  });
+
   return res
     .status(200)
+    .clearCookie("verificationToken")
+    .cookie("accessToken", accessToken, options)
+    .cookie("refreshToken", refreshToken, options)
     .json(
-      new ApiResponse(200, "User verified successfully", verifiedUser.toJSON()),
+      new ApiResponse(
+        200,
+        "User verified and user tokens returned successfully",
+        user.toJSON(),
+      ),
     );
-});
-
-// Controller: get temporary user details
-const getUser = asyncHandler(async (req, res) => {
-  const { userId } = req.params;
-
-  if (!isValidObjectId(userId)) {
-    throw new ApiError(400, "Invalid user id");
-  }
-
-  const user = await User.findOne(
-    { _id: userId },
-    { email: 1, fullName: 1, username: 1 },
-  );
-
-  if (!user) {
-    throw new ApiError(500, "User not found!");
-  }
-
-  return res
-    .status(200)
-    .json(new ApiResponse(200, "User fetched successfully", user));
 });
 
 // Method: generating accessToken and refreshToken for user auth
@@ -257,39 +264,6 @@ const generateUserTokens = async ({ user }) => {
     throw new ApiError(500, error.message);
   }
 };
-
-const emailLogin = asyncHandler(async (req, res) => {
-  const { email } = req.body;
-
-  if (!email) {
-    throw new ApiError(400, "Email is required");
-  }
-
-  const user = await User.findOne({ email: email });
-
-  if (!user) {
-    throw new ApiError(400, "User not found!");
-  }
-
-  const { loggedInUser, accessToken, refreshToken } = await generateUserTokens({
-    user,
-  });
-
-  const options = {
-    httpOnly: true,
-    secure: true,
-  };
-
-  return res
-    .status(200)
-    .cookie("accessToken", accessToken, options)
-    .cookie("refreshToken", refreshToken, options)
-    .json(
-      new ApiResponse(200, "User tokens returned successfully", {
-        user: loggedInUser,
-      }),
-    );
-});
 
 // Controller: user login
 const loginUser = asyncHandler(async (req, res) => {
@@ -565,23 +539,22 @@ const resetUserPassword = asyncHandler(async (req, res) => {
 });
 
 // Controller: Update user details
-// TODO: Change according to new requirement
 const updateUserDetails = asyncHandler(async (req, res) => {
   const userId = req.user?._id;
 
-  const { email, fullName, username } = req.body;
+  const { bio, fullName, about } = req.body;
 
-  if (!email && !fullName && !username) {
-    throw new ApiError(400, "All fields are required");
+  if (!bio && !fullName && !about) {
+    throw new ApiError(400, "Fields are empty");
   }
 
   const user = await User.findByIdAndUpdate(
     userId,
     {
       $set: {
-        email,
-        username,
+        bio,
         fullName,
+        about,
       },
     },
     {
@@ -595,7 +568,9 @@ const updateUserDetails = asyncHandler(async (req, res) => {
 
   return res
     .status(200)
-    .json(new ApiResponse(200, "User details updated successfully", user));
+    .json(
+      new ApiResponse(200, "User details updated successfully", user.toJSON()),
+    );
 });
 
 // Controller: refresh accessToken
@@ -640,18 +615,93 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
     );
 });
 
+// Controller: Get user liked posts
+const getUserLikedPosts = asyncHandler(async (req, res) => {
+  const likedBy = req.user?._id;
+
+  if (!isValidObjectId(likedBy)) {
+    throw new ApiError(400, "Invalid user id");
+  }
+
+  // left join of PostLikes (left) with Posts (right) and Posts (array) with Users (right)
+  const userLikedPosts = await PostLike.aggregate([
+    {
+      $match: {
+        likedBy: new mongoose.Types.ObjectId(likedBy),
+      },
+    },
+    {
+      $lookup: {
+        from: "posts",
+        localField: "postId",
+        foreignField: "_id",
+        as: "userLikedPost",
+        pipeline: [
+          {
+            $project: {
+              title: 1,
+              content: 1,
+              userId: 1,
+              slug: 1,
+              featuredImage: 1,
+              createdAt: {
+                $dateToString: {
+                  date: "$createdAt",
+                  format: "%d %b %Y",
+                  timezone: "Asia/Kolkata",
+                },
+              },
+              updatedAt: {
+                $dateToString: {
+                  date: "$updatedAt",
+                  format: "%d %b %Y",
+                  timezone: "Asia/Kolkata",
+                },
+              },
+              category: 1,
+              likesCount: 1,
+              commentsCount: 1,
+            },
+          },
+        ],
+      },
+    },
+    {
+      $unwind: "$userLikedPost",
+    },
+    {
+      $project: {
+        _id: 0,
+        userLikedPost: 1,
+      },
+    },
+  ]);
+
+  if (userLikedPosts.length === 0) {
+    throw new ApiError(400, "No Posts found!");
+  }
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        "User liked posts fetched successfully",
+        userLikedPosts,
+      ),
+    );
+});
+
 // Controller: Delete user account
 const deleteUserAccount = asyncHandler(async (req, res) => {
   //  delete user
 });
 
 export {
-  getUser,
   registerUser,
   regenerateRegistrationOTP,
   removeUserAvatar,
-  verifyRegisteredUser,
-  emailLogin,
+  verifyAndLoginUser,
   loginUser,
   updateUserAvatar,
   logoutUser,
@@ -661,4 +711,5 @@ export {
   updateUserDetails,
   refreshAccessToken,
   deleteUserAccount,
+  getUserLikedPosts,
 };

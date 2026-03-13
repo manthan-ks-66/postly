@@ -32,11 +32,17 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    bio: {
+      type: String,
+    },
+    about: {
+      type: String,
+    },
     refreshToken: {
       type: String,
     },
 
-    // verification fields:
+    // verification fields: (for temp use)
     OTP: {
       type: String,
       default: undefined,
@@ -120,6 +126,21 @@ userSchema.methods.generateRefreshToken = function () {
     process.env.REFRESH_TOKEN_SECRET,
     {
       expiresIn: process.env.REFRESH_TOKEN_EXPIRY,
+    },
+  );
+};
+
+userSchema.methods.generateVerificationToken = function () {
+  return jwt.sign(
+    {
+      _id: this._id,
+      email: this.email,
+      fullName: this.fullName,
+      username: this.username,
+    },
+    process.env.VERIFICATION_TOKEN_SECRET,
+    {
+      expiresIn: process.env.VERIFICATION_TOKEN_EXPIRY,
     },
   );
 };

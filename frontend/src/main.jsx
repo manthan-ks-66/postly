@@ -17,7 +17,6 @@ import PublishPost from "./components/Post/PublishPost.jsx";
 import NotFound from "./components/NotFound.jsx";
 import QueryPosts from "./components/Post/QueryPosts.jsx";
 import OtpVerification from "./components/Auth/OtpVerification.jsx";
-import Registration from "./components/Auth/Registration.jsx";
 import NotificationProvider from "./context/NotificationProvider.jsx";
 import App from "./App.jsx";
 import DashBoard from "./DashBoard.jsx";
@@ -25,6 +24,7 @@ import UserSider from "./components/User/UserSider.jsx";
 import UserLIkedPosts from "./components/User/UserLIkedPosts.jsx";
 import UserProfile from "./components/User/UserProfile.jsx";
 import UserComments from "./components/User/UserComments.jsx";
+import Blueprint from "./components/Blueprint.jsx";
 
 const postlyDarkTheme = {
   algorithm: antdTheme.darkAlgorithm,
@@ -104,21 +104,36 @@ const router = createBrowserRouter([
             ),
           },
           {
-            // TODO: add the AuthLayout
             path: "/user",
-            element: <UserSider />,
+            element: (
+              <AuthLayout>
+                <UserSider />
+              </AuthLayout>
+            ),
             children: [
               {
                 path: "/user/profile",
-                element: <UserProfile />,
+                element: (
+                  <AuthLayout>
+                    <UserProfile />
+                  </AuthLayout>
+                ),
               },
               {
                 path: "/user/comments",
-                element: <UserComments />,
+                element: (
+                  <AuthLayout>
+                    <UserComments />
+                  </AuthLayout>
+                ),
               },
               {
                 path: "/user/liked-posts",
-                element: <UserLIkedPosts />,
+                element: (
+                  <AuthLayout>
+                    <UserLIkedPosts />
+                  </AuthLayout>
+                ),
               },
             ],
           },
@@ -145,40 +160,34 @@ const router = createBrowserRouter([
         element: <ResetPassword />,
       },
       {
-        path: "/auth",
+        path: "/auth/register",
         element: (
-          <AuthLayout authentication={false}>
-            <Registration />
+          <AuthLayout>
+            <Register />
           </AuthLayout>
         ),
-        children: [
-          {
-            path: "/auth/register",
-            element: (
-              <AuthLayout authentication={false}>
-                <Register />
-              </AuthLayout>
-            ),
-          },
-          {
-            path: "/auth/register/verify",
-            element: (
-              <AuthLayout authentication={false}>
-                <OtpVerification />
-              </AuthLayout>
-            ),
-          },
-        ],
+      },
+      {
+        path: "/auth/register/verify",
+        element: (
+          <AuthLayout>
+            <OtpVerification />
+          </AuthLayout>
+        ),
       },
       {
         path: "/auth/login",
         element: (
-          <AuthLayout authentication={false}>
+          <AuthLayout>
             <Login />
           </AuthLayout>
         ),
       },
     ],
+  },
+  {
+    path: "/test",
+    element: <Blueprint />,
   },
   {
     path: "*",

@@ -10,21 +10,11 @@ class AuthService {
     }
   }
 
-  async getUser(userId) {
-    try {
-      const res = await axios.get(
-        `${this.usersBaseUrl}/get-user-email/${userId}`,
-      );
-
-      return res.data?.data;
-    } catch (error) {
-      handleError(error);
-    }
-  }
-
   async registerUser(userData) {
     try {
-      const res = await axios.post(`${this.usersBaseUrl}/register`, userData);
+      const res = await axios.post(`${this.usersBaseUrl}/register`, userData, {
+        withCredentials: true,
+      });
 
       return res;
     } catch (error) {
@@ -32,12 +22,13 @@ class AuthService {
     }
   }
 
-  async regenerateRegistrationOTP(email) {
+  async regenerateRegistrationOTP() {
     try {
       const res = await axios.post(
         `${this.usersBaseUrl}/regenerate-registration-otp`,
+        {},
         {
-          email: email,
+          withCredentials: true,
         },
       );
 
@@ -47,35 +38,21 @@ class AuthService {
     }
   }
 
-  async verifyAndLoginUser({ email, otp }) {
-    try {
-      const res = await axios.post(`${this.usersBaseUrl}/verify-user`, {
-        email: email,
-        otp: otp.toString(),
-      });
-
-      if (res.status === 200) {
-        return await this.emailLogin({ email });
-      }
-    } catch (error) {
-      handleError(error);
-    }
-  }
-
-  // usage: only on otp verifications
-  async emailLogin({ email }) {
+  async verifyAndLoginUser({ otp }) {
     try {
       const res = await axios.post(
-        `${this.usersBaseUrl}/email-login`,
+        `${this.usersBaseUrl}/verify-user`,
         {
-          email,
+          otp: otp.toString(),
         },
         {
           withCredentials: true,
         },
       );
 
-      return res.data?.data?.user;
+      if (res.status === 200) {
+        return res.data?.data;
+      }
     } catch (error) {
       handleError(error);
     }

@@ -1,7 +1,6 @@
 // react and redux imports
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useOutletContext } from "react-router-dom";
 
 // services imports
 import authService from "../../services/authService.js";
@@ -22,39 +21,17 @@ function Register() {
   const navigate = useNavigate();
   const [error, setError] = useState("");
 
-  const { userData } = useOutletContext();
-
   const [form] = Form.useForm();
   const { token } = theme.useToken();
 
-  const { handleSubmit, control, reset } = useForm({
-    defaultValues: {
-      email: "",
-      username: "",
-      fullName: "",
-      password: "",
-    },
-  });
-
-  useEffect(() => {
-    reset({
-      email: userData?.email || "",
-      fullName: userData?.fullName || "",
-      username: userData?.username || "",
-      password: "",
-    });
-  }, [userData, reset]);
+  const { handleSubmit, control } = useForm();
 
   const register = async (data) => {
     try {
       const res = await authService.registerUser(data);
 
-      const userId = res.data?.data?.userId;
-      
-
       if (res.status === 201 || res.status === 200) {
-        localStorage.setItem("userId", userId);
-
+        localStorage.setItem("email", data.email);
         navigate("/auth/register/verify");
       }
     } catch (error) {

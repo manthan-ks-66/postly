@@ -6,7 +6,6 @@ import {
   Button,
   Input,
   Space,
-  Divider,
   Row,
   Col,
   Grid,
@@ -19,36 +18,39 @@ import {
   SaveOutlined,
   UploadOutlined,
   DeleteOutlined,
+  UserOutlined,
 } from "@ant-design/icons";
 import userService from "../../services/userService";
 import { update } from "../../store/authSlice.js";
 import { useDispatch } from "react-redux";
 import { useNotify } from "../../context/NotificationProvider.jsx";
 
+import { Controller, useForm } from "react-hook-form";
+
 const { Title, Text } = Typography;
 const { TextArea } = Input;
 const { useBreakpoint } = Grid;
 
 function UserProfile() {
+  const user = useSelector((state) => state.auth.user);
+
   const screens = useBreakpoint();
   const { token } = theme.useToken();
 
   const dispatch = useDispatch();
   const notify = useNotify();
 
-  const user = useSelector((state) => state.auth.user);
+  const { handleSubmit, control } = useForm({
+    defaultValues: {
+      bio: user?.bio || "",
+      about: user?.about || "",
+      fullName: user?.fullName || "",
+    },
+  });
 
   const [error, setError] = useState();
 
   const [isEditing, setIsEditing] = useState(false);
-  const [formData, setFormData] = useState({
-    bio: user?.bio || "Digital Creator & Tech Enthusiast",
-    about:
-      user?.about ||
-      "I love building modern web applications with React and Ant Design.",
-  });
-
-  const handleEditToggle = () => setIsEditing(!isEditing);
 
   const containerPadding = screens.xs ? "12px" : screens.sm ? "16px" : "24px";
   const sectionPadding = screens.xs ? "12px" : screens.sm ? "20px" : "32px";
@@ -62,7 +64,6 @@ function UserProfile() {
   const titleLevel = screens.xs ? 3 : screens.sm ? 2 : 1;
   const subtextSize = screens.xs ? "12px" : screens.sm ? "14px" : "16px";
   const textSize = screens.xs ? "14px" : screens.sm ? "15px" : "16px";
-  const labelSize = screens.xs ? "12px" : screens.sm ? "13px" : "14px";
 
   const handleAvatarUpdate = async ({ file }) => {
     try {
@@ -121,6 +122,28 @@ function UserProfile() {
     }
   };
 
+  const handleUserDataUpdate = async (userData) => {
+    try {
+      const user = await userService.updateUserDetails(userData);
+
+      if (user) {
+        dispatch(update(user));
+
+        notify.api.success({
+          title: "Your details updated successfully",
+          placement: "top",
+        });
+      }
+    } catch (error) {
+      notify.api.error({
+        message: error.message,
+        placement: "top",
+      });
+    } finally {
+      setIsEditing(false);
+    }
+  };
+
   return (
     <div
       style={{
@@ -174,6 +197,7 @@ function UserProfile() {
             style={{ marginBottom: 16 }}
           >
             <Upload
+              accept="jpeg, jpg, image/jpeg, image/jpg"
               customRequest={handleAvatarUpdate}
               maxCount={1}
               showUploadList={false}
@@ -205,7 +229,7 @@ function UserProfile() {
               color: token.colorTextBase,
             }}
           >
-            {user?.fullName || "User Full Name"}
+            {user?.fullName}
           </Title>
           <Text
             type="secondary"
@@ -215,14 +239,11 @@ function UserProfile() {
               display: "block",
             }}
           >
-            @{user?.username || "username"}
+            @{user?.username}
           </Text>
         </Col>
       </Row>
 
-      <Divider style={{ margin: screens.xs ? "12px 0" : "20px 0" }} />
-
-      {/* Edit Button - Right Aligned */}
       <Flex
         justify="flex-end"
         style={{ marginBottom: screens.xs ? "12px" : "16px" }}
@@ -230,7 +251,11 @@ function UserProfile() {
         <Button
           type={isEditing ? "primary" : "default"}
           icon={isEditing ? <SaveOutlined /> : <EditOutlined />}
-          onClick={handleEditToggle}
+          onClick={
+            isEditing
+              ? handleSubmit(handleUserDataUpdate)
+              : () => setIsEditing(true)
+          }
           size="small"
           style={{
             padding: "10px 14px",
@@ -253,36 +278,79 @@ function UserProfile() {
         }}
       >
         <Space vertical size="large" style={{ width: "100%" }}>
-          {/* Bio Section */}
           <section>
-            <Text
-              strong
+            <Title
+              level={5}
               style={{
                 display: "block",
                 marginBottom: 8,
                 color: token.colorTextSecondary,
-                fontSize: labelSize,
+                letterSpacing: "0.5px",
+              }}
+            >
+              Full Name
+            </Title>
+            {isEditing ? (
+              <Controller
+                name="fullName"
+                control={control}
+                render={({ field }) => (
+                  <Input
+                    {...field}
+                    size={screens.xs ? "middle" : "large"}
+                    style={{
+                      fontSize: textSize,
+                      borderRadius: token.borderRadiusLG,
+                    }}
+                  />
+                )}
+              />
+            ) : (
+              <Text
+                style={{
+                  marginTop: 0,
+                  marginBottom: 0,
+                  color: token.colorTextBase,
+                  fontSize: textSize,
+                }}
+                value={user?.fullName}
+              >
+                {user?.fullName}
+              </Text>
+            )}
+          </section>
+
+          {/* Bio Section */}
+          <section>
+            <Title
+              level={5}
+              style={{
+                display: "block",
+                marginBottom: 8,
+                color: token.colorTextSecondary,
                 letterSpacing: "0.5px",
               }}
             >
               Bio
-            </Text>
+            </Title>
             {isEditing ? (
-              <Input
-                size={screens.xs ? "middle" : "large"}
-                value={formData.bio}
-                onChange={(e) =>
-                  setFormData({ ...formData, bio: e.target.value })
-                }
-                placeholder="Write a catchy bio..."
-                style={{
-                  fontSize: textSize,
-                  borderRadius: token.borderRadiusLG,
-                }}
+              <Controller
+                name="bio"
+                control={control}
+                render={({ field }) => (
+                  <Input
+                    {...field}
+                    size={screens.xs ? "middle" : "large"}
+                    placeholder="Write a catchy bio..."
+                    style={{
+                      fontSize: textSize,
+                      borderRadius: token.borderRadiusLG,
+                    }}
+                  />
+                )}
               />
             ) : (
-              <Title
-                level={5}
+              <Text
                 style={{
                   marginTop: 0,
                   marginBottom: 0,
@@ -290,50 +358,51 @@ function UserProfile() {
                   fontSize: textSize,
                 }}
               >
-                {formData.bio}
-              </Title>
+                {user?.bio}
+              </Text>
             )}
           </section>
 
-          <Divider style={{ margin: "12px 0" }} />
-
           {/* About Section */}
           <section>
-            <Text
-              strong
+            <Title
+              level={5}
               style={{
                 display: "block",
                 marginBottom: 8,
                 color: token.colorTextSecondary,
-                fontSize: labelSize,
                 letterSpacing: "0.5px",
               }}
             >
               About
-            </Text>
+            </Title>
             {isEditing ? (
-              <TextArea
-                rows={screens.xs ? 4 : screens.sm ? 5 : 6}
-                value={formData.about}
-                onChange={(e) =>
-                  setFormData({ ...formData, about: e.target.value })
-                }
-                placeholder="Tell us about yourself..."
-                style={{
-                  fontSize: textSize,
-                  borderRadius: token.borderRadiusLG,
-                  lineHeight: "1.6",
-                }}
+              <Controller
+                name="about"
+                control={control}
+                render={({ field }) => (
+                  <TextArea
+                    {...field}
+                    rows={screens.xs ? 3 : screens.sm ? 3 : 4}
+                    placeholder="Tell us about yourself..."
+                    style={{
+                      fontSize: textSize,
+                      borderRadius: token.borderRadiusLG,
+                      lineHeight: "1.6",
+                    }}
+                  />
+                )}
               />
             ) : (
               <Text
                 style={{
-                  fontSize: textSize,
-                  lineHeight: "1.6",
+                  marginTop: 0,
+                  marginBottom: 0,
                   color: token.colorTextBase,
+                  fontSize: textSize,
                 }}
               >
-                {formData.about}
+                {user?.about}
               </Text>
             )}
           </section>

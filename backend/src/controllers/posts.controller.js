@@ -219,6 +219,7 @@ const togglePostLike = asyncHandler(async (req, res) => {
 });
 
 // test controller
+// TODO: implement isLiked functionality
 const fetchPost = asyncHandler(async (req, res) => {
   const { postId } = req.body;
   const userId = req.user?._id;
@@ -227,7 +228,6 @@ const fetchPost = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Invalid post id");
   }
 
-  // TODO: implement isLiked functionality
   const post = await Post.aggregate([
     {
       $match: {
@@ -322,84 +322,6 @@ const getPost = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, "Post fetched successfully", post));
 });
 
-// Controller: Get user liked posts
-const getUserLikedPosts = asyncHandler(async (req, res) => {
-  const likedBy = req.user?._id;
-
-  if (!isValidObjectId(likedBy)) {
-    throw new ApiError(400, "Invalid user id");
-  }
-
-  // left join of PostLikes (left) with Posts (right) and Posts(array) with Users (right)
-
-  const userLikedPosts = await PostLike.aggregate([
-    {
-      $match: {
-        likedBy: new mongoose.Types.ObjectId(likedBy),
-      },
-    },
-    {
-      $lookup: {
-        from: "posts",
-        localField: "postId",
-        foreignField: "_id",
-        as: "userLikedPosts",
-        pipeline: [
-          {
-            $project: {
-              title: 1,
-              content: 1,
-              userId: 1,
-              slug: 1,
-              featuredImage: 1,
-              createdAt: {
-                $dateToString: {
-                  date: "$createdAt",
-                  format: "%d %b %Y",
-                  timezone: "Asia/Kolkata",
-                },
-              },
-              updatedAt: {
-                $dateToString: {
-                  date: "$updatedAt",
-                  format: "%d %b %Y",
-                  timezone: "Asia/Kolkata",
-                },
-              },
-              category: 1,
-              likesCount: 1,
-              commentsCount: 1,
-            },
-          },
-        ],
-      },
-    },
-    {
-      $unwind: "$userLikedPosts",
-    },
-    {
-      $project: {
-        _id: 0,
-        userLikedPosts: 1,
-      },
-    },
-  ]);
-
-  if (userLikedPosts.length === 0) {
-    throw new ApiError(400, "No Posts found!");
-  }
-
-  return res
-    .status(200)
-    .json(
-      new ApiResponse(
-        200,
-        "User liked posts fetched successfully",
-        userLikedPosts,
-      ),
-    );
-});
-
 // Controller: Editor image file upload
 const uploadEditorImage = asyncHandler(async (req, res) => {
   const editorImageLocalPath = req.file?.path;
@@ -449,6 +371,5 @@ export {
   updatePost,
   togglePostLike,
   getQueryPosts,
-  getUserLikedPosts,
   uploadEditorImage,
 };
