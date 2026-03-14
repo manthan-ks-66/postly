@@ -161,8 +161,16 @@ function Register() {
                 name="username"
                 control={control}
                 rules={{ required: true }}
-                render={({ field }) => (
-                  <Input {...field} placeholder="username" size="middle" />
+                render={({ field: { onChange, ...restField } }) => (
+                  <Input
+                    {...restField}
+                    placeholder="username"
+                    size="middle"
+                    onChange={(e) => onChange(e.target.value.replace(/@/g, ""))}
+                    onKeyDown={(e) => {
+                      if (e.key === "@") e.preventDefault();
+                    }}
+                  />
                 )}
               />
             </Form.Item>
@@ -211,7 +219,7 @@ function Register() {
               block
               style={{
                 fontWeight: "bold",
-                padding: 20,
+                padding: 17,
                 borderRadius: 10,
               }}
             >

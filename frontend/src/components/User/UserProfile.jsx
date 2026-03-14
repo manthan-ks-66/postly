@@ -272,8 +272,7 @@ function UserProfile() {
         style={{
           padding: sectionPadding,
           borderRadius: token.borderRadiusLG,
-          background: token.colorBgContainer,
-          border: `1px solid ${token.colorBorder}`,
+          background: token.colorBgCard,
           boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
         }}
       >
