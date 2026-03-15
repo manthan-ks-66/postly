@@ -63,7 +63,7 @@ function Login() {
         alignItems: "center",
         justifyContent: "center",
         background: token.colorBgContainer,
-        minHeight: "100vh", // Use minHeight for mobile stability
+        minHeight: "100vh",
         padding: "10px",
       }}
     >
@@ -71,7 +71,7 @@ function Login() {
 
       <div
         style={{
-          width: "80%",
+          width: "50%",
           maxWidth: "450px",
           padding: "30px 20px",
           backgroundColor: "#ffffff1e",

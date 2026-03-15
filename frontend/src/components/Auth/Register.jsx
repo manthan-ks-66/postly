@@ -136,22 +136,18 @@ function Register() {
           onFinish={handleAntdSubmit}
           requiredMark={false}
         >
-          <Flex gap="middle">
-            <Form.Item
-              prefix={<UserOutlined />}
-              label="Full Name"
-              style={{ flex: 1 }}
-            >
-              <Controller
-                name="fullName"
-                control={control}
-                rules={{ required: true }}
-                render={({ field }) => (
-                  <Input {...field} placeholder="full name" size="middle" />
-                )}
-              />
-            </Form.Item>
+          <Form.Item label="Full Name">
+            <Controller
+              name="fullName"
+              control={control}
+              rules={{ required: true }}
+              render={({ field }) => (
+                <Input {...field} placeholder="full name" size="middle" />
+              )}
+            />
+          </Form.Item>
 
+          <Flex gap="small">
             <Form.Item
               prefix={<UserOutlined />}
               label="Username"
@@ -171,23 +167,6 @@ function Register() {
                       if (e.key === "@") e.preventDefault();
                     }}
                   />
-                )}
-              />
-            </Form.Item>
-          </Flex>
-
-          <Flex style={{ marginBottom: 8 }} gap="middle">
-            <Form.Item
-              prefix={<UserOutlined />}
-              label="Email"
-              style={{ flex: 1 }}
-            >
-              <Controller
-                name="email"
-                control={control}
-                rules={{ required: true }}
-                render={({ field }) => (
-                  <Input {...field} placeholder="email" size="middle" />
                 )}
               />
             </Form.Item>
@@ -211,6 +190,17 @@ function Register() {
               />
             </Form.Item>
           </Flex>
+
+          <Form.Item prefix={<UserOutlined />} label="Email">
+            <Controller
+              name="email"
+              control={control}
+              rules={{ required: true }}
+              render={({ field }) => (
+                <Input {...field} placeholder="email" size="middle" />
+              )}
+            />
+          </Form.Item>
 
           <Form.Item>
             <Button

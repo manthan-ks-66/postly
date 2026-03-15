@@ -70,7 +70,7 @@ function PostPage() {
 
   useEffect(() => {
     fetchPost();
-  }, [_id]);
+  }, [_id, slug]);
 
   const togglePostLike = async () => {
     if (user) {

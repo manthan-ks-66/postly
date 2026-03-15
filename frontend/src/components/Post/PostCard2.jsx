@@ -6,8 +6,6 @@ const { Title, Paragraph } = Typography;
 function PostCard2({ userLikedPost }) {
   const { token } = theme.useToken();
 
-  console.log(userLikedPost);
-
   const navigate = useNavigate();
   return (
     <Layout

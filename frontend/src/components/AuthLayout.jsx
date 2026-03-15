@@ -1,6 +1,5 @@
 import { useSelector } from "react-redux";
-import { useLocation } from "react-router-dom";
-import { Navigate } from "react-router-dom";
+import { useLocation, Navigate } from "react-router-dom";
 
 function AuthLayout({ children }) {
   const authStatus = useSelector((state) => state.auth.status);
