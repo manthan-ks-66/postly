@@ -1,30 +1,45 @@
+// react imports
 import { createRoot } from "react-dom/client";
 import "./index.css";
+
+// state management providers
 import { store } from "./store/store.js";
 import { Provider } from "react-redux";
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
+import { ConfigProvider, theme as antdTheme } from "antd";
+import NotificationProvider from "./context/NotificationProvider.jsx";
+
+// Parent components
+import App from "./App.jsx";
+import DashBoard from "./DashBoard.jsx";
+
+// auth components
 import Register from "./components/Auth/Register.jsx";
 import Login from "./components/Auth/Login.jsx";
-import Home from "./components/Home.jsx";
-import AuthLayout from "./components/AuthLayout.jsx";
-import About from "./components/About.jsx";
-import Settings from "./components/Auth/Settings.jsx";
 import ResetPassword from "./components/Auth/ResetPassword.jsx";
-import { ConfigProvider, theme as antdTheme } from "antd";
+import OtpVerification from "./components/Auth/OtpVerification.jsx";
+
+// general components (un protected)
+import Home from "./components/Home.jsx";
+import About from "./components/About.jsx";
+import NotFound from "./components/NotFound.jsx";
+
+// routes guard
+import AuthLayout from "./components/AuthLayout.jsx";
+
+// Post components 
 import PostPage from "./components/Post/PostPage.jsx";
 import Explore from "./components/Post/Explore.jsx";
 import PublishPost from "./components/Post/PublishPost.jsx";
-import NotFound from "./components/NotFound.jsx";
 import QueryPosts from "./components/Post/QueryPosts.jsx";
-import OtpVerification from "./components/Auth/OtpVerification.jsx";
-import NotificationProvider from "./context/NotificationProvider.jsx";
-import App from "./App.jsx";
-import DashBoard from "./DashBoard.jsx";
+import Author from "./components/Post/Author.jsx";
+
+// Users components (under protected routes)
 import UserSider from "./components/User/UserSider.jsx";
+import Settings from "./components/Auth/Settings.jsx";
 import UserLIkedPosts from "./components/User/UserLIkedPosts.jsx";
 import UserProfile from "./components/User/UserProfile.jsx";
 import UserComments from "./components/User/UserComments.jsx";
-import Blueprint from "./components/Blueprint.jsx";
 
 const postlyDarkTheme = {
   algorithm: antdTheme.darkAlgorithm,
@@ -104,6 +119,10 @@ const router = createBrowserRouter([
             ),
           },
           {
+            path: "/author/:username",
+            element: <Author />,
+          },
+          {
             path: "/user",
             element: (
               <AuthLayout>
@@ -112,7 +131,7 @@ const router = createBrowserRouter([
             ),
             children: [
               {
-                path: "/user/profile",
+                path: "/user/:username",
                 element: (
                   <AuthLayout>
                     <UserProfile />
@@ -184,10 +203,6 @@ const router = createBrowserRouter([
         ),
       },
     ],
-  },
-  {
-    path: "/test",
-    element: <Blueprint />,
   },
   {
     path: "*",

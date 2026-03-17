@@ -95,7 +95,7 @@ function NavBar() {
   const userItems = [
     {
       label: "Profile",
-      key: "/user/profile",
+      key: `/user/@${user?.username}`,
       icon: <UserOutlined />,
     },
     {

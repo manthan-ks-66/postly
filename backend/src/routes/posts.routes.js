@@ -3,7 +3,7 @@ import { upload } from "../middlewares/multer.middleware.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 
 import {
-  getPost,
+  fetchPost,
   updatePost,
   publishPost,
   togglePostLike,
@@ -18,7 +18,7 @@ router.route("/get-all-posts").get(getAllPosts);
 
 router.route("/get-query-post").get(getQueryPosts);
 
-router.route("/get-post/:postId").get(getPost);
+router.route("/fetch-post/:postId").get(fetchPost);
 
 // secured routes:
 router

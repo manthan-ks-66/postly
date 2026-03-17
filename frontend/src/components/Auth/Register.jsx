@@ -10,7 +10,12 @@ import { useForm, Controller } from "react-hook-form";
 
 // antd imports
 import { Button, Flex, Form, Input, Layout, Divider, Typography } from "antd";
-import { UserOutlined, LockOutlined } from "@ant-design/icons";
+import {
+  UserOutlined,
+  LockOutlined,
+  FormOutlined,
+  MailOutlined,
+} from "@ant-design/icons";
 import Logo from "../Logo/Logo.jsx";
 import GoogleBtn from "./GoogleBtn.jsx";
 import { theme } from "antd";
@@ -20,13 +25,24 @@ const { Text } = Typography;
 function Register() {
   const navigate = useNavigate();
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const [form] = Form.useForm();
   const { token } = theme.useToken();
-
-  const { handleSubmit, control } = useForm();
+  const {
+    handleSubmit,
+    control,
+    formState: { errors },
+  } = useForm({
+    defaultValues: {
+      username: "",
+      password: "",
+      fullName: "",
+      email: "",
+    },
+  });
 
   const register = async (data) => {
+    setLoading(true);
     try {
       const res = await authService.registerUser(data);
 
@@ -36,11 +52,9 @@ function Register() {
       }
     } catch (error) {
       setError(error.message);
+    } finally {
+      setLoading(false);
     }
-  };
-
-  const handleAntdSubmit = () => {
-    handleSubmit(register)();
   };
 
   return (
@@ -129,94 +143,122 @@ function Register() {
           <Divider>OR</Divider>
         </div>
 
-        <Form
-          style={{ width: "100%" }}
-          form={form}
-          layout="vertical"
-          onFinish={handleAntdSubmit}
-          requiredMark={false}
-        >
-          <Form.Item label="Full Name">
-            <Controller
-              name="fullName"
-              control={control}
-              rules={{ required: true }}
-              render={({ field }) => (
-                <Input {...field} placeholder="full name" size="middle" />
-              )}
-            />
-          </Form.Item>
+        <form style={{ width: "100%" }} onSubmit={handleSubmit(register)}>
+          <Form layout="vertical" component={false}>
+            <Flex gap="small">
+              <Form.Item
+                label="Username"
+                style={{ flex: 1 }}
+                validateStatus={errors.username ? "error" : ""}
+                help={errors.username?.message}
+              >
+                <Controller
+                  name="username"
+                  control={control}
+                  rules={{
+                    required: "This field is required",
+                    pattern: {
+                      value: /^[a-zA-Z0-9_-]+$/,
+                      message: "Only _ and - are allowed",
+                    },
+                  }}
+                  render={({ field }) => (
+                    <Input
+                      {...field}
+                      prefix={<UserOutlined />}
+                      placeholder="username"
+                      size="middle"
+                    />
+                  )}
+                />
+              </Form.Item>
 
-          <Flex gap="small">
+              <Form.Item
+                label="Password"
+                style={{ flex: 1 }}
+                validateStatus={errors.password ? "error" : ""}
+                help={errors.password?.message}
+              >
+                <Controller
+                  name="password"
+                  control={control}
+                  rules={{ required: "This field is required" }}
+                  render={({ field }) => (
+                    <Input.Password
+                      {...field}
+                      prefix={<LockOutlined />}
+                      placeholder="password"
+                      size="middle"
+                    />
+                  )}
+                />
+              </Form.Item>
+            </Flex>
+
             <Form.Item
-              prefix={<UserOutlined />}
-              label="Username"
-              style={{ flex: 1 }}
+              label="Full Name"
+              validateStatus={errors.fullName ? "error" : ""}
+              help={errors.fullName?.message}
             >
               <Controller
-                name="username"
+                name="fullName"
                 control={control}
-                rules={{ required: true }}
-                render={({ field: { onChange, ...restField } }) => (
-                  <Input
-                    {...restField}
-                    placeholder="username"
-                    size="middle"
-                    onChange={(e) => onChange(e.target.value.replace(/@/g, ""))}
-                    onKeyDown={(e) => {
-                      if (e.key === "@") e.preventDefault();
-                    }}
-                  />
-                )}
-              />
-            </Form.Item>
-
-            <Form.Item
-              prefix={<LockOutlined />}
-              label="Password"
-              style={{ flex: 1 }}
-            >
-              <Controller
-                name="password"
-                control={control}
-                rules={{ required: true }}
+                rules={{ required: "This field is required" }}
                 render={({ field }) => (
-                  <Input.Password
+                  <Input
+                    prefix={<FormOutlined />}
                     {...field}
-                    placeholder="password"
+                    placeholder="full name"
                     size="middle"
                   />
                 )}
               />
             </Form.Item>
-          </Flex>
 
-          <Form.Item prefix={<UserOutlined />} label="Email">
-            <Controller
-              name="email"
-              control={control}
-              rules={{ required: true }}
-              render={({ field }) => (
-                <Input {...field} placeholder="email" size="middle" />
-              )}
-            />
-          </Form.Item>
-
-          <Form.Item>
-            <Button
-              type="primary"
-              htmlType="submit"
-              block
-              style={{
-                fontWeight: "bold",
-                padding: 17,
-                borderRadius: 10,
-              }}
+            <Form.Item
+              label="Email"
+              validateStatus={errors.email ? "error" : ""}
+              help={errors.email?.message}
             >
-              Register
-            </Button>
-          </Form.Item>
-        </Form>
+              <Controller
+                name="email"
+                control={control}
+                rules={{
+                  required: "This field is required",
+                  pattern: {
+                    value: /^\S+@\S+\.\S+$/,
+                    message: "Please enter a valid email",
+                  },
+                }}
+                render={({ field }) => (
+                  <Input
+                    {...field}
+                    prefix={<MailOutlined />}
+                    placeholder="email"
+                    size="middle"
+                  />
+                )}
+              />
+            </Form.Item>
+
+            <Form.Item>
+              <Button
+                type="primary"
+                htmlType="submit"
+                block
+                loading={loading}
+                disabled={loading}
+                style={{
+                  fontWeight: "bold",
+                  padding: 17,
+                  borderRadius: 10,
+                }}
+              >
+                Register
+              </Button>
+            </Form.Item>
+          </Form>
+        </form>
       </div>
     </Layout>
   );

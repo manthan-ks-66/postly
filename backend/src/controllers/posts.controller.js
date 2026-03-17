@@ -6,6 +6,7 @@ import { uploadToImageKit } from "../utils/imagekit.js";
 import mongoose, { isValidObjectId } from "mongoose";
 import { PostLike } from "../models/postLikes.model.js";
 import { PostImage } from "../models/postImages.model.js";
+import jwt from "jsonwebtoken";
 
 // Controller: Upload post
 const publishPost = asyncHandler(async (req, res) => {
@@ -125,7 +126,7 @@ const getAllPosts = asyncHandler(async (req, res) => {
 
   const data = {
     posts,
-    totalPosts: totalPosts, 
+    totalPosts: totalPosts,
   };
 
   return res
@@ -195,6 +196,7 @@ const togglePostLike = asyncHandler(async (req, res) => {
     return res.status(200).json(
       new ApiResponse(200, "Post Liked successfully", {
         likesCount: post.likesCount,
+        isLiked: true,
       }),
     );
   } catch (error) {
@@ -210,6 +212,7 @@ const togglePostLike = asyncHandler(async (req, res) => {
       return res.status(200).json(
         new ApiResponse(200, "Post un-liked successfully", {
           likesCount: post.likesCount,
+          isLiked: false,
         }),
       );
     } else {
@@ -218,32 +221,29 @@ const togglePostLike = asyncHandler(async (req, res) => {
   }
 });
 
-// test controller
-// TODO: implement isLiked functionality
+// Controller: Get Post
 const fetchPost = asyncHandler(async (req, res) => {
-  const { postId } = req.body;
-  const userId = req.user?._id;
-
-  if (!isValidObjectId(postId)) {
-    throw new ApiError(400, "Invalid post id");
-  }
-
-  const post = await Post.aggregate([
-    {
-      $match: {
-        _id: new mongoose.Types.ObjectId(postId),
-      },
-    },
-  ]);
-});
-
-// Controller: Get one post
-const getPost = asyncHandler(async (req, res) => {
   const { postId } = req.params;
 
   if (!isValidObjectId(postId)) {
     throw new ApiError(400, "Invalid post id");
   }
+
+  const token = req.cookies?.accessToken;
+  let decodedToken;
+
+  if (token) {
+    try {
+      decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+    } catch (error) {
+      throw new ApiError(400, "Token expired", error);
+    }
+  }
+
+  // access userId (likedBy) if user is present to find whether user has liked the post
+  const userId = decodedToken
+    ? new mongoose.Types.ObjectId(decodedToken._id)
+    : null;
 
   const post = await Post.aggregate([
     {
@@ -257,26 +257,46 @@ const getPost = asyncHandler(async (req, res) => {
         localField: "userId",
         foreignField: "_id",
         as: "author",
-        pipeline: [
-          {
-            $project: {
-              fullName: 1,
-              avatar: 1,
-            },
-          },
-        ],
       },
     },
     {
       $unwind: "$author",
     },
+
+    // Join with postlikes to check if the current user has liked this post
+    {
+      $lookup: {
+        from: "postlikes",
+
+        // at this stage we are still in the posts context (packing our box let post_id)
+        let: { post_id: "$_id" },
+
+        // sub pipeline to implement the $ match stage to filter out (now we will be in postlikes collection)
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $and: [
+                  { $eq: ["$postId", "$$post_id"] },
+                  { $eq: ["$likedBy", userId] },
+                ],
+              },
+            },
+          },
+        ],
+        as: "userLikedStatus",
+      },
+    },
     {
       $project: {
+        _id: 1,
         title: 1,
         content: 1,
-        userId: 1,
         slug: 1,
         featuredImage: 1,
+        category: 1,
+        likesCount: 1,
+        commentsCount: 1,
         createdAt: {
           $dateToString: {
             date: "$createdAt",
@@ -286,40 +306,34 @@ const getPost = asyncHandler(async (req, res) => {
         },
         updatedAt: {
           $dateToString: {
-            date: "$updatedAt",
+            date: "$createdAt",
             format: "%d %b %Y",
             timezone: "Asia/Kolkata",
           },
         },
-        editedAt: {
+        author: {
+          username: 1,
+          fullName: 1,
+          avatar: 1,
+        },
+        isLiked: {
           $cond: {
-            // check if editedAt is false then format the date
-            if: { $ifNull: ["$editedAt", false] },
-            then: {
-              $dateToString: {
-                date: "$updatedAt",
-                format: "%d %b %Y",
-                timezone: "Asia/Kolkata",
-              },
-            },
-            else: null,
+            if: { $gt: [{ $size: "$userLikedStatus" }, 0] },
+            then: true,
+            else: false,
           },
         },
-        category: 1,
-        likesCount: 1,
-        commentsCount: 1,
-        author: 1,
       },
     },
   ]);
 
-  if (!post) {
+  if (post?.length === 0) {
     throw new ApiError(400, "No post found");
   }
 
   return res
     .status(200)
-    .json(new ApiResponse(200, "Post fetched successfully", post));
+    .json(new ApiResponse(200, "Post fetched successfully", post[0]));
 });
 
 // Controller: Editor image file upload
@@ -365,7 +379,7 @@ const uploadEditorImage = asyncHandler(async (req, res) => {
 });
 
 export {
-  getPost,
+  fetchPost,
   publishPost,
   getAllPosts,
   updatePost,

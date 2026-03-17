@@ -12,14 +12,13 @@ import {
   Spin,
 } from "antd";
 import {
-  LikeFilled,
   LikeOutlined,
   MessageOutlined,
   UploadOutlined,
   EditOutlined,
   DeleteOutlined,
   UserOutlined,
-  LinkedinOutlined,
+  LikeTwoTone,
 } from "@ant-design/icons";
 import "./PostPage.css";
 
@@ -29,6 +28,7 @@ import { useSelector } from "react-redux";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useNotify } from "../../context/NotificationProvider.jsx";
+import { useNavigate } from "react-router-dom";
 
 const { Content } = Layout;
 const { Title, Paragraph, Text } = Typography;
@@ -42,10 +42,14 @@ function PostPage() {
   const [post, setPost] = useState(null);
   const [error, setError] = useState("");
   const [loader, setLoader] = useState(true);
+  const [isLiking, setIsLiking] = useState(false);
+  const [likeAnimationType, setLikeAnimationType] = useState("");
+  const [likeAnimationKey, setLikeAnimationKey] = useState(0);
 
   const { _id, slug } = useParams();
 
   const user = useSelector((state) => state.auth.user);
+  const navigate = useNavigate();
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(window.location.href);
@@ -58,9 +62,9 @@ function PostPage() {
 
   const fetchPost = async () => {
     try {
-      const resPost = await postService.fetchOnePost(_id);
+      const resPost = await postService.fetchPost(_id);
 
-      setPost(resPost[0]);
+      setPost(resPost);
     } catch (error) {
       setError(error.message);
     } finally {
@@ -73,21 +77,36 @@ function PostPage() {
   }, [_id, slug]);
 
   const togglePostLike = async () => {
-    if (user) {
-      postService.togglePostLike(post?._id).then((res) => {
-        if (res.statusCode === 200) {
-          setPost((prev) => ({
-            ...prev,
-            likesCount: res.data?.likesCount,
-          }));
-        }
-      });
-    } else {
+    if (!user) {
       notify.api.info({ title: "Login to like post", placement: "top" });
+      return;
+    }
+
+    if (isLiking || !post?._id) {
+      return;
+    }
+
+    try {
+      setIsLiking(true);
+      const res = await postService.togglePostLike(post._id);
+
+      if (res.statusCode === 200) {
+        const nextLiked = Boolean(res.data?.isLiked);
+
+        setPost((prev) => ({
+          ...prev,
+          isLiked: nextLiked,
+          likesCount: res.data?.likesCount,
+        }));
+
+        // Re-mount icon wrapper to replay animation on every toggle.
+        setLikeAnimationType(nextLiked ? "liked" : "unliked");
+        setLikeAnimationKey((prev) => prev + 1);
+      }
+    } finally {
+      setIsLiking(false);
     }
   };
-
-  // TODO: implement isLiked functionality
 
   const isAuthor = post && user ? user._id === post.userId : false;
 
@@ -137,12 +156,14 @@ function PostPage() {
             <Space>
               <Avatar
                 size={40}
-                src={post?.author?.avatar}
+                src={post?.author?.avatar?.url}
                 icon={<UserOutlined />}
               />
-              <Text type="secondary" strong>
-                By {post?.author?.fullName}
-              </Text>
+              <Link to={`/author/@${post?.author?.username}`}>
+                <Text type="secondary" strong>
+                  by {post?.author?.fullName}
+                </Text>
+              </Link>
             </Space>
 
             <div
@@ -196,7 +217,27 @@ function PostPage() {
               borderBottom: `1px solid ${token.colorBorderSecondary}`,
             }}
           >
-            <Button icon={<LikeFilled />} onClick={togglePostLike}>
+            <Button
+              icon={
+                <span
+                  key={likeAnimationKey}
+                  className={`like-icon-wrap ${
+                    likeAnimationType
+                      ? `like-icon-wrap-${likeAnimationType}`
+                      : ""
+                  }`}
+                >
+                  {post?.isLiked ? (
+                    <LikeTwoTone twoToneColor="#1677ff" className="like-icon" />
+                  ) : (
+                    <LikeOutlined className="like-icon" />
+                  )}
+                  <span className="like-icon-ring" />
+                </span>
+              }
+              onClick={togglePostLike}
+              disabled={isLiking}
+            >
               {post?.likesCount}
             </Button>
 

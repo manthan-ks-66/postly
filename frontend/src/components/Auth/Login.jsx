@@ -71,8 +71,7 @@ function Login() {
 
       <div
         style={{
-          width: "50%",
-          maxWidth: "450px",
+          width: "420px",
           padding: "30px 20px",
           backgroundColor: "#ffffff1e",
           border: "1px solid rgba(255, 255, 255, 0.12)",

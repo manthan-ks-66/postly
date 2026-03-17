@@ -45,6 +45,88 @@
   padding: 12px 0;
 }
 
+.like-icon-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transform-origin: center;
+  transform: translateY(-1px);
+}
+
+.post-interactions .ant-btn .ant-btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.like-icon {
+  font-size: 16px;
+  line-height: 1;
+}
+
+.like-icon-ring {
+  position: absolute;
+  inset: -7px;
+  border-radius: 50%;
+  border: 2px solid rgba(22, 119, 255, 0.45);
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.6);
+}
+
+.like-icon-wrap-liked {
+  animation: ytLikePop 320ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.like-icon-wrap-liked .like-icon-ring {
+  animation: ytLikeRing 420ms ease-out;
+}
+
+.like-icon-wrap-unliked {
+  animation: ytUnlikeDip 220ms ease;
+}
+
+@keyframes ytLikePop {
+  0% {
+    transform: scale(0.75);
+  }
+
+  55% {
+    transform: scale(1.25);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes ytLikeRing {
+  0% {
+    opacity: 0.55;
+    transform: scale(0.55);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(1.35);
+  }
+}
+
+@keyframes ytUnlikeDip {
+  0% {
+    transform: scale(1);
+  }
+
+  45% {
+    transform: scale(0.78);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
 .post-body {
   font-size: 16px !important;
   line-height: 1.9 !important;

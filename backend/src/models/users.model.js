@@ -7,11 +7,9 @@ const userSchema = new mongoose.Schema(
     avatar: {
       url: {
         type: String,
-        default: "",
       },
       fileId: {
         type: String,
-        default: "",
       },
     },
     username: {
@@ -30,7 +28,6 @@ const userSchema = new mongoose.Schema(
     },
     password: {
       type: String,
-      required: true,
     },
     bio: {
       type: String,
@@ -41,8 +38,13 @@ const userSchema = new mongoose.Schema(
     refreshToken: {
       type: String,
     },
+    isVerified: {
+      type: Boolean,
+      required: true,
+      default: false,
+    },
 
-    // verification fields: (for temp use)
+    // temporary fields for verification
     OTP: {
       type: String,
       default: undefined,
@@ -51,14 +53,9 @@ const userSchema = new mongoose.Schema(
       type: Date,
       default: undefined,
     },
-    isVerified: {
-      type: Boolean,
-      required: true,
-      default: false,
-    },
     lifeTime: {
       type: Date,
-      index: { expires: "12hr" },
+      index: { expires: "24hr" },
     },
   },
   {
@@ -75,10 +72,11 @@ userSchema.set("toJSON", {
   },
 });
 
-// middleware: bcrypt password hashing
+// Middlewares
+// bcrypt password hashing
 userSchema.pre("save", async function () {
   // check: if password is changed while updating user data on userSchema
-  if (!this.isModified("password")) return;
+  if (!this.password || !this.isModified("password")) return;
 
   this.password = await bcrypt.hash(this.password, 10);
 });
@@ -92,7 +90,7 @@ userSchema.pre("findOneAndUpdate", async function () {
   const plainPassword =
     update.password || (update.$set && update.$set.password);
 
-  if (!plainPassword) return;
+  if (!plainPassword || typeof plainPassword !== "string") return;
 
   const hashedPassword = await bcrypt.hash(plainPassword, 10);
 

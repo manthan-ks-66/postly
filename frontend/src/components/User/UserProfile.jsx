@@ -130,17 +130,17 @@ function UserProfile() {
         dispatch(update(user));
 
         notify.api.success({
-          title: "Your details updated successfully",
+          title: "Details updated successfully",
           placement: "top",
         });
+
+        setIsEditing(false);
       }
     } catch (error) {
       notify.api.error({
         message: error.message,
         placement: "top",
       });
-    } finally {
-      setIsEditing(false);
     }
   };
 

@@ -4,6 +4,7 @@ import { verifyJWT } from "../middlewares/auth.middleware.js";
 import {
   registerUser,
   regenerateRegistrationOTP,
+  authenticateWithGoogle,
   verifyAndLoginUser,
   loginUser,
   updateUserAvatar,
@@ -23,6 +24,8 @@ router.route("/register").post(registerUser);
 router.route("/regenerate-registration-otp").post(regenerateRegistrationOTP);
 
 router.route("/verify-user").post(verifyAndLoginUser);
+
+router.route("/google-auth").post(authenticateWithGoogle);
 
 router.route("/login").post(loginUser);
 

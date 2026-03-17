@@ -1,13 +1,21 @@
+// model imports
 import { User } from "../models/users.model.js";
 import { PostLike } from "../models/postLikes.model.js";
+
+// utilities and built-in methods
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { ApiError } from "../utils/ApiError.js";
 import { uploadToImageKit, deleteImageKitFile } from "../utils/imagekit.js";
 import asyncHandler from "../utils/asyncHandler.js";
+
+// node_module imports
 import jwt from "jsonwebtoken";
 import { randomInt } from "node:crypto";
 import nodemailer from "nodemailer";
 import mongoose, { isValidObjectId } from "mongoose";
+import { OAuth2Client } from "google-auth-library";
+
+// Methods and configurations:
 
 // nodemailer: transporter config
 const transporter = nodemailer.createTransport({
@@ -23,6 +31,7 @@ const options = {
   secured: true,
 };
 
+// user one time passcode generator method
 const generateAndSendOTP = async (processMsg, user, email, subject) => {
   const otp = randomInt(100000, 999999);
 
@@ -48,7 +57,25 @@ Thank You`;
   });
 };
 
-// Controller: user registration
+// generate user accessToken and refreshToken
+const generateUserTokens = async ({ user }) => {
+  try {
+    const accessToken = user.generateAccessToken();
+    const refreshToken = user.generateRefreshToken();
+
+    user.refreshToken = refreshToken;
+
+    await user.save();
+
+    const loggedInUser = user.toJSON();
+
+    return { loggedInUser, accessToken, refreshToken };
+  } catch (error) {
+    throw new ApiError(500, error.message);
+  }
+};
+
+// Controllers:
 const registerUser = asyncHandler(async (req, res) => {
   const { email, username, fullName, password } = req.body;
 
@@ -99,6 +126,7 @@ const registerUser = asyncHandler(async (req, res) => {
   }
 
   const user = await User.create({
+    avatar: null,
     username,
     email,
     password,
@@ -170,7 +198,6 @@ const regenerateRegistrationOTP = asyncHandler(async (req, res) => {
     );
 });
 
-// Controller: verify and login registered user
 const verifyAndLoginUser = asyncHandler(async (req, res) => {
   /**
    * get verificationToken, otp from req
@@ -247,25 +274,22 @@ const verifyAndLoginUser = asyncHandler(async (req, res) => {
     );
 });
 
-// Method: generating accessToken and refreshToken for user auth
-const generateUserTokens = async ({ user }) => {
-  try {
-    const accessToken = user.generateAccessToken();
-    const refreshToken = user.generateRefreshToken();
+const authenticateWithGoogle = asyncHandler(async (req, res) => {
+  const { idToken } = req.body;
+  const client = new OAuth2Client(process.env.GOOGLE_AUTH_ID);
 
-    user.refreshToken = refreshToken;
+  const ticket = await client.verifyIdToken({
+    idToken,
+    audience: process.env.GOOGLE_AUTH_ID,
+  });
 
-    await user.save();
+  const payload = ticket.getPayload();
 
-    const loggedInUser = user.toJSON();
+  console.log(payload);
 
-    return { loggedInUser, accessToken, refreshToken };
-  } catch (error) {
-    throw new ApiError(500, error.message);
-  }
-};
+  return res.status(200).json({ message: "client logged", data: payload });
+});
 
-// Controller: user login
 const loginUser = asyncHandler(async (req, res) => {
   const { username, password } = req.body;
 
@@ -302,7 +326,6 @@ const loginUser = asyncHandler(async (req, res) => {
     );
 });
 
-// Controller: logout user
 const logoutUser = asyncHandler(async (req, res) => {
   const userId = req.user?._id;
 
@@ -319,7 +342,6 @@ const logoutUser = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, "User tokens removed successfully", {}));
 });
 
-// Controller: update user avatar picture
 const updateUserAvatar = asyncHandler(async (req, res) => {
   const avatarLocalPath = req.file?.path;
 
@@ -381,7 +403,6 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, "Avatar updated successfully", user.toJSON()));
 });
 
-// Controller: remove user avatar
 const removeUserAvatar = asyncHandler(async (req, res) => {
   const userId = req.user?._id;
 
@@ -410,7 +431,6 @@ const removeUserAvatar = asyncHandler(async (req, res) => {
     );
 });
 
-// Controller: Get user details
 const getCurrentUser = asyncHandler(async (req, res) => {
   const user = req.user;
 
@@ -419,7 +439,6 @@ const getCurrentUser = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, "User details fetched successfully", user));
 });
 
-// Controller: send the OTP to user for password reset
 const handleResetPasswordOTP = asyncHandler(async (req, res) => {
   /* 
   get email from req.body
@@ -460,7 +479,6 @@ const handleResetPasswordOTP = asyncHandler(async (req, res) => {
   return res.status(200).json(new ApiResponse(200, "OTP sent successfully"));
 });
 
-// Controller: Reset user password
 const resetUserPassword = asyncHandler(async (req, res) => {
   /* 
     get email , otp, newPassword, confirmNewPassword from req.body
@@ -533,14 +551,13 @@ const resetUserPassword = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, "Password changed successfully", {}));
 });
 
-// Controller: Update user details
 const updateUserDetails = asyncHandler(async (req, res) => {
   const userId = req.user?._id;
 
   const { bio, fullName, about } = req.body;
 
-  if (!bio && !fullName && !about) {
-    throw new ApiError(400, "Fields are empty");
+  if (!fullName) {
+    throw new ApiError(400, "Name cannot be empty");
   }
 
   const user = await User.findByIdAndUpdate(
@@ -568,7 +585,6 @@ const updateUserDetails = asyncHandler(async (req, res) => {
     );
 });
 
-// Controller: refresh accessToken
 // TODO: Postman testing
 const refreshAccessToken = asyncHandler(async (req, res) => {
   const incomingToken = req.cookies?.refreshToken;
@@ -610,7 +626,6 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
     );
 });
 
-// Controller: Get user liked posts
 const getUserLikedPosts = asyncHandler(async (req, res) => {
   const likedBy = req.user?._id;
 
@@ -687,14 +702,14 @@ const getUserLikedPosts = asyncHandler(async (req, res) => {
     );
 });
 
-// Controller: Delete user account
 const deleteUserAccount = asyncHandler(async (req, res) => {
-  //  delete user
+  // TODO: delete user
 });
 
 export {
   registerUser,
   regenerateRegistrationOTP,
+  authenticateWithGoogle,
   removeUserAvatar,
   verifyAndLoginUser,
   loginUser,

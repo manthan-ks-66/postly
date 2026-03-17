@@ -22,9 +22,11 @@ class PostService {
     }
   }
 
-  async fetchOnePost(postId) {
+  async fetchPost(postId) {
     try {
-      const res = await axios.get(`${this.postsBaseUrl}/get-post/${postId}`);
+      const res = await axios.get(`${this.postsBaseUrl}/fetch-post/${postId}`, {
+        withCredentials: true,
+      });
 
       return res.data?.data;
     } catch (error) {
