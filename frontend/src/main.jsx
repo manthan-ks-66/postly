@@ -19,7 +19,7 @@ import Login from "./components/Auth/Login.jsx";
 import ResetPassword from "./components/Auth/ResetPassword.jsx";
 import OtpVerification from "./components/Auth/OtpVerification.jsx";
 
-// general components (un protected)
+// general components (un-protected)
 import Home from "./components/Home.jsx";
 import About from "./components/About.jsx";
 import NotFound from "./components/NotFound.jsx";

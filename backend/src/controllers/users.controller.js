@@ -10,7 +10,7 @@ import asyncHandler from "../utils/asyncHandler.js";
 
 // node_module imports
 import jwt from "jsonwebtoken";
-import { randomInt } from "node:crypto";
+import { randomInt, createHash } from "node:crypto";
 import nodemailer from "nodemailer";
 import mongoose, { isValidObjectId } from "mongoose";
 import { OAuth2Client } from "google-auth-library";
@@ -75,6 +75,17 @@ const generateUserTokens = async ({ user }) => {
   }
 };
 
+// generate unique username for google authenticated users
+const generateUniqueUsername = (given_name, sub) => {
+  const base = given_name.trim().toLowerCase();
+
+  const suffix = createHash("sha256").update(sub).digest("hex").slice(0, 5);
+
+  const username = `${base}_${suffix}`;
+
+  return username;
+};
+
 // Controllers:
 const registerUser = asyncHandler(async (req, res) => {
   const { email, username, fullName, password } = req.body;
@@ -127,6 +138,7 @@ const registerUser = asyncHandler(async (req, res) => {
 
   const user = await User.create({
     avatar: null,
+    authProvider: "local",
     username,
     email,
     password,
@@ -284,10 +296,56 @@ const authenticateWithGoogle = asyncHandler(async (req, res) => {
   });
 
   const payload = ticket.getPayload();
+  const { sub } = payload;
 
-  console.log(payload);
+  const user = await User.findOne({ googleId: sub });
 
-  return res.status(200).json({ message: "client logged", data: payload });
+  if (user) {
+    const { loggedInUser, accessToken, refreshToken } =
+      await generateUserTokens({
+        user,
+      });
+
+    return res
+      .status(200)
+      .cookie("accessToken", accessToken, options)
+      .cookie("refreshToken", refreshToken, options)
+      .json(
+        new ApiResponse(201, "User tokens returned successfully", loggedInUser),
+      );
+  } else {
+    const { email, given_name, sub, name, picture } = payload;
+    const username = generateUniqueUsername(given_name, sub);
+
+    const user = await User.create({
+      fullName: name,
+      googleId: sub,
+      email: email,
+      username: username,
+      isVerified: true,
+      authProvider: "google",
+      avatar: {
+        url: picture,
+      },
+    });
+
+    const { loggedInUser, accessToken, refreshToken } =
+      await generateUserTokens({
+        user,
+      });
+
+    return res
+      .status(201)
+      .cookie("accessToken", accessToken, options)
+      .cookie("refreshToken", refreshToken, options)
+      .json(
+        new ApiResponse(
+          201,
+          "User created and tokens returned successfully",
+          loggedInUser,
+        ),
+      );
+  }
 });
 
 const loginUser = asyncHandler(async (req, res) => {
@@ -303,6 +361,10 @@ const loginUser = asyncHandler(async (req, res) => {
 
   if (!user) {
     throw new ApiError(401, "User does not exist");
+  }
+
+  if (user.authProvider === "google" && !user.password) {
+    throw new ApiError(400, "Invalid user credentials");
   }
 
   const isPasswordValid = await user.isPasswordCorrect(password);
@@ -344,9 +406,7 @@ const logoutUser = asyncHandler(async (req, res) => {
 
 const updateUserAvatar = asyncHandler(async (req, res) => {
   const avatarLocalPath = req.file?.path;
-
   const userId = req.user?._id;
-
   const fileName = req.file?.originalname;
 
   if (!avatarLocalPath) {
@@ -383,7 +443,12 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
       try {
         await deleteImageKitFile(imagekitAvatar.fileId);
       } catch (cleanupErr) {
-        console.log("Imagekit rollback delete failed\n", cleanupErr.message);
+        console.log(
+          "Imagekit rollback delete failed\n",
+          cleanupErr.message,
+          "\nfileId: ",
+          imagekitAvatar?.fileId,
+        );
       }
     }
 
@@ -394,7 +459,12 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
     try {
       await deleteImageKitFile(oldFileId);
     } catch (error) {
-      console.log("imagekit avatar file deletion failed\n", error.message);
+      console.log(
+        "imagekit avatar file deletion failed\n",
+        error.message,
+        "\nfile_id: ",
+        oldFileId,
+      );
     }
   }
 

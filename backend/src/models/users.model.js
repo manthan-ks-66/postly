@@ -43,6 +43,16 @@ const userSchema = new mongoose.Schema(
       required: true,
       default: false,
     },
+    googleId: {
+      type: String,
+      unique: true,
+      sparse: true,
+    },
+    authProvider: {
+      type: String,
+      required: true,
+      enum: ["local", "google"],
+    },
 
     // temporary fields for verification
     OTP: {
