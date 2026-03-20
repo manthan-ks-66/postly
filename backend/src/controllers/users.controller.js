@@ -78,9 +78,7 @@ const generateUserTokens = async ({ user }) => {
 // generate unique username for google authenticated users
 const generateUniqueUsername = (given_name, sub) => {
   const base = given_name.trim().toLowerCase();
-
   const suffix = createHash("sha256").update(sub).digest("hex").slice(0, 5);
-
   const username = `${base}_${suffix}`;
 
   return username;
@@ -287,65 +285,81 @@ const verifyAndLoginUser = asyncHandler(async (req, res) => {
 });
 
 const authenticateWithGoogle = asyncHandler(async (req, res) => {
-  const { idToken } = req.body;
-  const client = new OAuth2Client(process.env.GOOGLE_AUTH_ID);
+  const { code } = req.body;
+
+  const client = new OAuth2Client(
+    process.env.GOOGLE_AUTH_CLIENT_ID,
+    process.env.GOOGLE_AUTH_CLIENT_SECRET,
+    "postmessage",
+  );
+
+  const { tokens } = await client.getToken(code);
+  const idToken = tokens.id_token;
 
   const ticket = await client.verifyIdToken({
     idToken,
-    audience: process.env.GOOGLE_AUTH_ID,
+    audience: process.env.GOOGLE_AUTH_CLIENT_ID,
   });
 
   const payload = ticket.getPayload();
-  const { sub } = payload;
+  const { email, given_name, sub, name, picture } = payload;
 
-  const user = await User.findOne({ googleId: sub });
+  // Priorities for user registerd locally and by google
+  // Priority 1 - find the user by googleId
+  let user = await User.findOne({ googleId: sub });
 
   if (user) {
-    const { loggedInUser, accessToken, refreshToken } =
-      await generateUserTokens({
-        user,
-      });
-
-    return res
-      .status(200)
-      .cookie("accessToken", accessToken, options)
-      .cookie("refreshToken", refreshToken, options)
-      .json(
-        new ApiResponse(201, "User tokens returned successfully", loggedInUser),
-      );
+    // in case if user has updated the email at google
+    if (user.email !== email) {
+      user.email = email;
+      await user.save();
+    }
   } else {
-    const { email, given_name, sub, name, picture } = payload;
-    const username = generateUniqueUsername(given_name, sub);
+    /**
+     * Priority 2 - find the user by email (in case user is registered locally)
+     * this else case will only run when user from the googleId is not found - then find the user by email
+     * if the user from the email is still not found then create user to proceed further for login
+     *
+     * - if user by googleId is found the logic proceeds to login user
+     */
+    user = await User.findOne({ email });
 
-    const user = await User.create({
-      fullName: name,
-      googleId: sub,
-      email: email,
-      username: username,
-      isVerified: true,
-      authProvider: "google",
-      avatar: {
-        url: picture,
-      },
-    });
+    if (user) {
+      user.googleId = sub;
+      await user.save();
+    } else {
+      const username = generateUniqueUsername(given_name, sub);
 
-    const { loggedInUser, accessToken, refreshToken } =
-      await generateUserTokens({
-        user,
+      user = await User.create({
+        fullName: name,
+        googleId: sub,
+        email: email,
+        username: username,
+        isVerified: true,
+        avatar: {
+          url: picture,
+        },
       });
-
-    return res
-      .status(201)
-      .cookie("accessToken", accessToken, options)
-      .cookie("refreshToken", refreshToken, options)
-      .json(
-        new ApiResponse(
-          201,
-          "User created and tokens returned successfully",
-          loggedInUser,
-        ),
-      );
+    }
   }
+
+  const { loggedInUser, accessToken, refreshToken } = await generateUserTokens({
+    user,
+  });
+
+  const statusCode = user.isNew ? 201 : 200;
+
+  return res
+    .status(statusCode)
+    .cookie("accessToken", accessToken, options)
+    .cookie("refreshToken", refreshToken, options)
+    .json(
+      new ApiResponse(
+        statusCode,
+        "User tokens returned successfully",
+        loggedInUser,
+      ),
+    );
 });
 
 const loginUser = asyncHandler(async (req, res) => {

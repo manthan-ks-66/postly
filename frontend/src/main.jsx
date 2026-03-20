@@ -8,12 +8,13 @@ import { Provider } from "react-redux";
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import { ConfigProvider, theme as antdTheme } from "antd";
 import NotificationProvider from "./context/NotificationProvider.jsx";
+import { GoogleOAuthProvider } from "@react-oauth/google";
 
-// Parent components
+// Root components
 import App from "./App.jsx";
 import DashBoard from "./DashBoard.jsx";
 
-// auth components
+// auth components (under protected routes - /auth)
 import Register from "./components/Auth/Register.jsx";
 import Login from "./components/Auth/Login.jsx";
 import ResetPassword from "./components/Auth/ResetPassword.jsx";
@@ -27,19 +28,21 @@ import NotFound from "./components/NotFound.jsx";
 // routes guard
 import AuthLayout from "./components/AuthLayout.jsx";
 
-// Post components 
+// Post components
 import PostPage from "./components/Post/PostPage.jsx";
 import Explore from "./components/Post/Explore.jsx";
-import PublishPost from "./components/Post/PublishPost.jsx";
 import QueryPosts from "./components/Post/QueryPosts.jsx";
 import Author from "./components/Post/Author.jsx";
 
-// Users components (under protected routes)
+// protected Post components
+import PublishPost from "./components/Post/PublishPost.jsx";
+
+// Users components (under protected routes - /user)
 import UserSider from "./components/User/UserSider.jsx";
 import Settings from "./components/Auth/Settings.jsx";
-import UserLIkedPosts from "./components/User/UserLIkedPosts.jsx";
 import UserProfile from "./components/User/UserProfile.jsx";
 import UserComments from "./components/User/UserComments.jsx";
+import UserLikedPosts from "./components/User/UserLikedPosts.jsx";
 
 const postlyDarkTheme = {
   algorithm: antdTheme.darkAlgorithm,
@@ -150,7 +153,7 @@ const router = createBrowserRouter([
                 path: "/user/liked-posts",
                 element: (
                   <AuthLayout>
-                    <UserLIkedPosts />
+                    <UserLikedPosts />
                   </AuthLayout>
                 ),
               },
@@ -212,10 +215,12 @@ const router = createBrowserRouter([
 
 createRoot(document.getElementById("root")).render(
   <Provider store={store}>
-    <ConfigProvider theme={postlyDarkTheme}>
-      <NotificationProvider>
-        <RouterProvider router={router} />
-      </NotificationProvider>
-    </ConfigProvider>
+    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_AUTH_CLIENT_ID}>
+      <ConfigProvider theme={postlyDarkTheme}>
+        <NotificationProvider>
+          <RouterProvider router={router} />
+        </NotificationProvider>
+      </ConfigProvider>
+    </GoogleOAuthProvider>
   </Provider>,
 );

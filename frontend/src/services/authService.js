@@ -10,6 +10,24 @@ class AuthService {
     }
   }
 
+  async authenticateWithGoogle({ code }) {
+    try {
+      const res = await axios.post(
+        `${this.usersBaseUrl}/google-auth`,
+        {
+          code,
+        },
+        {
+          withCredentials: true,
+        },
+      );
+
+      return res.data?.data;
+    } catch (error) {
+      handleError(error);
+    }
+  }
+
   async registerUser(userData) {
     try {
       const res = await axios.post(`${this.usersBaseUrl}/register`, userData, {

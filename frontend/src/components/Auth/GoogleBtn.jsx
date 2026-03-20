@@ -1,4 +1,10 @@
 import { Button } from "antd";
+import { useNotify } from "../../context/NotificationProvider";
+import { useGoogleLogin } from "@react-oauth/google";
+import authService from "../../services/authService";
+import { useDispatch } from "react-redux";
+import { login } from "../../store/authSlice";
+import { useNavigate } from "react-router-dom";
 
 const buttonStyle = {
   padding: "16px",
@@ -26,12 +32,43 @@ const iconStyle = {
 };
 
 const GoogleBtn = () => {
-  const handleGoogleAuth = () => {
-    console.log("Redirecting to Google...");
-  };
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const notify = useNotify();
+
+  const handleGoogleAuth = useGoogleLogin({
+    onSuccess: async (tokenResponse) => {
+      const code = tokenResponse.code;
+      await authService
+        .authenticateWithGoogle({ code })
+        .then((user) => {
+          if (user) {
+            dispatch(login(user));
+
+            notify.api.success({
+              title: "Welcome to Postly",
+              description: "You are now logged in",
+              placement: "top",
+            });
+
+            navigate("/");
+          }
+        })
+        .catch((error) =>
+          notify.api.error({
+            title: error.message,
+            placement: "top",
+          }),
+        );
+    },
+    flow: "auth-code",
+    onError: (error) =>
+      notify.api.error({ title: error.message, placement: "top" }),
+  });
 
   return (
     <Button
+      className="google-btn"
       type="default"
       size="middle"
       block
@@ -46,7 +83,7 @@ const GoogleBtn = () => {
   );
 };
 
-// Helper component for the Google "G" logo
+// Helper component for the Google logo
 const GoogleIcon = () => (
   <svg
     width="18"

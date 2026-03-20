@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import userService from "../../services/userService";
+import userService from "../../services/userService.js";
 import AntdSpin from "../AntdSpin.jsx";
 
 import { Typography } from "antd";
@@ -7,7 +7,7 @@ const { Text } = Typography;
 
 import PostCard2 from "../Post/PostCard2.jsx";
 
-function UserLIkedPosts() {
+function UserLikedPosts() {
   const [userLikedPosts, setUserLikedPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState();
@@ -37,4 +37,4 @@ function UserLIkedPosts() {
     ));
 }
 
-export default UserLIkedPosts;
+export default UserLikedPosts;
