@@ -119,12 +119,15 @@ class AuthService {
     }
   }
 
-  async sendOTP({ email }) {
+  async sendResetPasswordOTP({ email }) {
     try {
       const response = await axios.post(
-        `${this.usersBaseUrl}/send-reset-password-otp`,
+        `${this.usersBaseUrl}/initiate-reset-password-otp`,
         {
           email,
+        },
+        {
+          withCredentials: true,
         },
       );
 
@@ -136,11 +139,15 @@ class AuthService {
 
   async resetUserPassword(data) {
     try {
-      const response = await axios.post(`${this.usersBaseUrl}/reset-password`, {
+      const response = await axios.post(
+        `${this.usersBaseUrl}/reset-user-password`,
         data,
-      });
+        {
+          withCredentials: true,
+        },
+      );
 
-      return response.data;
+      return response;
     } catch (error) {
       handleError(error);
     }

@@ -4,6 +4,7 @@ import bcrypt from "bcrypt";
 
 const userSchema = new mongoose.Schema(
   {
+    // user data fields
     avatar: {
       url: {
         type: String,
@@ -29,12 +30,6 @@ const userSchema = new mongoose.Schema(
     password: {
       type: String,
     },
-    bio: {
-      type: String,
-    },
-    about: {
-      type: String,
-    },
     refreshToken: {
       type: String,
     },
@@ -52,6 +47,34 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
       enum: ["local", "google"],
+    },
+
+    // user information fields
+    bio: {
+      type: String,
+      default: "",
+    },
+    about: {
+      type: String,
+      default: "",
+    },
+
+    // user social link fields
+    instagram: {
+      type: String,
+      default: "",
+    },
+    likedIn: {
+      type: String,
+      default: "",
+    },
+    x: {
+      type: String,
+      default: "",
+    },
+    github: {
+      type: String,
+      default: "",
     },
 
     // temporary fields for verification

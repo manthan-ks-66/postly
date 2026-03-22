@@ -2,6 +2,7 @@ import { Router } from "express";
 import { upload } from "../middlewares/multer.middleware.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 import {
+  fetchAuthor,
   registerUser,
   regenerateRegistrationOTP,
   authenticateWithGoogle,
@@ -16,7 +17,6 @@ import {
   getUserLikedPosts,
   removeUserAvatar,
 } from "../controllers/users.controller.js";
-
 const router = Router();
 
 router.route("/register").post(registerUser);
@@ -31,7 +31,9 @@ router.route("/login").post(loginUser);
 
 router.route("/initiate-reset-password-otp").post(handleResetPasswordOTP);
 
-router.route("/reset-password").post(resetUserPassword);
+router.route("/reset-user-password").post(resetUserPassword);
+
+router.route("/get-author/:username").get(fetchAuthor);
 
 // secured routes
 router.route("/logout").post(verifyJWT, logoutUser);

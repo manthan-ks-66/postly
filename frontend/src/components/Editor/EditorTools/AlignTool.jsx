@@ -19,7 +19,7 @@ import {
 } from "@ant-design/icons";
 
 // react
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 
 // css
 import "../Editor.css";

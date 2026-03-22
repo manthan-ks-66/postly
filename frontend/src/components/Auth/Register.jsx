@@ -41,13 +41,15 @@ function Register() {
     },
   });
 
-  const register = async (data) => {
+  const register = async (userData) => {
     setLoading(true);
     try {
-      const res = await authService.registerUser(data);
+      const res = await authService.registerUser(userData);
 
       if (res.status === 201 || res.status === 200) {
-        localStorage.setItem("email", data.email);
+        sessionStorage.setItem("email", userData.email);
+        sessionStorage.setItem("verificationStatus", true);
+
         navigate("/auth/register/verify");
       }
     } catch (error) {
@@ -156,7 +158,7 @@ function Register() {
                   name="username"
                   control={control}
                   rules={{
-                    required: "This field is required",
+                    required: "Username is required",
                     pattern: {
                       value: /^[a-zA-Z0-9_-]+$/,
                       message: "Only _ and - are allowed",
@@ -182,7 +184,15 @@ function Register() {
                 <Controller
                   name="password"
                   control={control}
-                  rules={{ required: "This field is required" }}
+                  rules={{
+                    required: "Password is required",
+                    pattern: {
+                      value:
+                        /^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).+$/,
+                      message:
+                        "Must include letters, digits, and one special character",
+                    },
+                  }}
                   render={({ field }) => (
                     <Input.Password
                       {...field}
@@ -203,7 +213,7 @@ function Register() {
               <Controller
                 name="fullName"
                 control={control}
-                rules={{ required: "This field is required" }}
+                rules={{ required: "Fullname is required" }}
                 render={({ field }) => (
                   <Input
                     prefix={<FormOutlined />}
@@ -224,10 +234,10 @@ function Register() {
                 name="email"
                 control={control}
                 rules={{
-                  required: "This field is required",
+                  required: "Email is required",
                   pattern: {
                     value: /^\S+@\S+\.\S+$/,
-                    message: "Please enter a valid email",
+                    message: "Enter a valid email",
                   },
                 }}
                 render={({ field }) => (

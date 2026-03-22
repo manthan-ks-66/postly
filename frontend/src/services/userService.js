@@ -69,6 +69,18 @@ class UserService {
       handleError(error);
     }
   }
+
+  async getAuthor(username) {
+    try {
+      const res = await axios.get(
+        `${this.usersBaseUrl}/get-author/${username}`,
+      );
+
+      return res.data?.data;
+    } catch (error) {
+      handleError(error);
+    }
+  }
 }
 
 const userService = new UserService();

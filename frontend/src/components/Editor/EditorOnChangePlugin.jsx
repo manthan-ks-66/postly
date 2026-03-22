@@ -1,6 +1,7 @@
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import { useEffect } from "react";
 
+// the onChange prop is the react-hook-form onChange
 function EditorOnChangePlugin({ onChange }) {
   const [editor] = useLexicalComposerContext();
 
@@ -9,7 +10,7 @@ function EditorOnChangePlugin({ onChange }) {
     // so no need to manually call the unsubscribe() here
 
     return editor.registerUpdateListener(({ editorState }) => {
-      // Purpose of this callback:
+      // Purpose of the editor.registerListener() callback:
       // Lexical calls this function every time the editor updates (type, format, move-cursor etc.)
 
       onChange(editorState.toJSON());

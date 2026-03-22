@@ -39,27 +39,27 @@ const GoogleBtn = () => {
   const handleGoogleAuth = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
       const code = tokenResponse.code;
-      await authService
-        .authenticateWithGoogle({ code })
-        .then((user) => {
-          if (user) {
-            dispatch(login(user));
 
-            notify.api.success({
-              title: "Welcome to Postly",
-              description: "You are now logged in",
-              placement: "top",
-            });
+      try {
+        const user = await authService.authenticateWithGoogle({ code });
 
-            navigate("/");
-          }
-        })
-        .catch((error) =>
-          notify.api.error({
-            title: error.message,
+        if (user) {
+          dispatch(login(user));
+
+          notify.api.success({
+            title: "Welcome to Postly",
+            description: "Your are now logged in",
             placement: "top",
-          }),
-        );
+          });
+
+          navigate("/");
+        }
+      } catch (error) {
+        notify.api.error({
+          title: error.message,
+          placement: "top",
+        });
+      }
     },
     flow: "auth-code",
     onError: (error) =>

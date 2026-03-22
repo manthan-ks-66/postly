@@ -19,6 +19,10 @@ import {
   UploadOutlined,
   DeleteOutlined,
   UserOutlined,
+  XOutlined,
+  GithubOutlined,
+  LinkedinOutlined,
+  InstagramOutlined,
 } from "@ant-design/icons";
 import userService from "../../services/userService";
 import { update } from "../../store/authSlice.js";
@@ -45,10 +49,14 @@ function UserProfile() {
       bio: user?.bio || "",
       about: user?.about || "",
       fullName: user?.fullName || "",
+      socialLinks: {
+        x: user?.socialLinks?.x || "",
+        github: user?.socialLinks?.github || "",
+        linkedin: user?.socialLinks?.linkedin || "",
+        instagram: user?.socialLinks?.instagram || "",
+      },
     },
   });
-
-  const [error, setError] = useState();
 
   const [isEditing, setIsEditing] = useState(false);
 
@@ -64,6 +72,33 @@ function UserProfile() {
   const titleLevel = screens.xs ? 3 : screens.sm ? 2 : 1;
   const subtextSize = screens.xs ? "12px" : screens.sm ? "14px" : "16px";
   const textSize = screens.xs ? "14px" : screens.sm ? "15px" : "16px";
+
+  const socialLinks = [
+    {
+      key: "x",
+      label: "X",
+      icon: <XOutlined style={{ color: token.colorTextBase }} />,
+      value: user?.x || "",
+    },
+    {
+      key: "github",
+      label: "GitHub",
+      icon: <GithubOutlined style={{ color: token.colorTextBase }} />,
+      value: user?.github || "",
+    },
+    {
+      key: "linkedIn",
+      label: "LinkedIn",
+      icon: <LinkedinOutlined style={{ color: "#0077b5" }} />,
+      value: user?.linkedIn || "",
+    },
+    {
+      key: "instagram",
+      label: "Instagram",
+      icon: <InstagramOutlined style={{ color: "#c13584" }} />,
+      value: user?.instagram || "",
+    },
+  ];
 
   const handleAvatarUpdate = async ({ file }) => {
     try {
@@ -88,8 +123,6 @@ function UserProfile() {
         });
       }
     } catch (error) {
-      setError(error.message);
-
       notify.api.error({
         message: "Failed to Update Avatar",
         description: error.message,
@@ -113,8 +146,6 @@ function UserProfile() {
         dispatch(update(user));
       }
     } catch (error) {
-      setError(error.message);
-
       notify.api.error({
         message: error.message,
         placement: "top",
@@ -172,11 +203,14 @@ function UserProfile() {
         >
           <Avatar
             src={user?.avatar?.url}
+            icon={<UserOutlined />}
             size={avatarSize}
             style={{
               border: `3px solid ${token.colorPrimary}`,
-              display: "block",
-              margin: "0 auto",
+              display: "flex",
+              margin: "auto",
+              alignItems: "center",
+              justifyContent: "center",
             }}
           />
         </Col>
@@ -403,6 +437,77 @@ function UserProfile() {
               >
                 {user?.about}
               </Text>
+            )}
+          </section>
+
+          {/* Social Links Section */}
+          <section>
+            <Title
+              level={5}
+              style={{
+                display: "block",
+                marginBottom: 8,
+                color: token.colorTextSecondary,
+                letterSpacing: "0.5px",
+              }}
+            >
+              Social Links
+            </Title>
+
+            {isEditing ? (
+              <Row gutter={[12, 12]}>
+                {socialLinks.map((item) => (
+                  <Col xs={24} sm={12} key={item.key}>
+                    <Controller
+                      name={item.key}
+                      control={control}
+                      render={({ field }) => (
+                        <Input
+                          {...field}
+                          prefix={item.icon}
+                          size={screens.xs ? "middle" : "large"}
+                          placeholder={item.placeholder}
+                          style={{
+                            fontSize: textSize,
+                            borderRadius: token.borderRadiusLG,
+                          }}
+                        />
+                      )}
+                    />
+                  </Col>
+                ))}
+              </Row>
+            ) : (
+              <Space
+                size={screens.xs ? "middle" : "large"}
+                wrap
+                style={{ fontSize: screens.xs ? "22px" : "24px" }}
+              >
+                {socialLinks.map((item) => {
+                  if (!item.value) return null;
+
+                  return (
+                    <a
+                      key={item.key}
+                      href={item.value}
+                      target="_blank"
+                      rel="noreferrer noopener"
+                      aria-label={item.label}
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        color: "inherit",
+                      }}
+                    >
+                      {item.icon}
+                    </a>
+                  );
+                })}
+                {!socialLinks.some((item) => item.value) ? (
+                  <Text type="secondary">No social links added</Text>
+                ) : null}
+              </Space>
             )}
           </section>
         </Space>

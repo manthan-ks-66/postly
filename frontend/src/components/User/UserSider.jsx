@@ -11,7 +11,9 @@ const { Header, Sider, Content } = Layout;
 
 // react
 import { useState, useMemo } from "react";
-import { Outlet, useNavigate } from "react-router-dom";
+import { Outlet, useNavigate, Navigate, useLocation } from "react-router-dom";
+import { useSelector } from "react-redux";
+import UserProfile from "./UserProfile";
 
 const userMenuItems = [
   {

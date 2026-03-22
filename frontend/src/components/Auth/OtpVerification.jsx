@@ -19,9 +19,7 @@ import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 
 const OtpVerification = () => {
-  const email = localStorage.getItem("email");
-
-  if (!email) return <Navigate to="/auth/register" replace />;
+  const email = sessionStorage.getItem("email");
 
   const [error, setError] = useState();
 
@@ -41,7 +39,7 @@ const OtpVerification = () => {
 
       if (user) {
         dispatch(login(user));
-        localStorage.clear();
+        sessionStorage.clear();
 
         notify.api.success({
           title: "Registration completed",

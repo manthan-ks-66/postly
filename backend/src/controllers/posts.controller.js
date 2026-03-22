@@ -1,11 +1,14 @@
+// model imports
 import { Post } from "../models/posts.model.js";
+import { PostLike } from "../models/postLikes.model.js";
+import { PostImage } from "../models/postImages.model.js";
+
+// utilities and methods and modules
 import asyncHandler from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { uploadToImageKit } from "../utils/imagekit.js";
 import mongoose, { isValidObjectId } from "mongoose";
-import { PostLike } from "../models/postLikes.model.js";
-import { PostImage } from "../models/postImages.model.js";
 import jwt from "jsonwebtoken";
 
 // Controller: Upload post
@@ -318,6 +321,8 @@ const fetchPost = asyncHandler(async (req, res) => {
         },
         isLiked: {
           $cond: {
+
+            // if $ size returns array as 1 flag gets true and if 0 flag gets false
             if: { $gt: [{ $size: "$userLikedStatus" }, 0] },
             then: true,
             else: false,
@@ -362,9 +367,9 @@ const uploadEditorImage = asyncHandler(async (req, res) => {
   }
 
   await PostImage.create({
-    imageKitFileId: imageKitFile?.fileId,
-    fileName: imageKitFile?.name,
-    url: imageKitFile?.url,
+    imageKitFileId: imageKitFile.fileId,
+    fileName: imageKitFile.name,
+    url: imageKitFile.url,
     uploadedBy: userId,
     postId: postId,
   });

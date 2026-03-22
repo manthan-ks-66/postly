@@ -8,15 +8,14 @@ import { ApiError } from "../utils/ApiError.js";
 import { uploadToImageKit, deleteImageKitFile } from "../utils/imagekit.js";
 import asyncHandler from "../utils/asyncHandler.js";
 
-// node_module imports
+// module imports
 import jwt from "jsonwebtoken";
 import { randomInt, createHash } from "node:crypto";
 import nodemailer from "nodemailer";
 import mongoose, { isValidObjectId } from "mongoose";
 import { OAuth2Client } from "google-auth-library";
 
-// Methods and configurations:
-
+// Methods and configs:
 // nodemailer: transporter config
 const transporter = nodemailer.createTransport({
   service: "gmail",
@@ -106,7 +105,7 @@ const registerUser = asyncHandler(async (req, res) => {
 
   if (existedUser) {
     if (existedUser.isVerified) {
-      throw new ApiError(400, "User is already registered, Please login");
+      throw new ApiError(400, "User is already registered");
     }
 
     Object.assign(existedUser, {
@@ -518,6 +517,10 @@ const removeUserAvatar = asyncHandler(async (req, res) => {
 const getCurrentUser = asyncHandler(async (req, res) => {
   const user = req.user;
 
+  if (!user) {
+    throw new ApiError(400, "Invalid token or Token is expired");
+  }
+
   return res
     .status(200)
     .json(new ApiResponse(200, "User details fetched successfully", user));
@@ -545,7 +548,7 @@ const handleResetPasswordOTP = asyncHandler(async (req, res) => {
   const user = await User.findOne({ email });
 
   if (!user) {
-    throw new ApiError(400, "User not found!");
+    throw new ApiError(400, "User with this email is not registered");
   }
 
   const otp = randomInt(100000, 999999);
@@ -560,42 +563,65 @@ const handleResetPasswordOTP = asyncHandler(async (req, res) => {
     "Password reset One Time PassCode",
   );
 
-  return res.status(200).json(new ApiResponse(200, "OTP sent successfully"));
+  const verificationToken = user.generateVerificationToken();
+
+  return res
+    .status(200)
+    .cookie("verificationToken", verificationToken, options)
+    .json(new ApiResponse(200, "OTP sent to registered email successfully"));
 });
 
 const resetUserPassword = asyncHandler(async (req, res) => {
-  /* 
-    get email , otp, newPassword, confirmNewPassword from req.body
+  /**
+    * get verificationToken, otp, newPassword, confirmNewPassword from req
 
-    find the user in the db through email
-      - throw error if user is not found
+    * check newPassword is equal to confirmNewPassword
 
-    check if the otp is expired 
+    * find the user from the db by decoding the token
+      - throw error if user is not registered
+
+    * check if the otp is expired 
       - throw error if Date.now is > otpExpiry
 
-    check if otp is correct 
+    * check if otp is correct 
 
-    check newPassword is equal to confirmNewPassword
+    * update the user password in the db and set the passwordResetOTP and otpExpiry field as null 
 
-    update the user password in the db and set the passwordResetOTP and otpExpiry field as null 
+    * return res - password updated
+    */
 
-    return res - password updated
-   */
-
-  const { email, otp, newPassword, confirmNewPassword } = req.body;
+  const { otp, newPassword, confirmNewPassword } = req.body;
 
   if (
-    [email, otp, newPassword, confirmNewPassword].some(
+    [otp, newPassword, confirmNewPassword].some(
       (field) => !field || field.trim() === "",
     )
   ) {
-    throw new ApiError(400, "All fields are required");
+    throw new ApiError(400, "Required field is empty");
   }
 
-  const user = await User.findOne({ email });
+  if (newPassword !== confirmNewPassword) {
+    throw new ApiError(400, "Password doesn't match with confirmed password");
+  }
+
+  const verificationToken = req.cookies?.verificationToken;
+
+  if (!verificationToken) {
+    throw new ApiError(
+      400,
+      "Invalid request: User has not requested for password update",
+    );
+  }
+
+  const decodedToken = jwt.verify(
+    verificationToken,
+    process.env.VERIFICATION_TOKEN_SECRET,
+  );
+
+  const user = await User.findOne({ _id: decodedToken._id });
 
   if (!user) {
-    throw new ApiError(400, "User not found!");
+    throw new ApiError(400, "User is not registered");
   }
 
   if (Date.now() > user.otpExpiry) {
@@ -608,12 +634,8 @@ const resetUserPassword = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Invalid OTP");
   }
 
-  if (newPassword !== confirmNewPassword) {
-    throw new ApiError(400, "Password doesn't match with confirmed password");
-  }
-
   const updatedUser = await User.findOneAndUpdate(
-    { email: email },
+    { _id: user._id },
     {
       $set: {
         password: newPassword,
@@ -632,13 +654,14 @@ const resetUserPassword = asyncHandler(async (req, res) => {
 
   return res
     .status(200)
-    .json(new ApiResponse(200, "Password changed successfully", {}));
+    .clearCookie("verificationToken")
+    .json(new ApiResponse(200, "Password updated successfully"));
 });
 
 const updateUserDetails = asyncHandler(async (req, res) => {
   const userId = req.user?._id;
 
-  const { bio, fullName, about } = req.body;
+  const { bio, fullName, about, x, linkedIn, instagram, github } = req.body;
 
   if (!fullName) {
     throw new ApiError(400, "Name cannot be empty");
@@ -651,6 +674,10 @@ const updateUserDetails = asyncHandler(async (req, res) => {
         bio,
         fullName,
         about,
+        x,
+        linkedIn,
+        instagram,
+        github,
       },
     },
     {
@@ -786,11 +813,50 @@ const getUserLikedPosts = asyncHandler(async (req, res) => {
     );
 });
 
+const fetchAuthor = asyncHandler(async (req, res) => {
+  const { username } = req.params;
+
+  if (!username) {
+    throw new ApiError(400, "Username is required");
+  }
+
+  let dbUsername = username;
+
+  if (username[0] === "@") {
+    dbUsername = username.replace("@", "");
+  }
+
+  const author = await User.findOne(
+    { username: dbUsername },
+    {
+      _id: 0,
+      fullName: 1,
+      avatar: 1,
+      bio: 1,
+      about: 1,
+      username: 1,
+      x: 1,
+      instagram: 1,
+      github: 1,
+      linkedIn: 1,
+    },
+  );
+
+  if (!author) {
+    throw new ApiError(400, "Author not found");
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, "Author details fetched successfully", author));
+});
+
 const deleteUserAccount = asyncHandler(async (req, res) => {
   // TODO: delete user
 });
 
 export {
+  fetchAuthor,
   registerUser,
   regenerateRegistrationOTP,
   authenticateWithGoogle,

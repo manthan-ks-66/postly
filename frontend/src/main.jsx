@@ -19,6 +19,7 @@ import Register from "./components/Auth/Register.jsx";
 import Login from "./components/Auth/Login.jsx";
 import ResetPassword from "./components/Auth/ResetPassword.jsx";
 import OtpVerification from "./components/Auth/OtpVerification.jsx";
+import VerifyIdentity from "./components/Auth/VerifyIdentity.jsx";
 
 // general components (un-protected)
 import Home from "./components/Home.jsx";
@@ -116,9 +117,9 @@ const router = createBrowserRouter([
           {
             path: "/post/new/write",
             element: (
-              <AuthLayout>
-                <PublishPost />
-              </AuthLayout>
+              // <AuthLayout>
+              <PublishPost />
+              // </AuthLayout>
             ),
           },
           {
@@ -178,10 +179,6 @@ const router = createBrowserRouter([
         ],
       },
       {
-        path: "/auth/reset-password",
-        element: <ResetPassword />,
-      },
-      {
         path: "/auth/register",
         element: (
           <AuthLayout>
@@ -202,6 +199,26 @@ const router = createBrowserRouter([
         element: (
           <AuthLayout>
             <Login />
+          </AuthLayout>
+        ),
+      },
+
+      // verify email for password reset
+      {
+        path: "/auth/forgot-password",
+        element: (
+          <AuthLayout>
+            <VerifyIdentity />,
+          </AuthLayout>
+        ),
+      },
+
+      // reset the user password
+      {
+        path: "/auth/forgot-password/reset/verify",
+        element: (
+          <AuthLayout>
+            <ResetPassword />,
           </AuthLayout>
         ),
       },

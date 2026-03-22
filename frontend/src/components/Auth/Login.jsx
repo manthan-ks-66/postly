@@ -24,16 +24,20 @@ function Login() {
   const notify = useNotify();
 
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const { control, handleSubmit } = useForm();
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
 
   const { token } = theme.useToken();
-  const [form] = Form.useForm();
 
-  const loginUser = async (data) => {
+  const handleLogin = async (data) => {
     try {
       const user = await authService.loginUser(data);
 
@@ -50,11 +54,9 @@ function Login() {
       navigate("/");
     } catch (error) {
       setError(error.message);
+    } finally {
+      setLoading(false);
     }
-  };
-
-  const handleAntdSubmit = () => {
-    handleSubmit(loginUser)();
   };
 
   return (
@@ -136,76 +138,93 @@ function Login() {
           <Divider>OR</Divider>
         </div>
 
-        <Form
-          form={form}
-          layout="vertical"
-          onFinish={handleAntdSubmit}
-          requiredMark={false}
-        >
-          <Form.Item
-            prefix={<UserOutlined />}
-            label="Username"
-            style={{ marginBottom: 16 }}
-          >
-            <Controller
-              name="username"
-              control={control}
-              rules={{ required: true }}
-              render={({ field }) => (
-                <Input
-                  {...field}
-                  placeholder="username or email"
-                  size="middle"
-                />
-              )}
-            />
-          </Form.Item>
-
-          <Form.Item
-            prefix={<LockOutlined />}
-            label="Password"
-            style={{ marginBottom: 8 }}
-          >
-            <Controller
-              name="password"
-              control={control}
-              rules={{ required: true }}
-              render={({ field }) => (
-                <Input.Password
-                  {...field}
-                  placeholder="password"
-                  size="middle"
-                />
-              )}
-            />
-          </Form.Item>
-
-          <div style={{ marginBottom: 19, textAlign: "left" }}>
-            <Link
-              to="/auth/reset-password"
-              style={{
-                fontSize: "13px",
-                fontWeight: "bold",
-                color: token.colorPrimary,
-              }}
+        <form style={{ width: "100%" }} onSubmit={handleSubmit(handleLogin)}>
+          <Form layout="vertical" component={false}>
+            <Form.Item
+              label="Username"
+              validateStatus={errors.username ? "error" : ""}
+              help={errors.username?.message}
             >
-              Forgot Password?
-            </Link>
-          </div>
+              <Controller
+                name="username"
+                control={control}
+                rules={{
+                  required: "Username is required",
+                  pattern: {
+                    value: /^[a-zA-Z0-9_-]+$/,
+                    message: "Only _ and - are allowed",
+                  },
+                }}
+                render={({ field }) => (
+                  <Input
+                    {...field}
+                    prefix={<UserOutlined />}
+                    placeholder="username or email"
+                    size="middle"
+                  />
+                )}
+              />
+            </Form.Item>
 
-          <Form.Item>
-            <Button
-              type="primary"
-              htmlType="submit"
-              block
-              style={{
-                fontWeight: "bold",
-              }}
+            <Form.Item
+              label="Password"
+              validateStatus={errors.password ? "error" : ""}
+              help={errors.password?.message}
             >
-              Login
-            </Button>
-          </Form.Item>
-        </Form>
+              <Controller
+                name="password"
+                control={control}
+                rules={{
+                  required: "Password is required",
+                  pattern: {
+                    value:
+                      /^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).+$/,
+                    message:
+                      "Must include letters, digits, and one special character",
+                  },
+                }}
+                render={({ field }) => (
+                  <Input.Password
+                    {...field}
+                    prefix={<LockOutlined />}
+                    placeholder="password"
+                    size="middle"
+                  />
+                )}
+              />
+            </Form.Item>
+
+            <div style={{ textAlign: "left", marginBottom: "10px", marginTop: "-20px" }}>
+              <Link
+                to="/auth/forgot-password"
+                style={{
+                  fontSize: "13px",
+                  fontWeight: "bold",
+                  color: token.colorPrimary,
+                }}
+              >
+                Forgot Password?
+              </Link>
+            </div>
+
+            <Form.Item>
+              <Button
+                type="primary"
+                htmlType="submit"
+                block
+                loading={loading}
+                disabled={loading}
+                style={{
+                  fontWeight: "bold",
+                  padding: 17,
+                  borderRadius: 10,
+                }}
+              >
+                Login
+              </Button>
+            </Form.Item>
+          </Form>
+        </form>
       </div>
     </Layout>
   );

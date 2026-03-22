@@ -9,6 +9,10 @@
   margin-bottom: 20px;
 }
 
+.authorName:hover {
+  color: #fff;
+}
+
 .featured-image-wrapper {
   margin-bottom: 30px;
   width: 100%;

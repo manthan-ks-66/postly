@@ -34,6 +34,8 @@ const { Content } = Layout;
 const { Title, Paragraph, Text } = Typography;
 
 function PostPage() {
+  const user = useSelector((state) => state.auth.user);
+
   const { token } = theme.useToken();
   const notify = useNotify();
 
@@ -48,7 +50,6 @@ function PostPage() {
 
   const { _id, slug } = useParams();
 
-  const user = useSelector((state) => state.auth.user);
   const navigate = useNavigate();
 
   const copyToClipboard = () => {
@@ -159,11 +160,14 @@ function PostPage() {
                 src={post?.author?.avatar?.url}
                 icon={<UserOutlined />}
               />
-              <Link to={`/author/@${post?.author?.username}`}>
-                <Text type="secondary" strong>
-                  by {post?.author?.fullName}
-                </Text>
-              </Link>
+              <Text type="secondary">
+                by{" "}
+                <Link to={`/author/@${post?.author?.username}`}>
+                  <Text className="authorName" type="secondary" strong>
+                    {post?.author?.fullName}
+                  </Text>
+                </Link>
+              </Text>
             </Space>
 
             <div
