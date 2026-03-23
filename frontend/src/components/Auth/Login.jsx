@@ -69,11 +69,14 @@ function Login() {
         padding: "10px",
       }}
     >
-      <Logo />
+      <Link to="/">
+        <Logo />
+      </Link>
 
       <div
         style={{
-          width: "420px",
+          width: "100%",
+          maxWidth: "470px",
           padding: "30px 20px",
           backgroundColor: "#ffffff1e",
           border: "1px solid rgba(255, 255, 255, 0.12)",
@@ -194,7 +197,13 @@ function Login() {
               />
             </Form.Item>
 
-            <div style={{ textAlign: "left", marginBottom: "10px", marginTop: "-20px" }}>
+            <div
+              style={{
+                textAlign: "left",
+                marginBottom: "10px",
+                marginTop: "-20px",
+              }}
+            >
               <Link
                 to="/auth/forgot-password"
                 style={{

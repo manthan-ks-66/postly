@@ -46,79 +46,92 @@ const VerifyIdentity = () => {
         padding: "10px",
       }}
     >
-      <div
+      <Card
         style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          minHeight: "100vh",
+          width: "100%",
+          maxWidth: "400px",
+          padding: "10px",
+          backgroundColor: "#ffffff1e",
+          border: "1px solid rgba(255, 255, 255, 0.12)",
+          borderRadius: 20,
+          boxShadow: "0 8px 32px 0 rgba(0, 0, 0, 0)",
         }}
       >
-        <Card
+        <div
           style={{
-            width: 400,
-            borderRadius: "8px",
-            backgroundColor: "#ffffff1e",
-            boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+            minHeight: "20px",
+            margin: "10px 0",
+            textAlign: "center",
+            visibility: error ? "visible" : "hidden",
           }}
+          className="errorContainer"
         >
-          <div style={{ textAlign: "center", marginBottom: "24px" }}>
-            <Title level={3}>Forgot Password?</Title>
-            <Text type="secondary">
-              Enter your registered email to receive an OTP
-            </Text>
-          </div>
-
-          <form onSubmit={handleSubmit(submitEmail)}>
-            <Form layout="vertical" component={false}>
-              <Form.Item
-                label="Email Address"
-                validateStatus={errors.email ? "error" : ""}
-                help={errors.email?.message}
-              >
-                <Controller
-                  name="email"
-                  control={control}
-                  rules={{
-                    required: "Email is required",
-                    pattern: {
-                      value: /^\S+@\S+\.\S+$/,
-                      message: "Enter a valid email",
-                    },
-                  }}
-                  render={({ field }) => (
-                    <Input {...field} size="middle" prefix={<MailOutlined />} />
-                  )}
-                />
-              </Form.Item>
-
-              <Button
-                loading={loading}
-                disabled={loading}
-                type="primary"
-                htmlType="submit"
-                block
-                size="middle"
-                style={{ marginTop: "8px" }}
-              >
-                Send Reset Code
-              </Button>
-            </Form>
-          </form>
-
-          <div style={{ textAlign: "center", marginTop: "16px" }}>
-            <Button
-              style={{ color: token.colorPrimary }}
-              size="small"
-              icon={<ArrowLeftOutlined />}
-              onClick={() => navigate("/auth/login")}
-              type="link"
+          {error && (
+            <Text
+              style={{ display: "flex", justifyContent: "center" }}
+              type="danger"
             >
-              Back to Login
+              {error}
+            </Text>
+          )}
+        </div>
+
+        <div style={{ textAlign: "center", marginBottom: "20px" }}>
+          <Title level={3}>Forgot Password?</Title>
+          <Text type="secondary">
+            Enter your registered email to receive an OTP
+          </Text>
+        </div>
+
+        <form onSubmit={handleSubmit(submitEmail)}>
+          <Form layout="vertical" component={false}>
+            <Form.Item
+              label="Email Address"
+              validateStatus={errors.email ? "error" : ""}
+              help={errors.email?.message}
+            >
+              <Controller
+                name="email"
+                control={control}
+                rules={{
+                  required: "Email is required",
+                  pattern: {
+                    value: /^\S+@\S+\.\S+$/,
+                    message: "Enter a valid email",
+                  },
+                }}
+                render={({ field }) => (
+                  <Input {...field} size="middle" prefix={<MailOutlined />} />
+                )}
+              />
+            </Form.Item>
+
+            <Button
+              loading={loading}
+              disabled={loading}
+              type="primary"
+              htmlType="submit"
+              block
+              size="middle"
+              style={{ marginTop: "8px" }}
+            >
+              Send Code
             </Button>
-          </div>
-        </Card>
-      </div>
+          </Form>
+        </form>
+
+        <div style={{ textAlign: "center", marginTop: "16px" }}>
+          <Button
+            style={{ color: token.colorPrimary }}
+            size="small"
+            icon={<ArrowLeftOutlined />}
+            onClick={() => navigate("/auth/login")}
+            type="link"
+          >
+            Back to Login
+          </Button>
+        </div>
+      </Card>
     </Layout>
   );
 };

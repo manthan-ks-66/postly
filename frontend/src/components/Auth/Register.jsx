@@ -69,12 +69,14 @@ function Register() {
         padding: "10px",
       }}
     >
-      <Logo />
+      <Link to="/">
+        <Logo />
+      </Link>
 
       <div
         style={{
           width: "100%",
-          maxWidth: "500px",
+          maxWidth: "520px",
           padding: "30px 20px",
           backgroundColor: "#ffffff1e",
           border: "1px solid rgba(255, 255, 255, 0.12)",

@@ -7,23 +7,18 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { ApiError } from "../utils/ApiError.js";
 import { uploadToImageKit, deleteImageKitFile } from "../utils/imagekit.js";
 import asyncHandler from "../utils/asyncHandler.js";
+import returnHTML from "../utils/returnMailHtml.js";
 
 // module imports
 import jwt from "jsonwebtoken";
 import { randomInt, createHash } from "node:crypto";
-import nodemailer from "nodemailer";
 import mongoose, { isValidObjectId } from "mongoose";
 import { OAuth2Client } from "google-auth-library";
+import { Resend } from "resend";
 
 // Methods and configs:
-// nodemailer: transporter config
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.EMAIL_ADDRESS,
-    pass: process.env.EMAIL_PASSWORD,
-  },
-});
+// Resend mail config
+const resend = new Resend(process.env.RESEND_VERIFICATION_MAIL_API_KEY);
 
 const options = {
   httpOnly: true,
@@ -37,22 +32,13 @@ const generateAndSendOTP = async (processMsg, user, email, subject) => {
   await user.hashOTP(otp);
   await user.save();
 
-  const mailMsg = `
-Hi ${user.fullName.trim().split(" ")[0]}, 
+  const mailHTML = returnHTML(processMsg, user, email, subject, otp);
 
-To continue with the ${processMsg} on Postly, 
-
-Use the One Time Password (OTP): ${otp} 
-
-This OTP is valid for 2 minutes. Do not share this code with anyone
-
-Thank You`;
-
-  await transporter.sendMail({
-    from: process.env.EMAIL_ADDRESS,
+  await resend.emails.send({
+    from: "Prose <noreply@verify.onprose.tech>",
     to: email,
     subject: subject,
-    text: mailMsg,
+    html: mailHTML,
   });
 };
 

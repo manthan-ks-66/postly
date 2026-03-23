@@ -47,7 +47,7 @@ const GoogleBtn = () => {
           dispatch(login(user));
 
           notify.api.success({
-            title: "Welcome to Postly",
+            title: "Welcome to PROSE",
             description: "Your are now logged in",
             placement: "top",
           });

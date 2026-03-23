@@ -49,12 +49,10 @@ function UserProfile() {
       bio: user?.bio || "",
       about: user?.about || "",
       fullName: user?.fullName || "",
-      socialLinks: {
-        x: user?.socialLinks?.x || "",
-        github: user?.socialLinks?.github || "",
-        linkedin: user?.socialLinks?.linkedin || "",
-        instagram: user?.socialLinks?.instagram || "",
-      },
+      x: user?.x || "",
+      github: user?.github || "",
+      linkedin: user?.linkedin || "",
+      instagram: user?.instagram || "",
     },
   });
 
@@ -103,7 +101,7 @@ function UserProfile() {
   const handleAvatarUpdate = async ({ file }) => {
     try {
       notify.api.info({
-        message: "Updating Avatar",
+        title: "Updating Avatar",
         description: "Please wait while updation is in process...",
         placement: "top",
       });
@@ -137,7 +135,7 @@ function UserProfile() {
 
       if (res.status === 200) {
         notify.api.success({
-          message: "Avatar removed successfully",
+          title: "Avatar removed successfully",
           placement: "top",
         });
 
@@ -169,7 +167,7 @@ function UserProfile() {
       }
     } catch (error) {
       notify.api.error({
-        message: error.message,
+        title: error.message,
         placement: "top",
       });
     }

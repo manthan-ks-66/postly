@@ -77,11 +77,8 @@ const Author = () => {
         <Card
           variant="borderless"
           style={{
-            maxWidth: 600,
             width: "100%",
-            borderRadius: "16px",
             textAlign: "center",
-            boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
           }}
         >
           {/* 1. Avatar Section */}
@@ -89,7 +86,7 @@ const Author = () => {
             size={160}
             src={author.avatar?.url}
             icon={<UserOutlined />}
-            style={{ border: "4px solid #f0f2f5" }}
+            style={{ border: "3.3px solid #55aa00" }}
           />
 
           {/* 2. Full Name and Username */}
@@ -122,13 +119,41 @@ const Author = () => {
           <Divider />
 
           {/* 4. Social Links */}
-          <Space size="large" style={{ fontSize: "24px" }}>
-            <XOutlined style={{ color: "#000", cursor: "pointer" }} />
-            <GithubOutlined style={{ color: "#000", cursor: "pointer" }} />
-            <LinkedinOutlined style={{ color: "#0077b5", cursor: "pointer" }} />
-            <InstagramOutlined
-              style={{ color: "#833ab4", cursor: "pointer" }}
-            />
+          <Space
+            size="middle"
+            style={{
+              fontSize: "24px",
+              display: "flex",
+              justifyContent: "start",
+            }}
+          >
+            {author?.x && (
+              <a href={author?.x}>
+                <XOutlined style={{ color: "#000", cursor: "pointer" }} />
+              </a>
+            )}
+
+            {author?.github && (
+              <a href={author?.github}>
+                <GithubOutlined style={{ color: "#000", cursor: "pointer" }} />
+              </a>
+            )}
+
+            {author?.linkedIn && (
+              <a href={author?.linkedIn}>
+                <LinkedinOutlined
+                  style={{ color: "#0077b5", cursor: "pointer" }}
+                />
+              </a>
+            )}
+
+            {author?.instagram && (
+              <a href={author?.instagram}>
+                <InstagramOutlined
+                  style={{ color: "#833ab4", cursor: "pointer" }}
+                />
+              </a>
+            )}
           </Space>
         </Card>
       </Content>

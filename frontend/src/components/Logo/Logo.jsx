@@ -5,9 +5,8 @@ function Logo() {
     <>
       <div className="logo-container">
         <div className="logo">
-          <img width={35} height={35} src="/logo.png" alt="logo" />
+          <img width={200} height={105} src="/logo.png" alt="logo" />
         </div>
-        <h3 className="brand-name">Postly</h3>
       </div>
     </>
   );

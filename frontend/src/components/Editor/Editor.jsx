@@ -28,7 +28,7 @@ const theme = {
 };
 
 function onError(error) {
-  console.error(error);
+  console.error("lexical editor error", error);
 }
 
 function Editor({ control, name = "content" }) {

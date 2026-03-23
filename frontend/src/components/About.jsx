@@ -1,4 +1,3 @@
-import React from "react";
 import {
   Layout,
   Typography,
@@ -54,7 +53,7 @@ function About() {
         <div style={{ textAlign: "center", marginBottom: 60 }}>
           <Title level={2} style={{ fontSize: "24px", letterSpacing: "1px" }}>
             The Story of{" "}
-            <span style={{ color: token.colorPrimary }}>Postly</span>
+            <span style={{ color: token.colorPrimary }}>PROSE</span>
           </Title>
           <Paragraph
             style={{
@@ -63,7 +62,7 @@ function About() {
               lineHeight: "1.8",
             }}
           >
-            Postly was founded with a simple mission: to bridge the gap between
+            Prose, founded with a simple mission: to bridge the gap between
             complex technology and human storytelling. In a world of
             fast-scrolling content, we created a space for meaningful innovation
             and creative depth.
@@ -77,7 +76,7 @@ function About() {
           {values.map((item, index) => (
             <Col xs={24} sm={12} key={index}>
               <Card
-                bordered={false}
+                variant="bordered"
                 style={{
                   background: "#ffffff0a", // Slightly subtler than login for readability
                   borderRadius: 16,
@@ -85,7 +84,7 @@ function About() {
                   border: "1px solid rgba(255, 255, 255, 0.05)",
                 }}
               >
-                <Space direction="vertical" size="small">
+                <Space vertical size="small">
                   <div
                     style={{
                       fontSize: "20px",
