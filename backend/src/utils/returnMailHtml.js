@@ -57,7 +57,7 @@ const returnHTML = function (processMsg, user, email, subject, otp) {
               </h2>
 
               <p style="font-size: 15px; line-height: 26px; color: #4b5563; margin: 0 0 32px 0; font-weight: 400;">
-                To continue with <span style="color: #55aa00;">${processMsg}</span> on Prose,<br>
+                To continue with <span>${processMsg}</span> on PROSE,<br>
                 please use the One-Time Password below.
               </p>
 

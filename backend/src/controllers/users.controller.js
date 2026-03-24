@@ -35,7 +35,7 @@ const generateAndSendOTP = async (processMsg, user, email, subject) => {
   const mailHTML = returnHTML(processMsg, user, email, subject, otp);
 
   await resend.emails.send({
-    from: "Prose <noreply@verify.onprose.tech>",
+    from: "PROSE <noreply@verify.onprose.tech>",
     to: email,
     subject: subject,
     html: mailHTML,
@@ -155,15 +155,20 @@ const registerUser = asyncHandler(async (req, res) => {
 
 const regenerateRegistrationOTP = asyncHandler(async (req, res) => {
   const verificationToken = req.cookies?.verificationToken;
+  let decodedToken;
 
   if (!verificationToken) {
     throw new ApiError(400, "Invalid token: User is not registered");
   }
 
-  const decodedToken = jwt.verify(
-    verificationToken,
-    process.env.VERIFICATION_TOKEN_SECRET,
-  );
+  try {
+    decodedToken = jwt.verify(
+      verificationToken,
+      process.env.VERIFICATION_TOKEN_SECRET,
+    );
+  } catch (error) {
+    throw new ApiError(400, "Session Expired - Register again");
+  }
 
   const user = await User.findOne({ _id: decodedToken._id });
 
@@ -208,15 +213,20 @@ const verifyAndLoginUser = asyncHandler(async (req, res) => {
   const { otp } = req.body;
 
   const verificationToken = req.cookies?.verificationToken;
+  let decodedToken;
 
   if (!verificationToken) {
     throw new ApiError(400, "Invalid token: User is not registered");
   }
 
-  const decodedToken = jwt.verify(
-    verificationToken,
-    process.env.VERIFICATION_TOKEN_SECRET,
-  );
+  try {
+    decodedToken = jwt.verify(
+      verificationToken,
+      process.env.VERIFICATION_TOKEN_SECRET,
+    );
+  } catch (error) {
+    throw new ApiError(400, "Session Expired - Register again");
+  }
 
   const userAccount = await User.findOne({ _id: decodedToken._id });
 

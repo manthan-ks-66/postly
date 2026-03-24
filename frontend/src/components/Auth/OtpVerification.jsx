@@ -115,7 +115,7 @@ const OtpVerification = () => {
               Check your email
             </Title>
             <Text type="secondary">
-              Enter the 6 digit One Time PassCode sent to
+              Enter the 6 digit OTP sent to
               <br />
               <strong>{email}</strong>
             </Text>
