@@ -22,7 +22,8 @@ const resend = new Resend(process.env.RESEND_VERIFICATION_MAIL_API_KEY);
 
 const options = {
   httpOnly: true,
-  secured: true,
+  secured: false,
+  sameSite: "Strict",
 };
 
 // user one time passcode generator method
