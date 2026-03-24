@@ -7,13 +7,6 @@ dotenv.config();
 
 const app = express();
 
-app.use(
-  cors({
-    origin: "http://localhost:5173",
-    credentials: true,
-  }),
-);
-
 // middlewares
 app.use(express.json());
 // encode the url that has symbols and special charecters like %_ @#
