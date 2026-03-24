@@ -16,19 +16,6 @@ const app = express();
 //   }),
 // );
 
-app.use((req, res, next) => {
-  // Allow requests from your development origin
-  res.setHeader("Access-Control-Allow-Origin", "http://localhost:5173");
-  // You might also need to allow specific methods and headers
-  res.setHeader(
-    "Access-Control-Allow-Methods",
-    "GET, POST, PUT, DELETE, OPTIONS",
-  );
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
-  res.setHeader("Access-Control-Allow-Credentials", "true");
-  next()
-});
-
 // middlewares
 app.use(express.json());
 // encode the url that has symbols and special charecters like %_ @#
@@ -64,6 +51,19 @@ app.use((err, req, res, next) => {
     message: message,
     errors: err.errors || [],
   });
+});
+
+app.use((req, res, next) => {
+  // Allow requests from your development origin
+  res.setHeader("Access-Control-Allow-Origin", "http://localhost:5173");
+  // You might also need to allow specific methods and headers
+  res.setHeader(
+    "Access-Control-Allow-Methods",
+    "GET, POST, PUT, DELETE, OPTIONS",
+  );
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.setHeader("Access-Control-Allow-Credentials", "true");
+  next();
 });
 
 export default app;
