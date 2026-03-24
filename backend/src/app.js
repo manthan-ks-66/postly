@@ -7,6 +7,15 @@ dotenv.config();
 
 const app = express();
 
+app.use(cors());
+
+// app.use(
+//   cors({
+//     origin: process.env.CORS_ORIGIN,
+//     credentials: true,
+//   }),
+// );
+
 // middlewares
 app.use(express.json());
 // encode the url that has symbols and special charecters like %_ @#
